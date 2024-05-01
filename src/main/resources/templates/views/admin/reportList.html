@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+    <script type="text/javascript" src="https://chir.ag/projects/ntc/ntc.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<title>Bootstrap demo</title>
+<style>
+    /* 리스트들의 전체 div */
+    .tables {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    /* 각 리스트들의 div */
+    .board-list {
+        flex: 1 1 40%;   
+        margin: 20px; 
+        display: center;
+        text-align: center;
+
+    }
+
+    /* 각 테이블 */
+    .table-bordered {
+       margin: auto;
+       margin-top: 10px;
+       width: 90%;
+
+    }
+
+    .list-name {
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .reportImage {
+        width: auto;
+        height: 100%;
+    }
+    
+    #reportAllList {
+    	cursor : pointer;
+    }
+    
+    .reportTr:hover {
+    	background-color: yellow;
+     }
+    
+
+
+</style>
+</head>
+<body>
+    <!-- tap -->
+     <div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="container-fluid d-flex mx-5">
+			<div th:replace="~{common/adminNav :: adminNav}"></div>
+			<div class="col-10 pt-3 mb-5">
+                <div class="mb-5">
+                    <!-- 랭킹은 기간을 정하는게 좋겠음(ex:6달) -->
+                    <h3 class="border-bottom border-black border-2 pb-3">신고누적현황(랭킹)</h3>
+                    <div class="container-fluid table-responsive d-flex" style="height: 250px;">       
+                        <table class="current-report table table-bordered table-light mt-0">
+                            <thead>
+                                <tr class="text-center table-primary ">
+                                    <th>회원아이디</th>
+                                    <th>회원이름</th>
+                                    <th>신고누적횟수</th>
+                                    <th>정지누적횟수</th>
+                                    <th>마지막 신고일</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                                <tr class="text-center" th:if="${rkList != null}" th:each="rk: ${rkList}">
+                                    <td th:text="${rk.R_ACCUSED}"></td>
+                                    <td th:text="${rk.MB_NAME}"></td>
+                                    <td th:text="${rk.TOTAL_REPORT_COUNT}"></td>
+                                    <td th:text="${rk.R_SITUATION_W_COUNT}"></td>
+                                    <td th:text="${rk.LAST_REPORT_DATE}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 신고리스트 -->
+                <h3 class="border-bottom border-black border-2 pb-3">신고리스트</h3>
+                <div  class="m-2 pt-2">
+                    <form action="/admin/reportList.ad">
+                        <div class="row col-auto mt-3">
+                            <label for="searchBox" class="form-label">회원 검색</label>
+                        </div>
+                        <div class="row g-0 text-center">
+                            <div class="col-sm-6 col-md-10 input-group-lg">
+                            <input type="text" id="searchBox" class="form-control" placeholder="검색" name="mbId">
+                            </div>
+                            <div class="col-6 col-md-2">
+                                <button type="submit" class="btn btn-outline-dark btn-lg" id="searchBtn">검색</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="d-sm-flex">
+                    <div class="container-fluid table-responsive mt-4 mb-3">
+                        <table class="all-report table table-light">
+                            <thead>
+                                <tr class="text-center table-warning">
+                                    <th class="col-1">신고번호</th>
+                                    <th class="col-1">신고대상</th>
+                                    <th class="col-1">신고구분</th>
+                                    <th class="col-6">신고내용</th>
+                                    <th class="col-2">글 구분</th>
+                                    <th class="col-1">상태(현황)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider" id="reportAllList">
+                                <tr class="text-center reportTr" th:each="r : ${rList}">
+                                    <td th:text="${r.rNo}"></td>
+                                    <td th:text="${r.rAccused}"></td>
+                                    <td th:text="${#strings.arraySplit(r.rContent, '&^')[0]}"></td>
+                                    <td th:text="${#strings.arraySplit(r.rContent, '&^')[1]}"></td>
+                                    <td th:text="${r.rType == 'B' ? '게시글' : '댓글'}"></td>
+                                    <td th:text="${r.rSituation == 'A' ? '접수' : (r.rSituation == 'W' ? '경고' : (r.rSituation == 'B' ? '정지' : '반려'))}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div> 
+                
+                
+                <nav class="nav justify-content-center" aria-label="Standard pagination example" th:if="${rList.size != 0}" th:with="loc=${loc}">
+		        	<ul class="pagination">
+		        		<th:block th:if="${ pi.currentPage <= 1}">
+		        			<li class="page-item">
+		        				<a class="page-link disable" aria-label="Previous">
+		        					<span aria-hidden="true">&laquo;</span>
+		        				</a>
+		        			</li>
+		        		</th:block>
+		        		<th:block th:unless="${ pi.currentPage <= 1}">
+			        		<li class="page-item">
+					            <a class="page-link" th:href="@{${loc}(page=${pi.currentPage - 1})}" aria-label="Previous">
+					            	<span aria-hidden="true">&laquo;</span>
+					            </a>
+					        </li>
+					    </th:block>
+				        
+		                  <li class="page-item" th:each="p : ${#numbers.sequence(pi.startPage, pi.endPage)}">
+		                      <a class="page-link" th:href="@{${loc}(page=${p})}" th:text="${p}"></a>
+		                  </li>
+				           	
+			           	<li class="page-item" th:if="${ pi.currentPage >= pi.maxPage }">
+			            	<a class="page-link" aria-label="Next">
+			            		<span aria-hidden="true">&raquo;</span>
+			            	</a>
+		         		 </li>
+			           	<th:block th:unless="${ pi.currentPage >= pi.maxPage }")>
+			          	 	<li class="page-item">
+			            		<a class="page-link" th:href="@{${loc}(page=${pi.currentPage + 1})}" aria-label="Next">
+			            			<span aria-hidden="true">&raquo;</span>
+			            		</a>
+			            	</li>
+		            	</th:block>
+			    	</ul>
+		        </nav>
+           </div>   
+        </div>
+    </main>
+</body>
+
+<script>
+	window.onload = () => {
+		
+		const reportAllList = document.getElementById('reportAllList');
+		reportAllList.addEventListener('click', function(event) {
+			const tds = event.target;
+			const trs = tds.parentElement;
+			const rNo = trs.children[0].innerText;
+
+			location.href="/admin/reportDetail?rNo=" + rNo;
+		});
+		
+	}
+</script>
+
+</html>

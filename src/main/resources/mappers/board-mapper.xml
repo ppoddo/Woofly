@@ -1,0 +1,1266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.kh.woofly.board.model.dao.BoardDAO">
+	
+	<insert id="insertUsedSaved">
+		insert into saved
+		values (saved_seq.nextval, #{productId}, #{id}, 'U')
+	</insert>
+
+	<delete id="deleteUsedSaved">
+		delete from saved
+		where product_id = #{productId} and mb_id = #{id}
+	</delete>
+	
+	<select id="selectUsedSaved" resultType="_int">
+		select count(*)
+		from saved
+		where mb_id = #{mbId} and saved_type = 'U' and product_id = #{uNo} 
+	</select>
+
+	<select id="getReplyListCount" resultType="_int">
+		select count(*)
+		from Reply
+		where b_type= "DW" and b_no = #{dwNo} and re_d_status ="Y"
+	</select>
+
+	<!-- 연준이꺼 -->
+	<select id="selectMyUsedBuyingCount" resultType="_int">
+		select count(*)
+		from used_board
+			 join attachment on (u_no = attm_ref_no)
+		where buyer_id = #{id} and attm_ref_type = 'U' and attm_level = 1  and u_status = 'Y' and u_type = '일반'
+			<if test="startDate != null">
+		    	and sold_date >= #{startDate}
+		    </if>
+		    <if test="endDate != null">
+		    	and sold_date <![CDATA[<]]> #{endDate}
+		    </if>
+			<if test="orderDate != null">
+			    order by sold_date ${orderDate}
+			</if>
+			<if test="price != null">
+			    order by product_price ${price}
+			</if>
+	</select>
+	
+	<select id="selectMyUsedBuying" resultType="UsedBoard">
+		select *
+		from used_board
+			 join attachment on (u_no = attm_ref_no)
+ 		where buyer_id = #{id} and attm_ref_type = 'U' and attm_level = 1  and u_status = 'Y' and u_type = '일반'
+ 			<if test="startDate != null">
+		    	and sold_date >= #{startDate}
+		    </if>
+		    <if test="endDate != null">
+		    	and sold_date <![CDATA[<]]> #{endDate}
+		    </if>
+			<if test="orderDate != null">
+			    order by sold_date ${orderDate}
+			</if>
+			<if test="price != null">
+			    order by product_price ${price}
+			</if>
+	</select>
+	
+	<select id="selectMySellingCount" resultType="_int">
+		select count(*)
+		from used_board
+			 join attachment on (u_no = attm_ref_no)
+		where mb_id = #{id} and attm_ref_type = 'U' and attm_level = 1 and u_status = 'Y' and u_type = '일반'
+			<if test="startDate != null">
+		    	and sold_date >= #{startDate}
+		    </if>
+		    <if test="endDate != null">
+		    	and sold_date <![CDATA[<]]> #{endDate}
+		    </if>
+	        <if test="startDate != null">
+		    	or (mb_id = #{id} and sold_date is null and attm_ref_type = 'U' and attm_level = 1 and u_status = 'Y' and u_type = '일반')
+		    </if>
+			<if test="soldDate != null">
+			    order by sold_date ${soldDate}
+			</if>
+			<if test="price != null">
+			    order by product_price ${price}
+			</if>
+			<if test="uEnd != null">
+			    order by u_end ${uEnd}
+			</if>
+	</select>
+	
+	<select id="selectMySelling" resultType="UsedBoard">
+		select *
+		from used_board
+			 join attachment on (u_no = attm_ref_no)
+ 		where mb_id = #{id} and attm_ref_type = 'U' and attm_level = 1 and u_status = 'Y' and u_type = '일반'
+ 			<if test="startDate != null">
+		    	and sold_date >= #{startDate}
+		    </if>
+		    <if test="endDate != null">
+		    	and sold_date <![CDATA[<]]> #{endDate}
+		    </if>
+	        <if test="startDate != null">
+		    	or (mb_id = #{id} and sold_date is null and attm_ref_type = 'U' and attm_level = 1 and u_status = 'Y' and u_type = '일반')
+		    </if>
+			<if test="soldDate != null">
+			    order by sold_date ${soldDate}
+			</if>
+			<if test="price != null">
+			    order by product_price ${price}
+			</if>
+			<if test="uEnd != null">
+			    order by u_end ${uEnd}
+			</if>
+	</select>
+
+	<!-- 자유게시판 -->	
+	
+	<!-- 검색 기능 -->
+   <select id="searchFreeBoards" parameterType="map" resultType="Board">
+       SELECT *
+       FROM Board
+         JOIN Member using(mb_id)
+       WHERE b_status = 'Y'
+       <choose>
+           <when test="searchType == 'mn'">
+               AND (b_title LIKE '%' || #{searchKeyword} || '%' or mb_nickname LIKE '%' || #{searchKeyword} || '%')
+           </when>
+           <when test="searchType != null">
+               AND ${searchType} LIKE '%' || #{searchKeyword} || '%'
+           </when>
+       </choose>
+       ORDER BY b_no DESC
+   </select>
+	
+	<select id="getListCount" resultType="_int">
+		select count(*)
+		from board
+		where b_status = 'Y'
+	</select>
+
+	<select id="selectFreeBoardList" resultType="Board">
+	    select b.*, m.mb_nickname as "mbNickName" , m.mb_photo as "mbPhoto" 
+	    from board b 
+	    join member m on b.mb_id = m.mb_id 
+	    where b.b_status = 'Y' 
+	    order by b.b_no desc
+	</select>
+
+
+	<select id="selectAttmFreeBoardList" resultType="Attachment">
+		select *
+		from attachment
+		where attm_status='Y'
+		<if test="bId != null">
+			and attm_ref_type = 'B'
+			and attm_ref_no = #{ bNo }
+		</if>
+		order by attm_id
+	</select>
+	
+	<select id="selectFreeBoard" resultType="board">
+		select  b.*, m.mb_nickname as "mbNickName", m.mb_photo as "mbPhoto"  
+		from board b
+			join member m on b.mb_id = m.mb_id 
+		where b.b_status = 'Y' and b.b_no = #{ bNo }
+	</select>
+	
+
+	<insert id="insertFreeBoard">
+	    <selectKey keyProperty="bNo" order="BEFORE" resultType="_int"> 
+	        select seq_b_no.nextval as bNo from dual
+	    </selectKey>
+	    insert into board 
+	    values (#{bNo}, #{bTitle}, default, SYSDATE, default, #{mbId}, #{bContent}, default)
+	</insert>
+	
+	<update id="updateFreeCount">
+		update board
+		set b_count = b_count +1
+		where b_no = #{bNo}
+	</update>
+
+	<insert id="insertFreeAttm">
+		insert all
+		<foreach collection="list" item="item">
+			into attachment
+			values(new_aid, #{item.originalName}, #{item.renameName},
+			SYSDATE, SYSDATE, #{item.attmPath}, default, 'B', #{item.attmRefNo}, #{item.attmLevel})
+		</foreach>
+		select * from dual
+	</insert>
+	
+	<update id="updateFreeBoard">
+		update board
+		set b_title = #{bTitle}, b_content = #{bContent}
+		where b_no = #{ bNo }
+	</update>
+	
+	<update id="deleteFreeBoard">
+		update board
+		set b_status = 'N'
+		where b_no = #{ bNo }
+	</update>
+	
+	<delete id="deleteFreeAttm">
+		delete from attachment
+		<where>
+			<foreach item="item" collection="list" open="rename_name in (" separator="," close=")">
+				#{item}
+			</foreach>
+		</where>
+	</delete>
+
+	<update id="updateAttmLevel">
+		update attachment
+		set attm_level = 1
+		where attm_id = (select min(attm_id)
+						 from attachment
+						 where attm_ref_no = #{bNo})
+	</update>
+		
+	<update id="statusNAttm">
+		update attachment
+		set attm_status = 'N'
+		where attm_ref_no = #{bNo} and attm_ref_type=#{type}
+	</update>
+	
+	<insert id="insertFreeReply">
+      insert into reply
+      values(reply_seq.nextval, 'B', #{bNo}, 
+            #{reContent}, SYSDATE, default, default, #{mbId})
+   </insert>
+   
+   <update id="deleteFreeReply">
+		update Reply
+		set re_d_status = 'N'
+		where r_no = #{ rNo } and b_type = 'B'
+	</update>
+	
+	<select id="selectFreeReply" resultType="Reply">
+		select  r.*, m.mb_nickname as "mbNickName" , m.mb_photo as "mbPhoto" 
+		from reply r
+			join member m on r.mb_id = m.mb_id 
+		where r.b_no = #{bNo} and r.re_d_status = 'Y' and r.b_type = 'B'
+		order by r.r_no desc
+	</select>
+	
+	<select id="freeBoardLike" resultType="_int">
+		select count(*)
+		from board_like
+		where like_ref_board = #{bNo} and like_user = #{id}
+	</select>
+	
+	<insert id="insertFreeBoardLike">
+		insert into board_like
+		values (bl_seq.nextval, 'B', #{bNo}, #{id})
+	</insert>
+	
+	<delete id="deleteFreeBoardLike">
+		delete from board_like
+		where like_ref_board = #{bNo} and like_ref_type = 'B' and like_user =#{id}
+	</delete>
+	
+	<select id="selectReplyLike" resultType="ReplyLike">
+		select *
+			from reply
+	             join reply_like on (r_no = like_ref_board)
+	      where like_ref_board = #{rNo} and like_user = #{mbId}
+	</select>
+	
+	<insert id="insertBoardReplyLike">
+		insert into reply_like
+		values (rl_seq.nextval, #{rNo}, #{id})
+	</insert>
+	
+	<delete id="deleteBoardReplyLike">
+		delete from reply_like
+		where like_ref_board = #{rNo} and like_user =#{id}
+	</delete>
+	
+	<insert id="insertFreeBoardNotice">
+		insert into notification
+		values (noti_seq.nextval, (select mb_id from board where b_no = #{bNo}), 'FB', null, 'Y', #{id}, 1, sysdate)
+	</insert>
+	
+	<insert id="insertFreeReplyNotice">
+		insert into notification
+		values (noti_seq.nextval, (select mb_id from reply where r_no = #{rNo}), 'FR', null, 'Y', #{id}, 1, sysdate)
+	</insert>
+	
+	
+	<!--/////////// 도그워커 게시판 ////////////-->
+	
+	<select id="searchDwBoards" parameterType="map" resultType="DwBoard">
+       SELECT *
+       FROM dw_board
+         JOIN Member using(mb_id)
+       WHERE dw_status = 'Y' and dw_type = 0
+       <choose>
+           <when test="searchType == 'mn'">
+               AND dw_title LIKE '%' || #{searchKeyword} || '%' or mb_nickname LIKE '%' || #{searchKeyword} || '%'
+           </when>
+           <when test="searchType != null">
+               AND ${searchType} LIKE '%' || #{searchKeyword} || '%'
+           </when>
+       </choose>
+       ORDER BY dw_no DESC
+   </select>   
+	
+	<select id="getDwListCount" resultType="_int">
+		select count(*)
+		from dw_board
+		where dw_status = 'Y' and dw_type = '0'
+	</select>
+
+	<select id="selectDwBoardList" resultType="DwBoard">
+	    select b.*, m.mb_nickname as "mbNickName" , m.mb_photo as "mbPhoto" 
+	    from dw_board b 
+	    join member m on b.mb_id = m.mb_id 
+	    where b.dw_status = 'Y' and dw_type = '0'
+	    order by b.dw_no desc
+	</select>
+
+
+	<select id="selectAttmDwBoardList" resultType="Attachment">
+		select *
+		from attachment
+		where attm_status='Y'
+		<if test="bId != null">
+			and attm_ref_type = 'DW'
+			and attm_ref_no = #{ dwNo }
+		</if>
+		order by attm_id
+	</select>
+	
+	<select id="searchDwRvBoards" parameterType="map" resultType="DwBoard">
+       SELECT *
+       FROM dw_board
+         JOIN Member using(mb_id)
+       WHERE dw_status = 'Y' and dw_type = 1
+       <choose>
+           <when test="searchType == 'mn'">
+               AND dw_title LIKE '%' || #{searchKeyword} || '%' or mb_nickname LIKE '%' || #{searchKeyword} || '%'
+           </when>
+           <when test="searchType != null">
+               AND ${searchType} LIKE '%' || #{searchKeyword} || '%'
+           </when>
+       </choose>
+       ORDER BY dw_no DESC
+   </select>
+	
+	<select id="getDwRvListCount" resultType="_int">
+		select count(*)
+		from dw_board
+		where dw_status = 'Y' and dw_type = '1'
+	</select>
+
+	<select id="selectDwRvBoardList" resultType="DwBoard">
+	    select b.*, m.mb_nickname as "mbNickName", m.mb_photo as "mbPhoto"  
+	    from dw_board b 
+	    join member m on b.mb_id = m.mb_id 
+	    where b.dw_status = 'Y' and dw_type = '1'
+	    order by b.dw_no desc
+	</select>
+
+
+	<select id="selectAttmDwRvBoardList" resultType="Attachment">
+		select *
+		from attachment
+		where attm_status='Y'
+		<if test="bId != null">
+			and attm_ref_type = 'DW'
+			and attm_ref_no = #{ dwNo }
+		</if>
+		order by attm_id
+	</select>
+	
+	
+	<select id="selectDwBoard" resultType="DwBoard">
+		select  b.*, m.mb_nickname as "mbNickName" , m.mb_photo as "mbPhoto" 
+		from dw_board b
+			join member m on b.mb_id = m.mb_id 
+		where b.dw_status = 'Y' and b.dw_no = #{ dwNo }
+	</select>
+	
+	<select id="selectDwReply" resultType="Reply">
+		select  r.*, m.mb_nickname as "mbNickName" , m.mb_photo as "mbPhoto" 
+		from reply r
+			join member m on r.mb_id = m.mb_id 
+		where r.b_no = #{dwNo} and r.re_d_status = 'Y' and r.b_type = 'DW'
+		order by r.r_no desc
+	</select>
+	
+	<update id="updateDwCount">
+		update dw_board
+		set dw_count = dw_count +1
+		where dw_no = #{dwNo}
+	</update>
+		
+	<insert id="insertDwBoard">
+	    <selectKey keyProperty="dwNo" order="BEFORE" resultType="_int"> 
+	        select dw_seq.nextval as dwNo from dual
+	    </selectKey>
+	    insert into dw_board 
+	    values (#{dwNo}, #{dwType}, #{dwTitle}, #{dwContent}, default, #{dwLocation}, SYSDATE, default, default, #{mbId}, default, #{dwPrice})
+	</insert>	
+	
+	<insert id="insertDwAttm">
+		insert all
+		<foreach collection="list" item="item">
+			into attachment
+			values(new_aid, #{item.originalName}, #{item.renameName},
+			SYSDATE, SYSDATE, #{item.attmPath}, default, 'DW', #{item.attmRefNo}, #{item.attmLevel})
+		</foreach>
+		select * from dual
+	</insert>
+	
+	<delete id="deleteDwAttm">
+		delete from attachment
+		<where>
+			<foreach item="item" collection="list" open="rename_name in (" separator="," close=")">
+				#{item}
+			</foreach>
+		</where>
+	</delete>
+	
+	<update id="updateDwBoard">
+		update dw_board
+		set dw_title = #{dwTitle}, dw_type = #{dwType}, dw_content = #{dwContent}, dw_price=#{dwPrice}, dw_location =#{dwLocation}
+		where dw_no = #{ dwNo }
+	</update>
+	
+	<update id="deleteDwBoard">
+		update dw_board
+		set dw_status = 'N'
+		where dw_no = #{ dwNo }
+	</update>
+		
+	<insert id="insertDwReply">
+      insert into reply
+      values(reply_seq.nextval, #{bType}, #{bNo}, 
+            #{reContent}, SYSDATE, default, default, #{mbId})
+   </insert>
+   
+   <update id="deleteDwReply">
+		update Reply
+		set re_d_status = 'N'
+		where r_no = #{ rNo } and b_type = 'DW'
+	</update>
+	
+	<update id="updateDwReply">
+		update reply
+		set re_content = #{reContent}
+		where r_No = #{rNo}
+	</update>
+	
+	
+	<select id="selectBoardReport" resultType="int">
+		select count(*)
+		from report
+		where r_accuser= #{rAccuser} and r_board_no = #{rBoardNo}
+	</select>
+	
+	<insert id="BoardReport">	    
+	    insert into report 
+	    values (rep_seq.nextval, #{rContent}, SYSDATE, default, #{rCategory},#{rBoardNo}, #{rType}, #{rAccuser}, #{rAccused})
+	</insert>
+	
+	<select id="checkReplyResult" resultType="_int">
+		select count(*)
+		from report
+		where r_board_no = #{rBoardNo} and r_accuser = #{rAccuser}
+	</select>
+	
+	<insert id="insertReplyReport" parameterType="Report">
+		insert into report
+		values(rep_seq.nextval, #{rContent}, sysdate, 'A', #{rCategory}, #{rBoardNo}, 'R', #{rAccuser}, #{rAccused})
+	</insert>
+	
+	<select id="DwBoardLike" resultType="_int">
+		select count(*)
+		from board_like
+		where like_ref_board = #{dwNo} and like_user = #{id}
+	</select>
+	
+	<insert id="insertDwBoardLike">
+		insert into board_like
+		values (bl_seq.nextval, 'DW', #{dwNo}, #{id})
+	</insert>
+	
+	<delete id="deleteDwBoardLike">
+		delete from board_like
+		where like_ref_board = #{dwNo} and like_ref_type = 'DW' and like_user =#{id}
+	</delete>
+	
+	<insert id="insertDwBoardNotice">
+		insert into notification
+		values (noti_seq.nextval, (select mb_id from dw_board where dw_no = #{dwNo}), 'DB', null, 'Y', #{id}, 1, sysdate)
+	</insert>
+	
+	<insert id="insertDwReplyNotice">
+		insert into notification
+		values (noti_seq.nextval, (select mb_id from reply where r_no = #{rNo}), 'DR', null, 'Y', #{id}, 1, sysdate)
+	</insert>
+	
+	
+	
+	
+	<!-- 산책메이트 -->
+	
+	<select id="searchWmBoards" parameterType="map" resultType="WmBoard">
+       SELECT *
+       FROM wm_board
+         JOIN Member using(mb_id)
+       WHERE wm_status = 'Y' and wm_type = 0
+       <choose>
+           <when test="searchType == 'mn'">
+               AND wm_title LIKE '%' || #{searchKeyword} || '%' or mb_nickname LIKE '%' || #{searchKeyword} || '%'
+           </when>
+           <when test="searchType != null">
+               AND ${searchType} LIKE '%' || #{searchKeyword} || '%'
+           </when>
+       </choose>
+       ORDER BY wm_no DESC
+   </select> 
+   
+   <select id="searchWmRvBoards" parameterType="map" resultType="WmBoard">
+       SELECT *
+       FROM wm_board
+         JOIN Member using(mb_id)
+       WHERE wm_status = 'Y' and wm_type = 1
+       <choose>
+           <when test="searchType == 'mn'">
+               AND wm_title LIKE '%' || #{searchKeyword} || '%' or mb_nickname LIKE '%' || #{searchKeyword} || '%'
+           </when>
+           <when test="searchType != null">
+               AND ${searchType} LIKE '%' || #{searchKeyword} || '%'
+           </when>
+       </choose>
+       ORDER BY wm_no DESC
+   </select> 
+	
+	<select id="getWmListCount" resultType="_int">
+		select count(*)
+		from wm_board
+		where wm_status = 'Y' and wm_type = '0'
+	</select>
+
+	<select id="selectWmBoardList" resultType="WmBoard">
+	    select b.*, m.mb_nickname as "mbNickName", m.mb_photo as "mbPhoto"  
+	    from wm_board b 
+	    join member m on b.mb_id = m.mb_id 
+	    where b.wm_status = 'Y' and wm_type = '0'
+	    order by b.wm_no desc
+	</select>
+
+
+	<select id="selectAttmWmBoardList" resultType="Attachment">
+		select *
+		from attachment
+		where attm_status='Y'
+		<if test="bId != null">
+			and attm_ref_type = 'WM'
+			and attm_ref_no = #{ wmNo }
+		</if>
+		order by attm_id
+	</select>
+	
+	<select id="getWmRvListCount" resultType="_int">
+		select count(*)
+		from wm_board
+		where wm_status = 'Y' and wm_type = '1'
+	</select>
+
+	<select id="selectWmRvBoardList" resultType="WmBoard">
+	    select b.*, m.mb_nickname as "mbNickName", m.mb_photo as "mbPhoto"  
+	    from wm_board b 
+	    join member m on b.mb_id = m.mb_id 
+	    where b.wm_status = 'Y' and wm_type = '1'
+	    order by b.wm_no desc
+	</select>
+
+
+	<select id="selectAttmWmRvBoardList" resultType="Attachment">
+		select *
+		from attachment
+		where attm_status='Y'
+		<if test="bId != null">
+			and attm_ref_type = 'WM'
+			and attm_ref_no = #{ wmNo }
+		</if>
+		order by attm_id
+	</select>
+	
+	<insert id="insertWmBoard">
+	    <selectKey keyProperty="wmNo" order="BEFORE" resultType="_int"> 
+	        select wm_seq.nextval as wmNo from dual
+	    </selectKey>
+	    insert into wm_board 
+	    values (#{wmNo}, #{wmType}, #{wmTitle}, #{wmContent}, default,#{wmLocation}, SYSDATE, default, #{mbId}, default)
+	</insert>	
+	
+	<insert id="insertWmAttm">
+		insert all
+		<foreach collection="list" item="item">
+			into attachment
+			values(new_aid, #{item.originalName}, #{item.renameName},
+			SYSDATE, SYSDATE, #{item.attmPath}, default, 'WM', #{item.attmRefNo}, #{item.attmLevel})
+		</foreach>
+		select * from dual
+	</insert>
+	
+	<select id="selectWmBoard" resultType="WmBoard">
+		select  b.*, m.mb_nickname as "mbNickName", m.mb_photo as "mbPhoto"  
+		from wm_board b
+			join member m on b.mb_id = m.mb_id 
+		where b.wm_status = 'Y' and b.wm_no = #{ wmNo }
+	</select>
+	
+	<update id="updateWmCount">
+		update wm_board
+		set wm_count = wm_count +1
+		where wm_no = #{wmNo}
+	</update>
+	
+	<delete id="deleteWmAttm">
+		delete from attachment
+		<where>
+			<foreach item="item" collection="list" open="rename_name in (" separator="," close=")">
+				#{item}
+			</foreach>
+		</where>
+	</delete>
+	
+	<update id="updateWmBoard">
+		update wm_board
+		set wm_title = #{wmTitle}, wm_type = #{wmType}, wm_content = #{wmContent}, wm_location=#{wmLocation}
+		where wm_no = #{ wmNo }
+	</update>
+	
+	<update id="deleteWmBoard">
+		update wm_board
+		set wm_status = 'N'
+		where wm_no = #{ wmNo }
+	</update>
+	
+	<insert id="inserWmReply">
+      insert into reply
+      values(reply_seq.nextval, #{bType}, #{bNo}, 
+            #{reContent}, SYSDATE, default, default, #{mbId})
+   </insert>
+   
+   <update id="deletWmReply">
+		update Reply
+		set re_d_status = 'N'
+		where r_no = #{ rNo } and b_type = 'WM'
+	</update>	
+	
+	
+	<select id="selectWmReply" resultType="Reply">
+		select  r.*, m.mb_nickname as "mbNickName", m.mb_photo as "mbPhoto"  
+		from reply r
+			join member m on r.mb_id = m.mb_id 
+		where r.b_no = #{wmNo} and r.re_d_status = 'Y' and r.b_type = 'WM'
+		order by r.r_no desc
+	</select>
+	
+	<update id="updateWmReply">
+		update reply
+		set re_content = #{reContent}
+		where r_No = #{rNo}
+	</update>
+	
+	<select id="WmBoardLike" resultType="_int">
+		select count(*)
+		from board_like
+		where like_ref_board = #{wmNo} and like_user = #{id}
+	</select>
+	
+	<insert id="insertWmBoardLike">
+		insert into board_like
+		values (bl_seq.nextval, 'WM', #{wmNo}, #{id})
+	</insert>
+	
+	<delete id="deleteWmBoardLike">
+		delete from board_like
+		where like_ref_board = #{wmNo} and like_ref_type = 'WM' and like_user =#{id}
+	</delete>
+	
+	<insert id="insertWmBoardNotice">
+		insert into notification
+		values (noti_seq.nextval, (select mb_id from wm_board where wm_no = #{wmNo}), 'WB', null, 'Y', #{id}, 1, sysdate)
+	</insert>
+	
+	<insert id="insertWmReplyNotice">
+		insert into notification
+		values (noti_seq.nextval, (select mb_id from reply where r_no = #{rNo}), 'WR', null, 'Y', #{id}, 1, sysdate)
+	</insert>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- 실종게시판 -->
+	
+	<!-- 검색 기능 -->
+	<select id="searchLostBoards" parameterType="map" resultType="LostBoard">
+	    SELECT *
+	    FROM Missing_Board
+	      JOIN Member using(mb_id)
+	    WHERE m_status = 'Y'
+	    <choose>
+	        <when test="searchType == 'mn'">
+	            AND m_title LIKE '%' || #{searchKeyword} || '%' or mb_nickName LIKE '%' || #{searchKeyword} || '%'
+	        </when>
+	        <when test="searchType != null">
+	            AND ${searchType} LIKE '%' || #{searchKeyword} || '%'
+	        </when>
+	    </choose>
+	    ORDER BY m_no DESC
+	</select>
+	
+	<!--삭제되지 않은 게시글 목록의 개수 조회-->
+	<select id="mListCount" resultType="_int">
+	    select count(*)
+	    from Missing_Board
+	    where m_status = 'Y'
+	</select>
+	
+	<!-- 게시글 목록 조회 -->
+	<select id="selectLostBoardList" resultType="LostBoard">
+	    select *
+	    from Missing_Board 
+	    join Member using( mb_id )
+	    where m_status = 'Y' 
+	    order by m_no desc
+	</select>
+	
+	<!-- 게시글에 첨부된 파일 목록 조회/ 썸네일 -->
+   <select id="selectAttmLostBoardList" resultType="com.kh.woofly.board.model.vo.Attachment">
+       select * from (
+           select 
+               ROW_NUMBER() OVER(PARTITION BY attm_Ref_No ORDER BY attm_id ASC) AS RNUM , m.*
+           from attachment m
+           where attm_status='Y'
+           and attm_ref_type = 'M' 
+           <if test="bId != null">
+               and attm_ref_no = #{bId}
+           </if>
+       ) A
+       WHERE 1=1
+       <if test="bId == null">
+         AND RNUM = 1
+      </if>
+      order by attm_id ASC
+   </select>
+	    
+	    <!--select *
+	    from attachment
+	    where attm_status='Y'
+	      and attm_ref_type = 'M'
+	    <if test="bId != null">
+	        and attm_ref_no = #{bId}
+	    </if>
+	    <if test="bId == null">
+	        and 1=2
+	    </if>
+	    order by attm_id-->
+	    
+	<!--게시글 등록-->
+	<insert id="insertLostBoard">
+       <selectKey keyProperty="mNo" order="BEFORE" resultType="_int"> 
+           select ms_no_seq.nextval as mNo from dual
+       </selectKey>
+       insert into missing_board 
+       values (#{mNo}, #{mTitle}, #{mContent},default, SYSDATE, default, #{mbId}, #{mRescue}, 0)
+   </insert>
+
+	<!--첨부파일 등록-->
+	<insert id="insertLostAttm">
+      insert all
+      <foreach collection="list" item="item">
+         into attachment
+         values(new_aid, #{item.originalName}, #{item.renameName},
+         SYSDATE, SYSDATE, #{item.attmPath}, default, 'M', #{item.attmRefNo}, #{item.attmLevel})
+      </foreach>
+      select * from dual
+   </insert>
+	
+	<!-- 특정 게시글 조회 -->
+	<select id="selectLostBoard" parameterType="int" resultMap="LostBoardWithAttachmentsMap">
+	    select mb.*, m.mb_nickName, m.mb_photo as "mbPhoto"  
+	    from Missing_Board mb
+	    join Member m on mb.mb_id = m.mb_id
+	    where mb.m_status = 'Y' and mb.m_no = #{mNo}
+	</select>
+	
+	<update id="updateUsedCount">
+		update used_board
+		set u_count = u_count +1
+		where u_no = #{uNo}
+	</update>
+	
+	<update id="updateLostCount">
+		update missing_board
+		set m_count = m_count +1
+		where m_no = #{mNo}
+	</update>	
+	
+	<!-- 게시글과 첨부파일 매핑 -->
+	<resultMap id="LostBoardWithAttachmentsMap" type="com.kh.woofly.board.model.vo.LostBoard">
+	    <id column="m_no" property="mNo"/>
+	    <result column="m_title" property="mTitle"/>
+	    <result column="m_content" property="mContent"/>
+	    <result column="m_count" property="mCount"/>
+	    <result column="m_create_date" property="mCreateDate"/>
+	    <result column="m_status" property="mStatus"/>
+	    <result column="mb_id" property="mbId"/>
+	    <result column="mb_nickName" property="mbNickName"/>
+	    <collection property="attachments" ofType="com.kh.woofly.board.model.vo.Attachment" 
+	                select="selectAttmLostBoardList" column="m_no" javaType="list"/>
+	</resultMap>
+	
+	<!--게시글 삭제-->
+	<!-- <update id="deleteLostBoard">
+		update missing_board
+		set m_status = 'N'
+		where m_no = #{bId}
+	</update> -->
+	
+	<!--게시글 첨부파일 삭제-->
+	<update id="deleteLostBoardAttm">
+		update attachment
+		set attm_status = 'N'
+		where attm_ref_type = 'M' and attm_ref_no = #{mNo}
+	</update>
+	
+	<!--게시글 수정-->
+	<!--<update id="editLostBoard">
+		update missing_board
+		set m_title = #{mTitle}, m_content = #{mContent}, M_RESCUE = #{mRescue}
+		where m_no = #{mNo}
+	</update>-->
+	
+	<delete id="deleteLostAttm">
+		delete from attachment
+		<where>
+			<foreach item="item" collection="list" open="rename_name in (" separator="," close=")">
+				#{item}
+			</foreach>
+		</where>
+	</delete>
+	
+	<update id="updateLostBoard">
+		update missing_board
+		set m_title = #{mTitle}, m_content = #{mContent}, m_rescue =#{mRescue}
+		where m_no = #{ mNo }
+	</update>
+	
+	<select id="selectLostReply" resultType="Reply">
+		select  r.*, m.mb_nickname as "mbNickName" , m.mb_photo as "mbPhoto" 
+		from reply r
+			join member m on r.mb_id = m.mb_id 
+		where r.b_no = #{mNo} and r.re_d_status = 'Y' and r.b_type = 'M'
+		order by r.r_no desc
+	</select>
+	
+	<update id="deleteLostBoard">
+		update missing_board
+		set m_status = 'N'
+		where m_no = #{ mNo }
+	</update>
+	
+	<select id="hasLevelOne" resultType="boolean" parameterType="int">
+        SELECT COUNT(*) 
+        FROM attachment
+        WHERE attm_ref_no = #{mNo}
+          AND attm_level = 1
+    </select>
+    
+    <insert id="insertLostReply">
+      insert into reply
+      values(reply_seq.nextval, #{bType}, #{bNo}, 
+            #{reContent}, SYSDATE, default, default, #{mbId})
+   </insert>
+   
+   <update id="deleteLostReply">
+		update Reply
+		set re_d_status = 'N'
+		where r_no = #{ rNo } and b_type = 'M'
+	</update>
+	
+	<update id="updateLostReply">
+		update reply
+		set re_content = #{reContent}
+		where r_No = #{rNo}
+	</update>
+	 
+	<select id="LostBoardLike" resultType="_int">
+		select count(*)
+		from board_like
+		where like_ref_board = #{mNo} and like_user = #{id}
+	</select>
+	
+	<insert id="insertLostBoardLike">
+		insert into board_like
+		values (bl_seq.nextval, 'M', #{mNo}, #{id})
+	</insert>
+	
+	<delete id="deleteLostBoardLike">
+		delete from board_like
+		where like_ref_board = #{mNo} and like_ref_type = 'M' and like_user =#{id}
+	</delete>
+	
+	<insert id="insertLostBoardNotice">
+		insert into notification
+		values (noti_seq.nextval, (select mb_id from missing_board where m_no = #{mNo}), 'MB', null, 'Y', #{id}, 1, sysdate)
+	</insert>
+	
+	<insert id="insertLostReplyNotice">
+		insert into notification
+		values (noti_seq.nextval, (select mb_id from reply where r_no = #{rNo}), 'MR', null, 'Y', #{id}, 1, sysdate)
+	</insert>
+	
+	
+	
+	<!-- 중고게시판 -->
+	
+	<!-- 검색 기능 -->
+	<select id="searchUsedBoards" parameterType="map" resultType="UsedBoard">
+	    SELECT *
+	    FROM used_board
+	      JOIN Member using(mb_id)
+	    WHERE u_status = 'Y' and u_type = '일반'
+	    <choose>
+	        <when test="searchType == 'mn'">
+	            AND u_title LIKE '%' || #{searchKeyword} || '%' or mb_nickName LIKE '%' || #{searchKeyword} || '%'
+	        </when>
+	        <when test="searchType != null">
+	            AND ${searchType} LIKE '%' || #{searchKeyword} || '%'
+	        </when>
+	    </choose>
+	    ORDER BY u_no DESC
+	</select>
+	
+	<!--삭제되지 않은 게시글 목록의 개수 조회-->
+	<select id="uListCount" resultType="_int">
+	    select count(*)
+	    from used_board
+	    where u_status = 'Y' and u_type = '일반'
+	</select>
+	
+	<!-- 게시글 목록 조회 -->
+	<select id="selectUsedBoardList" resultType="UsedBoard">
+	    select *
+	    from used_board
+	    	join Member using( mb_id )
+	    where u_status = 'Y' and u_type = '일반'
+	    order by u_no desc
+	</select>
+	
+	<!-- 게시글에 첨부된 파일 목록 조회/ 썸네일 -->
+   <select id="selectAttmUsedBoardList" resultType="com.kh.woofly.board.model.vo.Attachment">
+       select * from (
+      select 
+        ROW_NUMBER() OVER(PARTITION BY attm_Ref_No ORDER BY attm_id ASC) AS RNUM , u.*
+      from attachment u
+      where attm_status='Y'
+      and attm_ref_type = 'U' 
+      <if test="bId != null">
+           and attm_ref_no = #{uNo}
+       </if>
+      ) A
+      WHERE 1=1
+      <if test="bId == null">
+      AND RNUM = 1
+         </if>
+      order by attm_id ASC
+   </select>
+	
+	<!-- 특정 게시글 조회 -->
+	<select id="selectUsedBoard" resultType="UsedBoard">
+	    select u.*, m.mb_nickName , m.mb_photo as "mbPhoto" 
+	    from Used_Board u
+	    join Member m on u.mb_id = m.mb_id
+	    where u.u_status = 'Y' and u.u_no = #{uNo}
+	</select>
+	
+	
+	
+	<!--게시글 등록-->
+	<insert id="insertUsedBoard">
+	    <selectKey keyProperty="uNo" order="BEFORE" resultType="_int"> 
+	        select ub_seq.nextval as uNo from dual
+	    </selectKey>
+	    insert into used_board 
+	    values (#{uNo}, '일반' , #{uTitle}, #{uContent}, default, #{uLocation}, SYSDATE, default, default, default, #{mbId},#{productName},#{productStatus},#{productPrice}, #{soldDate},(select mb_Id from member where mb_nickname =#{buyerId}))
+	</insert>	
+	
+	<!--첨부파일 등록-->
+	<insert id="insertUsedAttm">
+		insert all
+		<foreach collection="list" item="item">
+			into attachment
+			values(new_aid, #{item.originalName}, #{item.renameName},
+			SYSDATE, SYSDATE, #{item.attmPath}, default, 'U', #{item.attmRefNo}, #{item.attmLevel})
+		</foreach>
+		select * from dual
+	</insert>
+	
+	<delete id="deleteUsedAttm">
+		delete from attachment
+		<where>
+			<foreach item="item" collection="list" open="rename_name in (" separator="," close=")">
+				#{item}
+			</foreach>
+		</where>
+	</delete>
+	
+	<update id="updateUsedBoard">
+		update used_board
+		set u_end=#{uEnd}, u_title = #{uTitle}, u_content = #{uContent}, u_location = #{uLocation}, product_name=#{productName}, product_status =#{productStatus}, product_price =#{productPrice}, sold_date = #{soldDate}, buyer_id = #{buyerId}
+		where u_no = #{ uNo }
+	</update>
+	
+	<select id="UsedhasLevelOne" resultType="boolean" parameterType="int">
+        SELECT COUNT(*) 
+        FROM attachment
+        WHERE attm_ref_no = #{uNo}
+          AND attm_level = 1
+    </select>
+    
+    <update id="deleteUsedBoard">
+		update used_board
+		set u_status = 'N'
+		where u_no = #{ uNo }
+	</update>
+	
+	<update id="deleteUsedBoardAttm">
+		update attachment
+		set attm_status = 'N'
+		where attm_ref_type = 'U' and attm_ref_no = #{uNo}
+	</update>
+	
+	<insert id="insertUsedReply">
+      insert into reply
+      values(reply_seq.nextval, #{bType}, #{bNo}, 
+            #{reContent}, SYSDATE, default, default, #{mbId})
+   </insert>
+   
+   <update id="deleteUsedReply">
+		update Reply
+		set re_d_status = 'N'
+		where r_no = #{ rNo } and b_type = 'U'
+	</update>
+	
+	<update id="updateUsedReply">
+		update reply
+		set re_content = #{reContent}
+		where r_No = #{rNo}
+	</update>
+	
+	<select id="selectUsedReply" resultType="Reply">
+		select  r.*, m.mb_nickname as "mbNickName" , m.mb_photo as "mbPhoto" 
+		from reply r
+			join member m on r.mb_id = m.mb_id 
+		where r.b_no = #{uNo} and r.re_d_status = 'Y' and r.b_type = 'U'
+		order by r.r_no desc
+	</select>
+	
+	
+	<!-- 중고게시판 -->
+	
+	
+	<insert id="insertUsedRvBoard">
+		<selectKey keyProperty="uNo" order="BEFORE" resultType="_int"> 
+	        select ub_seq.nextval as uNo from dual
+	    </selectKey>
+	    insert into used_board 
+	    values (
+	        #{uNo}, '후기', #{uTitle}, #{uContent}, default, #{uLocation},
+	        sysdate, default, default, default, #{mbId}, #{productName},
+	        #{productStatus}, #{productPrice}, #{soldDate}, (select mb_id from used_board where u_no = #{uNo})
+	    )
+	</insert>
+		
+	<insert id="insertUsedRvAttm">
+		insert all
+		<foreach collection="list" item="item">
+			into attachment
+			values(new_aid, #{item.originalName}, #{item.renameName},
+			SYSDATE, SYSDATE, #{item.attmPath}, default, 'U', #{item.attmRefNo}, #{item.attmLevel})
+		</foreach>
+		select * from dual
+	</insert>
+		
+	<select id="selectProdList" resultType="UsedBoard">
+		select *
+		from used_board
+		 join member using (mb_id)
+		where buyer_id= #{mbId} and u_type ='일반'
+	</select>
+	
+	<select id="checkProdList" resultType="UsedBoard">
+		select *
+		from used_board
+		 join member using (mb_id)
+		where u_no= #{prodNo}
+	</select>
+	
+	
+	
+	<select id="getUsedRvListCount" resultType="_int">
+		select count(*)
+		from used_board
+		where u_status = 'Y' and u_type = '후기'
+	</select>
+
+	<select id="selectUsedRvBoardList" resultType="UsedBoard">
+	    select b.*, m.mb_nickname as "mbNickName", m.mb_photo as "mbPhoto"  
+	    from used_board b 
+	    join member m on b.mb_id = m.mb_id 
+	    where b.u_status = 'Y' and u_type = '후기'
+	    order by b.u_no desc
+	</select>
+
+
+	<select id="selectAttmUsedRvBoardList" resultType="Attachment">
+		select *
+		from attachment
+		where attm_status='Y'
+		<if test="bId != null">
+			and attm_ref_type = 'U'
+			and attm_ref_no = #{ uNo }
+		</if>
+		order by attm_id
+	</select>
+	
+	<select id="searchUsedRvBoards" parameterType="map" resultType="UsedBoard">
+       SELECT *
+       FROM used_board
+         JOIN Member using(mb_id)
+       WHERE u_status = 'Y' and u_type = '후기'
+       <choose>
+           <when test="searchType == 'mn'">
+               AND u_title LIKE '%' || #{searchKeyword} || '%' or mb_nickname LIKE '%' || #{searchKeyword} || '%'
+           </when>
+           <when test="searchType != null">
+               AND ${searchType} LIKE '%' || #{searchKeyword} || '%'
+           </when>
+       </choose>
+       ORDER BY u_no DESC
+   </select>
+   
+	<select id="selectUsedRvBoard" resultType="UsedBoard">
+		select  b.*, m.mb_nickname as "mbNickName", m.mb_photo as "mbPhoto" ,m2.mb_nickname as "buyerNickName"
+		from used_board b
+			join member m on b.mb_id = m.mb_id 
+			left join member m2 ON b.buyer_id = m2.mb_id  -- 추가 부분
+		where b.u_status = 'Y' and b.u_no = #{ uNo }
+	</select>	
+	
+	<update id="updateUsedRvCount">
+		update used_board
+		set u_count = u_count +1
+		where u_no = #{uNo}
+	</update>
+	
+	<select id="getUsedRvReplyListCount" resultType="_int">
+		select count(*)
+		from Reply
+		where b_type= 'U' and b_no = #{uNo} and re_d_status ='Y'
+	</select>
+	
+	<select id="selectUsedRvReply" resultType="Reply">
+		select  r.*, m.mb_nickname as "mbNickName" , m.mb_photo as "mbPhoto" 
+		from reply r
+			join member m on r.mb_id = m.mb_id 
+		where r.b_no = #{uNo} and r.re_d_status = 'Y' and r.b_type = 'U'
+		order by r.r_no desc
+	</select>
+	
+	<delete id="deleteUsedRvAttm">
+		delete from attachment
+		<where>
+			<foreach item="item" collection="list" open="rename_name in (" separator="," close=")">
+				#{item}
+			</foreach>
+		</where>
+	</delete>
+	
+	<update id="updateUsedRvBoard">
+		update used_board
+		set u_title = #{uTitle}, u_content = #{uContent}
+		where u_no = #{ uNo }
+	</update>
+	
+	<update id="deleteUsedRvBoard">
+		update used_board
+		set u_status = 'N'
+		where u_no = #{ uNo }
+	</update>
+	
+	<!-- 댓글 -->
+	
+	<insert id="insertUsedRvReply">
+      insert into reply
+      values(reply_seq.nextval, #{bType}, #{bNo}, 
+            #{reContent}, SYSDATE, default, default, #{mbId})
+   </insert>
+   
+   <update id="deleteUsedRvReply">
+		update Reply
+		set re_d_status = 'N'
+		where r_no = #{ rNo } and b_type = 'U'
+	</update>
+	
+	<update id="updateUsedRvReply">
+		update reply
+		set re_content = #{reContent}
+		where r_No = #{rNo}
+	</update>
+	
+	<select id="UsedBoardLike" resultType="_int">
+		select count(*)
+		from board_like
+		where like_ref_board = #{uNo} and like_user = #{id}
+	</select>
+	
+	<insert id="insertUsedBoardLike">
+		insert into board_like
+		values (bl_seq.nextval, 'U', #{uNo}, #{id})
+	</insert>
+	
+	<delete id="deleteUsedBoardLike">
+		delete from board_like
+		where like_ref_board = #{uNo} and like_ref_type = 'U' and like_user =#{id}
+	</delete>
+	
+	<insert id="insertUsedRvBoardNotice">
+		insert into notification
+		values (noti_seq.nextval, (select mb_id from used_board where u_no = #{uNo}), 'UB', null, 'Y', #{id}, 1, sysdate)
+	</insert>
+	
+	<insert id="insertUsedRvReplyNotice">
+		insert into notification
+		values (noti_seq.nextval, (select mb_id from reply where r_no = #{rNo}), 'UR', null, 'Y', #{id}, 1, sysdate)
+	</insert>
+	
+		
+	
+</mapper>

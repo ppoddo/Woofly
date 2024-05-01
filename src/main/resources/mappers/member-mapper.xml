@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.kh.woofly.member.model.dao.MemberDAO">
+	
+	<delete id="deleteNotification">
+		delete from notification
+		where noti_no = #{notiNo}
+	</delete>
+	
+	<update id="readNotification">
+		update notification
+		set is_read = 'Y'
+		where mb_id = #{id}
+	</update>
+
+	<select id="selectNotification" resultType="Notification">
+		select *
+		from notification
+		where mb_id = #{id}
+		order by sent_date desc
+	</select>
+
+	<select id="getBlackList" resultType="Member">
+		select *
+		from blacklist
+		     join member on (blocked_entity = mb_id)
+		where blocked_by = #{id} and mb_status = 'Y'
+	</select>
+	
+	<delete id="removeBlock">
+		delete from blacklist
+		where blocked_entity = #{blockedEntity} and blocked_by = #{loginUser}
+	</delete>
+	
+	<select id="nicknameCheck" resultType="_int">
+		select count(*)
+		from member
+		where mb_nickname = #{nickname}
+	</select>
+	
+	<update id="editNickName">
+		update member
+		set mb_nickname = #{ mbNickName }, next_change = #{ nextChange }
+		where mb_id = #{mbId}
+	</update>
+	
+	<update id="editName">
+		update member
+		set mb_name = #{ mbName }
+		where mb_id = #{mbId}
+ 	</update>
+ 	
+ 	<update id="editIntro">
+ 		update member
+ 		set mb_intro = #{ mbIntro }
+ 		where mb_id = #{mbId}
+ 	</update>
+ 	
+ 	<update id="editIsPrivate">
+ 		update member
+ 		set is_private = #{ isPrivate }
+ 		where mb_id = #{mbId}
+ 	</update>
+ 	
+ 	<update id="editMbPhoto">
+ 		update member
+ 		set mb_photo = #{ mbPhoto } , isKakao = #{isKakao}
+ 		where mb_id = #{ mbId }
+ 	</update>
+ 	
+ 	<update id="deleteMbPhoto">
+ 		update member
+ 		set mb_photo = default
+ 		where mb_id = #{ mbId }
+ 	</update>
+ 	
+ 	<update id="updatePwd">
+ 		update member
+ 		set mb_pwd = #{mbPwd}
+ 		where mb_id = #{mbId}
+ 	</update>
+ 	
+ 	<update id="updateEmail">
+ 		update member
+ 		set mb_email = #{mbEmail}
+ 		where mb_id = #{mbId}
+ 	</update>
+ 	
+ 	<update id="updatePhone">
+ 		update member
+ 		set mb_tel = #{mbTel}
+ 		where mb_id = #{mbId}
+ 	</update>
+ 	
+ 	<update id="updateMbStatus">
+ 		update member
+ 		set mb_status = 'N'
+ 		where mb_id = #{mbId}
+ 	</update>
+ 	
+ 	<insert id="addAddress" useGeneratedKeys="true">
+ 		<selectKey keyProperty="addrId" order="BEFORE" resultType="_int">
+ 			select address_seq.nextval from dual
+ 		</selectKey>
+ 		
+ 		insert into member_address
+ 		values (#{addrId}, #{addr}, #{mbId}, #{addrType}, #{mbTel}, #{mbName}, #{postcode}, #{addrDetail})
+ 	</insert>
+ 	
+ 	<select id="selectMyAddress" resultType="MemberAddress">
+ 		select * from member_address
+ 		where mb_id = #{ id }
+ 	</select>
+ 	
+ 	<select id="checkAddrType" resultType="_int">
+ 		select count(*) from member_address
+ 		where mb_id = #{ mbId } and addr_type = 'Y'
+ 	</select>
+ 	
+ 	<select id="checkAddr" resultType="_int">
+ 		select count(*) from member_address
+ 		where mb_id = #{ mbId } and addr = #{addr} and postcode = #{postcode} 
+ 		<if test="addrDetail != ''">
+	 		and addr_detail = #{addrDetail}
+ 		</if>
+ 		<if test="addrDetail == ''">
+ 			and addr_detail is null
+ 		</if>
+ 	</select>
+ 	
+ 	<update id="updateAddr">
+	 	 update member_address
+	 	 set addr = #{addr}, addr_type = #{addrType}, mb_tel = #{mbTel}, mb_name = #{mbName}, postcode = #{postcode}, addr_detail = #{addrDetail}
+	 	 where addr_id = #{ addrId }
+ 	</update>
+ 	
+ 	<delete id="deleteAddr">
+ 		delete from member_address
+ 		where addr_id = #{ addrId }
+ 	</delete>
+ 	
+ 	<insert id="addPayment">
+	 	 insert into payment
+	 	 values (payment_seq.nextval, #{billingKey}, #{cardNumber}, #{cardCompany}, #{customerKey}, default)
+ 	</insert>
+ 	
+ 	<select id="selectMyPayment" resultType="Payment">
+ 		select * from payment
+ 		where member_id = #{id}
+ 		order by payment_type desc
+ 	</select>
+ 	
+ 	<update id="updatePaymentToN">
+ 		update payment
+ 		set payment_type = 'N'
+ 		where member_id = #{memberId}
+ 	</update>
+ 	
+ 	
+ 	<update id="updatePayment">
+ 		update payment
+ 		set payment_type = 'Y'
+ 		where payment_no = #{paymentNo}
+ 	</update>
+ 	
+ 	<delete id="deletePayment">
+ 		delete from payment
+ 		where payment_no = #{paymentNo}
+ 	</delete>
+ 	
+ 	<delete id="deleteExpiredPoints">
+ 		delete from point_history 
+ 		<![CDATA[
+ 		where transaction_datetime < (select to_date(to_char(sysdate, 'yy') - 1 || to_char(sysdate, 'MMdd'), 'yy/MM/dd') from dual)
+ 		and mb_id = #{id}
+ 		]]>
+ 	</delete>
+ 	
+ 	<select id="getPointsCount" resultType="_int">
+ 		select count(*) from point_history
+ 		where mb_id = #{id}
+ 	</select>
+ 	
+ 	<select id="selectMyPoints" resultType="Point">
+ 		select * from point_history
+ 		where mb_id = #{id}
+ 	</select>
+</mapper>

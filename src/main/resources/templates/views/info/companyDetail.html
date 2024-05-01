@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+	crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" th:href="@{/css/yh/modal.css}" /> 
+<title>협력업체 디테일</title>
+<link rel="icon" th:href="@{/image/woofly.png}">
+</head>
+<body>
+    <!-- top -->
+    	<div th:replace="~{common/top :: top}"></div>
+	<main>
+		<div class="container-fluid d-flex mx-5">
+			<!-- 관리자만 보이게!!!!!!!!!!!!!!!!!!! -->
+			<th:block th:if="${session.loginUser == null or session.loginUser.isAdmin == 'N'}">
+				<div th:replace="~{common/infoNav :: infoNav}"></div>
+			</th:block>
+			<th:block th:if="${session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+				<div th:replace="~{common/adminNav :: adminNav}"></div>
+			</th:block>
+			
+			<!-- 마이페이지 아래만 수정해주세요 -->
+			<div class="col-10 mb-5">
+			 <div class="container mt-4">
+			  <div class="row">
+			   <div class="col-md-12 mb-4">
+				<div class="card">
+					<form action="/info/CompanyEdit" method="POST">
+						<div class="card-header d-flex justify-content-between" >
+							<h4>협력업체 상세정보</h4>
+							<input type="hidden" th:value="${ c.comNo }" name="comNo">
+							<input type="hidden" th:value="${ page }" name="page">
+							<div class="d-flex gap-3" th:if="${session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+								<button class="btn btn-outline-warning bg-warning-subtle">수정</button>
+								<button type="button" id="modalOpen" class="btn btn-outline-danger bg-danger-subtle">삭제</button>                                         
+							</div>
+						</div>
+					</form>
+					<div class="card-body">
+						<table class="table">									
+							<tbody>
+								<tr>
+									<th>업체명</th>
+									<td>[[${ c.comName }]]</td>
+								</tr>
+								<tr>
+									<th>업체종류</th>
+									<td>[[${ c.comCategory }]]</td>
+								</tr>
+								<tr>
+									<th>전화 번호</th>
+									<td>[[${ c.comPhone }]]</td>
+								</tr>
+								<tr>
+									<th>이메일</th>
+									<td>[[${ c.comEmail }]]</td>
+								</tr>
+								<tr>
+									<th>협력업체 등록일</th>
+									<td>[[${ c.comCreateDate }]]</td>
+								</tr>
+								<tr>
+									<th>주소</th>
+									<td>[[${ #strings.arraySplit(c.comAddr, '@')[1] }]] ([[${ #strings.arraySplit(c.comAddr, '@')[0] }]])</td>
+								</tr>												
+								<tr>
+									<th>지도</th>
+									<td>
+										<div id="map" style="width:500px;height:400px;"></div>
+										<p style="margin-top:1px">
+											<em class="link">
+												<a href="javascript:void(0);" onclick="window.open('http://fiy.daum.net/fiy/map/CsGeneral.daum', '_blank', 'width=981, height=650')">
+													혹시 주소 결과가 잘못 나오는 경우에는 여기에 제보해주세요.
+												</a>
+											</em>
+										</p>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<div style="text-align: center; margin-top: 10px;">
+							<input class="btn btn-outline-dark" type="button" value="목 록" onclick="javascript:history.back();">
+						</div>
+					</div>
+				</div>
+			   </div>
+			  </div>                    
+			 </div>
+			</div>
+			<div id="modalContainer" class="hidden">
+				<div id="modalContent" class="modalContentCss">
+			    	<br>
+			    	<h1 style="text-align: center;">정말 삭제하시겠습니까?</h1>
+			    	<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+				    <button id="delete" type="button" class="btn btn-lg rounded-2 btn-outline-danger">삭제</button>
+					&emsp;&emsp;&emsp;&emsp;
+				    <button id="modalClose" type="button" class="btn btn-lg rounded-2 btn-outline-dark">닫기</button>	
+				</div>
+			</div>
+		</div>
+	</main>
+	
+	<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c10658eae848049b696170710e304723&libraries=services"></script>
+	<script>
+	var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+	    mapOption = {
+	        center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+	        level: 3 // 지도의 확대 레벨
+	    };  
+	
+	// 지도를 생성합니다    
+	var map = new kakao.maps.Map(mapContainer, mapOption); 
+	
+	// 주소-좌표 변환 객체를 생성합니다
+	var geocoder = new kakao.maps.services.Geocoder();
+	
+	// 주소로 좌표를 검색합니다
+	geocoder.addressSearch('[[${ #strings.arraySplit(c.comAddr, "@")[1] }]]', function(result, status) {
+	
+	    // 정상적으로 검색이 완료됐으면 
+	     if (status === kakao.maps.services.Status.OK) {
+	
+	        var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+	
+	        // 결과값으로 받은 위치를 마커로 표시합니다
+	        var marker = new kakao.maps.Marker({
+	            map: map,
+	            position: coords
+	        });
+	
+	        // 인포윈도우로 장소에 대한 설명을 표시합니다
+	        var infowindow = new kakao.maps.InfoWindow({
+	            content: '<div style="width:150px;text-align:center;padding:5px 0;">[[${ c.comName }]]</div>'
+	        });
+	        infowindow.open(map, marker);
+	
+	        // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+	        map.setCenter(coords);
+	    } 
+	});    
+	</script>
+	
+	<script th:inline="javascript">
+		window.onload = () => {
+			const mbt = document.getElementById('modalOpen');
+			const modalCloseButton = document.getElementById('modalClose');
+			const modal = document.getElementById('modalContainer');
+			const del = document.getElementById('delete');
+			
+			mbt.addEventListener('click', (event) => {
+				modal.classList.remove('hidden');
+			    
+				const mapDiv = document.getElementById('map');
+				const divElements = mapDiv.querySelectorAll('div');
+			    
+				divElements.forEach(function(div) {
+					mapDiv.style.width = '0px';
+					mapDiv.style.height = '0px';
+			    });
+			    
+			    del.addEventListener('click', () => { 
+			        location.href = '/info/deleteCompany?comNo=' /*<![CDATA[*/ + /*[[${c.comNo}]]*/123/*]]>*/ + "&page=" /*<![CDATA[*/ + /*[[${ page}]]*/123;/*]]>*/
+			    });
+			    
+			    modalCloseButton.addEventListener('click', () => { 
+			    	divElements.forEach(function(div) {
+			    		mapDiv.style.width = '500px';
+						mapDiv.style.height = '400px';
+				    });
+			    });
+			});
+								
+			modalCloseButton.addEventListener('click', () => {
+			  modal.classList.add('hidden');
+			});
+			
+			const anav = document.getElementById('myNav3')
+			anav.style.fontWeight = 'bold';
+		}
+		
+	</script>
+</body>
+</html>

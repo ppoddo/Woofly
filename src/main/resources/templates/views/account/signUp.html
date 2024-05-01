@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WOOFLY</title>
+<link rel="stylesheet"
+   href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="icon" href="/image/woofly.png">
+<style>
+.active {
+   color: black !important;
+   font-weight: 700 !important;
+}
+
+.border-bottom input:focus {
+   outline: none;
+}
+
+p {
+   margin-bottom: 0 !important;
+}
+</style>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+   <!-- top navigation bar -->
+   <!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+   <div th:replace="~{common/top :: top}"></div>
+   <!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+   <main>
+      <div class="d-flex justify-content-center mx-5">
+         <!-- 아래만 수정해주세요 -->
+         <!-- 아래만 수정해주세요 -->
+         <!-- 아래만 수정해주세요 -->
+         <!-- 아래만 수정해주세요 -->
+         <!-- 아래만 수정해주세요 -->
+         <!-- 아래만 수정해주세요 -->
+         <div class="col-10 pt-3 mb-5 d-flex justify-content-center">
+            <div style="width: 400px">
+               <div class="text-center border-bottom border-3 border-black">
+                  <h2 style="font-weight: 800">회원가입</h2>
+               </div>
+               <br>
+               <form action="/signUp.dw" method="post">
+                  <div class="mt-1 mb-2">
+                     <p>아이디</p>
+                     <div class="border-bottom d-flex justify-content-between">
+                        <input type="text" id="idCheck" name="mbId" style="border: none; background: transparent;">
+                        <button type="button" class="btn btn-outline-dark mb-3 btn-sm" id="idCheckBtn" disabled>중복확인</button>
+                     </div>
+                     <div class="mt-1 form-text" id="idCheckWarn" style="font-weight: bolder;" ></div>
+                     <div class="mt-1 form-text" id="idRegCheckWarn" style="font-weight: bolder;" ></div>
+                  </div>
+                  <br>
+                  <div class="mb-2">
+                     <p>비밀번호</p>
+                     <div class="border-bottom d-flex justify-content-between">
+                        <input type="password" name="mbPwd" id="mbPwd" style="border: none; background: transparent;">
+                     </div>
+                     <div class="mt-1 form-text" id="regCheckWarn" style="font-weight: bolder;"></div>
+                  </div>
+                  <div class="mb-2">
+                     <p>비밀번호 확인</p>
+                     <div class="border-bottom d-flex justify-content-between">
+                        <input type="password" id="mbPwd2" name="mbPwd2" style="border: none; background: transparent;">
+                     </div>
+                     <div class="mt-1 form-text" id="pwdCheckWarn" style="font-weight: bolder;"></div>
+                  </div>
+                  <div class="mb-2">
+                     <p>이름</p>
+                     <div class="border-bottom d-flex justify-content-between">
+                        <input type="text" name="mbName" style="border: none; background: transparent;" required>
+                     </div>
+                  </div>
+                  <div class="mb-2">
+                     <p>닉네임</p>
+                     <div class="border-bottom d-flex justify-content-between">
+                        <input type="text" id="mbNickname" name="mbNickName" style="border: none; background: transparent;">
+                        <button type="button" class="btn btn-outline-dark mb-3 btn-sm" id="mbNicknameBtn">중복확인</button>
+                     </div>
+                     <div class="mt-1 form-text" id="nicknameCheckWarn" style="font-weight: bolder;"></div>
+                  </div>
+                  <br>
+                  <div class="mb-2">
+                     <p>이메일</p>
+                     <div class="border-bottom d-flex justify-content-between">
+                        <input type="email" name="mbEmail" style="border: none; background: transparent;" required>
+                     </div>
+                  </div>
+                  <div class="mb-2">
+                     <p>휴대폰 번호 ('-'없이 입력)</p>
+                     <div class="border-bottom d-flex justify-content-between">
+                        <input type="text" id="mbPhone" name="mbTel" style="border: none; background: transparent;">
+                        <button type="button" id="injuengBtn" class="btn btn-outline-dark mb-3 btn-sm">전송</button>
+                     </div>
+                  </div>
+                  <br>
+                  <div class="mb-2">
+                     <p>인증번호 입력</p>
+                     <div class="border-bottom d-flex justify-content-between">
+                        <input type="hidden" value="" id="injeungbunho">
+                        <input type="text" id="injeung" name="injeung" style="border: none; background: transparent;">
+                        <button type="button" id="injeungCheckBtn" class="btn btn-outline-dark mb-3 btn-sm">확인</button>
+                     </div>
+                     <div class="mt-1 form-text" id="injuengCheckWarn" style="font-weight: bolder;"></div>
+                  </div>
+                  <div class="mb-2">
+                     <label for="postcode">우편번호</label>
+                     <div class="border-bottom d-flex pb-2 justify-content-between">
+                        <div class="col-10 ps-0">
+                        	<input type="text" class="form-control" id="postcode" name="mbAddress1" style="border: none; background: transparent;" readonly placeholder="우편 번호를 검색하세요">
+                        </div>
+                        <div>
+                        	<button type="button" onclick="execDaumPostcode()" class="btn btn-outline-dark btn-sm">검색</button>
+                     	</div>
+                     </div>
+                  </div>
+                  <div class="mb-2">
+                     <label for="postcode">주소</label>
+                     <div class="border-bottom d-flex">
+                        <input type="text" id="address" class="form-control" name="mbAddress2" style="border: none; background: transparent;" readonly placeholder="우편 번호 검색후 자동 입력됩니다">
+                     </div>
+                  </div>
+                  <div class="mb-2">
+                     <label for="postcode">상세주소</label>
+                     <div class="border-bottom d-flex justify-content-between">
+                        <input type="text" id="detailAddress" class="form-control" name="mbAddress3" style="border: none; background: transparent;" placeholder="건물, 아파트, 동/호수 입력">
+                     </div>
+                  </div>
+                  <div class="mb-2">
+                     <label for="postcode">참고항목</label>
+                     <div class="border-bottom d-flex justify-content-between">
+                        <input type="text" id="extraAddress" class="form-control" name="mbAddress4" style="border: none; background: transparent;" readonly>
+                     </div>
+                  </div>
+                  <br>
+                  <div class="mb-2">
+                     <p>생년월일</p>
+                     <div class="d-flex me-5">
+                        <input type="date" name="mbBirth" id="mbBirth" value="" class="form-control d-block" style="width: 100%;">
+                     </div>
+                  </div>
+                  <br>
+                  <div class="form-group">
+                     <label>개인정보 수집 및 이용 동의(필수)</label>
+                     <a role="button" class="text-secondary" id="privacyBtn">내용보기</a>
+                     <div class="modal fade" id="privacyModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-scrollable" role="document">
+                           <div class="modal-content">
+                              <div class="modal-header">
+                                 <h5 class="modal-title" id="exampleModalLabel">개인정보 수집 내용</h5>
+                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                 1. 개인정보 수집목적 및 이용목적<br> <br> 가. 서비스 제공에 관한 계약 이행 및
+                                 서비스 제공에 따른 요금정산<br> 콘텐츠 제공 , 구매 및 요금 결제 , 물품배송 또는 청구지 등
+                                 발송 , 금융거래 본인 인증 및 금융 서비스<br> <br> 나. 회원 관리<br>
+                                 회원제 서비스 이용에 따른 본인확인 , 개인 식별 , 불량회원의 부정 이용 방지와 비인가 사용 방지 , 가입
+                                 의사 확인 , 연령확인 , 만14세 미만 아동 개인정보 수집 시 법정 대리인 동의여부 확인, 불만처리 등
+                                 민원처리 , 고지사항 전달<br> <br> 2. 수집하는 개인정보 항목 <br>:
+                                 이름 , 생년월일 , 성별 , 로그인ID , 비밀번호 , 자택 전화번호 , 휴대전화번호 , 이메일 , 펫 정보<br>
+                                 <br> 3. 개인정보의 보유기간 및 이용기간<br> <br> 원칙적으로, 개인정보
+                                 수집 및 이용목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. 단, 다음의 정보에 대해서는 아래의
+                                 이유로 명시한 기간 동안 보존합니다.<br> <br> 가. 회사 내부 방침에 의한 정보 보유
+                                 사유<br> <br> o 부정거래 방지 및 쇼핑몰 운영방침에 따른 보관 : 1년<br>
+                                 <br> 나. 관련 법령에 의한 정보보유 사유<br> <br> o 계약 또는
+                                 청약철회 등에 관한 기록<br> <br> -보존이유 : 전자상거래등에서의소비자보호에관한법률<br>
+                                 <br> -보존기간 : 5년<br> <br> o 대금 결제 및 재화 등의 공급에
+                                 관한 기록<br> <br> -보존이유: 전자상거래등에서의소비자보호에관한법률<br>
+                                 <br> -보존기간 : 5년<br> <br> o 소비자 불만 또는 분쟁처리에 관한
+                                 기록<br> <br> -보존기간 : 3년<br> <br> o 로그 기록<br>
+                                 <br> -보존이유: 통신비밀보호법<br> <br> -보존기간 : 3개월<br>
+                                 <br> ※ 동의를 거부할 수 있으나 거부시 회원 가입이 불가능합니다.<br> <br>
+                                 4. 개인정보의 위탁 처리 (2020-09-28)<br> <br> “(주)Woofly”는
+                                 서비스 향상을 위해 관계법령에 따라 회원의 동의를 얻거나 관련 사항을 공개 또는 고지 후 회원의 개인정보를
+                                 외부에 위탁하여 처리하고 있습니다.<br> <br> “(주)Woofly”의 개인정보처리
+                                 업무의 내용은 다음과 같습니다.<br> <br> - 위탁 업무 내용 : 신규 서비스(제품)
+                                 개발 및 맞춤 서비스 제공, 이벤트 및 광고성 정보 및 참여기회 제공<br> - 수집항목 : 이름,
+                                 아이디, 휴대전화번호, 펫 정보<br> - 보유기간 : 회원 탈퇴 시 혹은 법정 보유기간<br>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <br>
+                     <div>
+                        <div class="form-check form-check-inline">
+                           <input onclick="validateForm()" class="form-check-input" type="radio" name="privacy" id="agree" value="agree" style="color:black;">
+                           <label class="form-check-label" for="agree">동의함</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                           <input onclick="validateForm()" class="form-check-input" type="radio" name="privacy" id="disagree" value="disagree" style="color:black;"> 
+                           <label class="form-check-label" for="disagree">동의안함</label>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="mt-4">
+                     <button onclick="checkAll()" type="button" class="btn btn-dark btn-sm" style="width: 100%; text-align: center;">가입하기</button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      <!-- 여기까지가 수정 -->
+      <!-- 여기까지가 수정 -->
+      <!-- 여기까지가 수정 -->
+      <!-- 여기까지가 수정 -->
+      <!-- 여기까지가 수정 -->
+      <!-- 여기까지가 수정 -->
+      <!-- 여기까지가 수정 -->
+      <!-- 여기까지가 수정 -->
+      </div>
+   </main>
+   <script>
+      $('#privacyBtn').click(function(e) {
+         e.preventDefault();
+         $('#privacyModal').modal("show");
+      });
+      
+      //생일 넘어가기
+      const now_date = Date.now();
+      const timeOff = new Date().getTimezoneOffset()*60000;
+      const today = new Date(now_date-timeOff).toISOString().split("T")[0];
+      document.getElementById("mbBirth").setAttribute("max", today);
+      
+      //필수항목 유효성 검사
+      let check_id = false;
+      let check_idReg = false;
+      let check_pwd = false;
+      let check_pwdReg = false;
+      let check_sms = false;
+      let check_nickName = false;
+      let check_privacy = false;
+      
+      function checkAll() {
+    	  if(!check_id) {
+    		  alert("아이디를 중복 확인 해주세요!");
+    	  } else if(!check_idReg && check_id){
+    		  alert("아이디 조건을 확인해 주세요!")
+    	  } else if(!check_pwd){
+    		  alert("비밀번호를 확인해 주세요!");
+    	  } else if(!check_pwdReg && check_pwd){
+    		  alert("비밀번호를 조건을 확인해 주세요!");
+    	  } else if(!check_nickName){
+    		  alert("닉네임을 중복 확인 해주세요!");
+    	  } else if(!check_sms) {
+    		  alert("문자인증을 완료해 주세요!");
+    	  } else if(!check_privacy) {
+    		  alert('개인정보 수집 이용 동의에 체크해 주세요!');
+    	  } else {
+    		  document.querySelector('form').submit()
+    	  }
+      }
+      
+      //인증번호 입력 문구 
+      $('#injeungCheckBtn').click(function() {
+         const injeung = document.getElementById('injeung').value;
+         const injeungbunho = document.getElementById('injeungbunho').value;
+         
+         if (injeungbunho == "") {
+            injuengCheckWarn.innerText = "인증을 진행해주세요.";
+            injuengCheckWarn.style.color = "red";
+            check_sms=false;
+	         } else {
+	            if (injeung == "") {
+	               injuengCheckWarn.innerText = "인증번호를 입력해주세요.";
+	               injuengCheckWarn.style.color = "red";
+	               check_sms=false;
+	         } else {
+	            if (injeung == injeungbunho) {
+	               // 인증 번호가 맞을때 실행할거
+	               injuengCheckWarn.innerText = "인증번호가 일치합니다.";
+	               injuengCheckWarn.style.color = "black";
+	               check_sms=true;
+	         } else {
+	            // 인증 번호가 맞지 않을때 실행할거
+	            injuengCheckWarn.innerText = "인증번호가 일치하지 않습니다.";
+	            injuengCheckWarn.style.color = "red";
+	            check_sms=false;
+	         }
+           }
+         }
+      });
+      
+      //문자 인증 API
+      document.getElementById('injuengBtn').addEventListener('click', function() {
+          const pNum = document.getElementById('mbPhone').value;
+             console.log(pNum);
+             $.ajax({
+                 url: '/send-one',
+                 data: { pNum: pNum },
+                 success: data => {
+                    if (data != 'bad') {
+                     alert("인증번호가 전송되었습니다!")
+                     console.log(data);              
+                        document.getElementById('injeungbunho').value = data;
+                    } else {
+                       alert();
+                    }
+                       
+                 },
+                 error: function(error) {
+                     console.log(error);
+                 }
+             });
+         });
+      
+      //주소
+      function execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+                // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                var addr = ''; // 주소 변수
+                var extraAddr = ''; // 참고항목 변수
+
+                //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                    addr = data.roadAddress;
+                } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                    addr = data.jibunAddress;
+                }
+
+                // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+                if(data.userSelectedType === 'R'){
+                    // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                    // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                    if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                        extraAddr += data.bname;
+                    }
+                    // 건물명이 있고, 공동주택일 경우 추가한다.
+                    if(data.buildingName !== '' && data.apartment === 'Y'){
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                    if(extraAddr !== ''){
+                        extraAddr = ' (' + extraAddr + ')';
+                    }
+                    // 조합된 참고항목을 해당 필드에 넣는다.
+                    document.getElementById("extraAddress").value = extraAddr;
+                
+                } else {
+                    document.getElementById("extraAddress").value = '';
+                }
+
+                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                document.getElementById('postcode').value = data.zonecode;
+                document.getElementById("address").value = addr;
+                // 커서를 상세주소 필드로 이동한다.
+                document.getElementById("detailAddress").focus();
+            }
+        }).open();
+    }      
+      window.onload = () =>{
+    	  //아이디 정규식
+    	  document.getElementById('idCheck').addEventListener('keyup', function() {
+    		  const idCheckWarn = document.getElementById('idCheckWarn');
+              const reg = /^[a-z0-9_.]{4,30}$/;
+              const regCheckWarn = document.getElementById('idRegCheckWarn');
+             if(document.getElementById('idCheck').value.match(reg) != null) {
+            	document.getElementById('idCheckBtn').disabled = false;
+                regCheckWarn.innerText = '';
+                regCheckWarn.style.color = 'grey';
+                check_idReg = true;
+             }else{
+            	document.getElementById('idCheckBtn').disabled = true;
+                idCheckWarn.innerText = '';
+                regCheckWarn.innerText = '아이디는 영문, 숫자, 특수문자(._) 포함 4~30자리 이상입니다.';
+                regCheckWarn.style.color = 'red';
+                
+                check_idReg = false;
+             }
+             
+          });
+    	  
+         //비밀번호 정규식
+         document.getElementById('mbPwd').addEventListener('keyup', function() {
+             const reg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,15}$/;
+             const regCheckWarn = document.getElementById('regCheckWarn');
+             const pwWarn = document.getElementById('pwdCheckWarn');   
+            if(document.getElementById('mbPwd').value.match(reg) != null) {
+               regCheckWarn.innerText = '사용가능한 비밀번호 입니다.';
+               regCheckWarn.style.color = 'grey';
+               check_pwdReg = true;
+            }else{
+               regCheckWarn.innerText = '비밀번호는 영문,숫자,특수문자 포함 8자리~15자리 이상입니다.';
+               regCheckWarn.style.color = 'red';
+               pwWarn.style.display = 'none';
+               check_pwdReg = false;
+            }
+            
+         });
+         
+         //비밀번호 체크   
+         document.getElementById('mbPwd2').addEventListener('keyup', function() {
+            const pw1 = document.getElementById('mbPwd');
+            const pw2 = document.getElementById('mbPwd2');
+            const pwWarn = document.getElementById('pwdCheckWarn');   
+            const password = pw1.value;
+            const confirmPassword = pw2.value;
+            console.log(pwWarn);
+            console.log(password);
+            console.log(confirmPassword);
+
+             if (password !== confirmPassword) {
+                pwWarn.innerText = '비밀번호가 일치하지 않습니다.';
+                pwWarn.style.color = 'red';
+                pwWarn.style.display = 'block';
+                check_pwd=false;
+             } else {
+                pwWarn.innerText = '비밀번호가 일치합니다';
+                pwWarn.style.color = 'grey';
+                pwWarn.style.display = 'block';
+                check_pwd=true;
+             }
+            
+         });
+         
+         const checkId = document.getElementById('idCheck')
+            document.getElementById("idCheckBtn").addEventListener("click",function () {
+               const idCheckWarn = document.getElementById('idCheckWarn');
+               //let check;// 체크결과값
+            
+                //아이디 체크   
+                  $.ajax({
+                     type : 'get',
+                     url : '/idCheck.dw', 
+                     data: {"id":document.getElementById('idCheck').value.trim()},
+                     success :(data)=>{
+                       if(data == "true") {
+                          idCheckWarn.innerText = "사용 가능한 아이디입니다.";
+                          idCheckWarn.style.color = "black";
+                          check_id=true;
+                       } else {
+                          idCheckWarn.innerText = "사용 불가한 아이디입니다.";
+                          idCheckWarn.style.color = "red";
+                          check_id=false;
+                       }
+                     }, 
+                     error : (data)=> {
+                        console.log(data);
+                     }
+                  }); 
+            });
+      }
+         
+      document.getElementById("mbNicknameBtn").addEventListener("click", function() {
+          $.ajax({
+                 url: "/nickCheck.dw",
+                 data: {"nickName": document.getElementById("mbNickname").value.trim()},
+                 success: (data) => {
+                    if(data == "true") {
+                          nicknameCheckWarn.innerText = "사용가능한 닉네임입니다.";
+                          nicknameCheckWarn.style.color = "black";
+                          check_nickName=true;
+                       } else {
+                          nicknameCheckWarn.innerText = "사용불가한 닉네임입니다.";
+                          nicknameCheckWarn.style.color = "red";
+                          check_nickName=false;
+                       }
+                 },
+                 error: (data) => console.log(data)
+              });
+      })
+      
+      //개인정보 수집 이용 동의
+       function validateForm() {
+          const privacy = document.getElementById('agree').checked;
+          if (!privacy) {
+        	 check_privacy = false;
+          } else {
+         	 check_privacy = true;;
+          }
+       }
+     
+      
+   </script>
+   <!--카카오 지도 api 관련-->
+   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+   
+</body>
+</html>

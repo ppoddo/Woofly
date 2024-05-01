@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="infoNav">
+<head>
+<meta charset="UTF-8">
+<style>
+	@font-face{
+	font-family:'DNFBitBitv2';
+	font-style:normal;font-weight:400;src:url('//cdn.df.nexon.com/img/common/font/DNFBitBitv2.otf')format('opentype')}
+	
+	* {
+	font-family: 'DNFBitBitv2';
+	font-weight: lighter;
+	}
+</style>
+<title>WOOFLY</title>
+</head>
+<body>
+	<div class="navbar mb-5 mt-4">
+		<div class="container-fluid flex-column align-items-start mb-auto">
+			<a class="navbar-brand" href="/info/notice" style="margin-top: 10%">
+				<h2> 고객 센터 </h2>
+			</a>
+			
+			<ul class="nav flex-column" style="margin-top: 30%">
+			 	<li class="nav-item">
+			    	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;"  href="/info/notice"><h4 class="mt-3" id="myNav1" style="color: black">공지 사항</h4></a>
+			  	</li>
+			  	<li class="nav-item">
+			    	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" href="/info/QNA"><h4 class="mt-5" id="myNav2" style="color: black">자주묻는 질문</h4></a>
+			  	</li>
+			  	<li class="nav-item">
+			    	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" href="/info/company"><h4 class="mt-5" id="myNav3" style="color: black">협력업체</h4></a>
+			  	</li>			  	
+			</ul>
+					
+		</div>
+	</div>
+</body>
+</html>

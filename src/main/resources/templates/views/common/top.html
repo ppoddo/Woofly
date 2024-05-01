@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="top">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" href= "image/woofly.png">
+<link rel="icon" href="/image/woofly.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+<style>
+	.offcanvas a {
+		border-radius: 23px;
+		margin: 5px;
+	}
+	
+	@font-face{
+	font-family:'DNFBitBitv2';
+	font-style:normal;font-weight:400;src:url('//cdn.df.nexon.com/img/common/font/DNFBitBitv2.otf')format('opentype')}
+	
+	* {
+	font-family: 'DNFBitBitv2';
+	font-weight: lighter;
+	}
+</style>
+</head>
+<body>
+	<nav class="navbar sticky-top bg-white pb-0">
+		<div class="container-fluid justify-content-end mx-5">
+			<ul class="nav bg-white">
+				<li class="nav-item"><a class="nav-link text-black" href="/info/notice"><small>고객센터</small></a></li>
+				<li class="nav-item"><a class="nav-link text-black" href="/my"><small>마이페이지</small></a></li>
+				<li class="nav-item"><a class="nav-link text-black" href="/my/saved"><small>관심</small></a></li>
+				<li class="nav-item"><a class="nav-link text-black" href="#offcanvas" data-bs-toggle="offcanvas" role="button"><small>알림</small></a></li>
+				<th:block th:if="${session.loginUser == null}">
+					<li class="nav-item"><a class="nav-link text-black" href="/account/login"><small>로그인</small></a></li>
+				</th:block>
+				<th:block th:if="${session.loginUser != null}">
+					<li class="nav-item"><a class="nav-link text-black" type="submit" href="/account/logout"><small>로그아웃</small></a></li>
+				</th:block>
+			</ul>
+		</div>
+		<div class="container-fluid mx-5">
+	   		<a class="navbar-brand" href="/"><img src="/image/woofly.png" alt="Woofly" width="180" height="100"></a>
+	   		<ul class="nav">
+	   			<li class="nav-item"><a class="nav-link text-black" href="/">HOME</a></li>
+	   			<li class="nav-item"><a class="nav-link text-black" href="/shopMain">SHOP</a></li>
+<!-- 	   			<li class="nav-item"><a class="nav-link text-black" href="/map">MAP</a></li> -->
+	   		</ul>
+		</div>
+	</nav>
+	
+	<div class="offcanvas offcanvas-end w-20" data-bs-backdrop="static" data-bs-scroll="true" tabindex="-1" id="offcanvas">
+	  	<div class="offcanvas-header">
+		    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+		    <h5 class="offcanvas-title" id="offcanvasLabel">알림</h5>
+  		</div>
+  		<div class="offcanvas-body">
+			<div id="notiBody">
+				<div class="d-flex gap-3 justify-content-start" th:if="${session.loginUser != null}" th:each="notification : ${session.notifications}" style="min-height: 100px;">
+					<div th:if="${notification.notiType == 'AM'}"><img src="/image/notification-bell.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'R'}"><img src="/image/free-icon-message-6596123.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'DR'}"><img src="/image/free-icon-message-6596123.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'FR'}"><img src="/image/free-icon-message-6596123.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'MR'}"><img src="/image/free-icon-message-6596123.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'UR'}"><img src="/image/free-icon-message-6596123.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'SR'}"><img src="/image/free-icon-message-6596123.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'WR'}"><img src="/image/free-icon-message-6596123.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'AB'}"><img src="/image/free-icon-love-3670159.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'DB'}"><img src="/image/free-icon-love-3670159.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'FB'}"><img src="/image/free-icon-love-3670159.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'MB'}"><img src="/image/free-icon-love-3670159.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'UB'}"><img src="/image/free-icon-love-3670159.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'WB'}"><img src="/image/free-icon-love-3670159.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'RL'}"><img src="/image/free-icon-love-3670159.png" style="width: 50px; height: 50px;"></div>
+					<div th:if="${notification.notiType == 'L'}"><img src="/image/free-icon-love-3670159.png" style="width: 50px; height: 50px;"></div>
+					<div class="me-auto">
+						<div th:if="${notification.notiType == 'R'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 게시글에 댓글을 달았습니다.|"></div>
+						<div th:if="${notification.notiType == 'DR'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 도그워커 게시글에 댓글을 달았습니다.|"></div>
+						<div th:if="${notification.notiType == 'FR'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 자유게시판 게시글에 댓글을 달았습니다.|"></div>
+						<div th:if="${notification.notiType == 'UR'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 중고게시판 게시글에 댓글을 달았습니다.|"></div>
+						<div th:if="${notification.notiType == 'WR'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 워킹메이트 게시글에 댓글을 달았습니다.|"></div>
+						<div th:if="${notification.notiType == 'SR'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 상품 리뷰 리뷰에 댓글을 달았습니다.|"></div>
+						<div th:if="${notification.notiType == 'MR'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 실종신고 게시글에 댓글을 달았습니다.|"></div>
+						<div th:if="${notification.notiType == 'L'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 게시글에 좋아요 눌렀습니다.|"></div>
+						<div th:if="${notification.notiType == 'AB'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 사진첩에 좋아요 눌렀습니다.|"></div>
+						<div th:if="${notification.notiType == 'DB'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 도그워커 게시글에 좋아요 눌렀습니다.|"></div>
+						<div th:if="${notification.notiType == 'FB'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 자유게시판 게시글에 좋아요 눌렀습니다.|"></div>
+						<div th:if="${notification.notiType == 'MB'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 실종신고 게시판 게시글에 좋아요 눌렀습니다.|"></div>
+						<div th:if="${notification.notiType == 'UB'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 중고게시판 게시글에 좋아요 눌렀습니다.|"></div>
+						<div th:if="${notification.notiType == 'WB'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 워킹메이트 게시글에 좋아요 눌렀습니다.|"></div>
+						<div th:if="${notification.notiType == 'RL'}" th:text="|${notification.fromUser}님이 ${session.loginUser.mbNickName}의 댓글에 좋아요를 눌렀습니다.|"></div>
+						<div th:if="${notification.notiType == 'AM'}">관리자가 보낸 메세지 입니다.</div>
+						<div>[[${notification.notiContent}]]</div>
+						<div>[[${#dates.format(notification.sentDate, 'yy/MM/dd')}]]</div>
+						<br>
+					</div>
+					<button type="button" class="btn-close" onclick="deleteNotification(this)"></button>
+					<input type="hidden" th:value="${notification.notiNo}">
+				</div>
+			</div>
+  		</div>
+  			
+	</div>
+	
+	
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		let notificationStatus = /*[[${session.notificationStatus}]]*/true;
+		const loginUser = /*[[${session.loginUser}]]*/null;
+		/*]]>*/
+		
+		const readNotifications = () => {
+			if(loginUser != null && !notificationStatus) {
+				notificationStatus = true;
+				$.ajax({
+					url: '/readNotifications.yj',
+					success: data => {
+						console.log(data);
+						if (document.getElementById('notiDot') != null) {
+							document.getElementById('notiDot').style.display = 'none';
+						}
+					},
+					error: data =>  console.log(data)
+					
+				})
+			}
+		}
+		
+		const deleteNotification = (target) => {
+			const notiNo = target.nextElementSibling.value;
+			$.ajax({
+				url: '/deleteNotifications.yj',
+				data: {'notiNo': notiNo},
+				success: data => {
+					console.log(data);
+					$('#offcanvas').load(location.href + " #offcanvas > *");
+				},
+				error: data =>  console.log(data)
+				
+			})
+		}
+		
+	</script>
+</body>
+</html>

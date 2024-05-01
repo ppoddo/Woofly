@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="pageNav">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+</head>
+<body>
+	
+	<th:block th:if="${generationNo == null }">
+		<nav class="border-top border-black pt-5" th:with="loc=${loc}">
+			<ul class="pagination justify-content-center">
+			
+				<li class="page-item" th:if="${ pi.currentPage <= 1 }">
+					<a class="page-link disable" >
+						<span aria-hidden="true">&laquo;</span>
+					</a>
+				</li>
+				<li class="page-item" th:if="${ pi.currentPage > 1 }" >	
+					<a class="page-link" th:href="@{${loc}(page=${pi.currentPage-1} )}">
+						<span aria-hidden="true">&laquo;</span>
+					</a>
+				</li>
+				
+				<li class="page-item" th:if="${ pi.listCount != 0 }" th:each="p : ${#numbers.sequence(pi.startPage, pi.endPage)}">
+					<a class="page-link" name="pagebtn" th:href="@{${loc}(page=${p})}">[[${ p }]]</a>
+				</li>
+				
+				<li class="page-item" th:if="${ pi.currentPage >= pi.maxPage }">
+					<a class="page-link disable" >
+						<span aria-hidden="true">&raquo;</span>
+					</a>
+				</li>
+				<li class="page-item" th:if="${ pi.currentPage < pi.maxPage }">	 
+					<a class="page-link" th:href="@{${loc}(page=${pi.currentPage+1})}">
+						<span aria-hidden="true">&raquo;</span>
+					</a>
+				</li>							
+			</ul>
+		</nav>
+	</th:block>
+	
+	<th:block th:if="${generationNo != null }">
+		<nav class="border-top border-black pt-5" th:with="loc=${loc}">
+			<ul class="pagination justify-content-center">
+			
+				<li class="page-item" th:if="${ pi.currentPage <= 1 }">
+					<a class="page-link disable" >
+						<span aria-hidden="true">&laquo;</span>
+					</a>
+				</li>
+				<li class="page-item" th:if="${ pi.currentPage > 1 }" >	
+					<a class="page-link" th:href="@{${loc}(selectValue=${generationNo}, page=${pi.currentPage-1} )}">
+						<span aria-hidden="true">&laquo;</span>
+					</a>
+				</li>
+				
+				<li class="page-item" th:if="${ pi.listCount != 0 }" th:each="p : ${#numbers.sequence(pi.startPage, pi.endPage)}">
+					<a class="page-link" name="pagebtn" th:href="@{${loc}(selectValue=${generationNo}, page=${p})}">[[${ p }]]</a>
+				</li>
+				
+				<li class="page-item" th:if="${ pi.currentPage >= pi.maxPage }">
+					<a class="page-link disable" >
+						<span aria-hidden="true">&raquo;</span>
+					</a>
+				</li>
+				<li class="page-item" th:if="${ pi.currentPage < pi.maxPage }">	 
+					<a class="page-link" th:href="@{${loc}(selectValue=${generationNo}, page=${pi.currentPage+1})}">
+						<span aria-hidden="true">&raquo;</span>
+					</a>
+				</li>							
+			</ul>
+		</nav>
+	</th:block>
+	
+	
+	
+	
+</body>
+</html>

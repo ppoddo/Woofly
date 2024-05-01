@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+	crossorigin="anonymous">
+
+<link rel="stylesheet" type="text/css" th:href="@{/css/yh/contestAllList.css}" /> 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>	
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="container-fluid d-flex mx-5">
+			
+			<!-- 관리자만 보이게!!!!!!!!!!!!!!!!!!! -->
+			<th:block th:if="${ session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+				<div th:replace="~{common/adminNav :: adminNav}"></div>
+			</th:block>
+			<th:block th:if="${ session.loginUser == null || session.loginUser.isAdmin != 'Y'}">
+				<div th:replace="~{common/contestNav :: contestNav}"></div>
+			</th:block>
+			
+			<!-- 마이페이지 아래만 수정해주세요 -->
+			<div class="col-10 mb-5">
+				
+				<div class="container mx-5 mt-5">
+					<div class="container d-flex px-0 border-bottom border-black border-3 justify-content-between align-items-center">
+						<h1>역대 콘테스트</h1>		
+					</div>
+					
+					<form action="/contest/searchBestContestList">
+						<div class="row g-0 text-center" style="margin-top: 10px;">
+							<div class="col-6 col-md-1" style="margin-top: 7px;">
+							
+								<select class="form-select form-select-lg mb-3" aria-label="Large select example" style="margin-left: 20px;" name="gen" id="selectGens">
+									<option th:each=" n : ${allCNo}"  th:value="${n}"  th:selected="${ n == generationNo  }"  > [[${n}]]기 </option>
+								</select>
+								
+							</div>
+							<div class="col-6 col-md-2" style="margin-top: 5px;"></div>
+							
+							<th:block th:if="${generationNo == null }">
+								<div class="col-6 col-md-6" style="margin-top: 10px;"><h3> [[${allCNo[0]}]]기 최우수 강아지들</h3></div>
+							</th:block>
+							<th:block th:if="${generationNo != null }">
+								<div class="col-6 col-md-6" style="margin-top: 10px;"><h3> [[${generationNo}]]기 최우수 강아지들</h3></div>
+							</th:block>
+							
+							<div class="col-sm-6 col-md-2 input-group-lg" style="margin-top: 5px;">
+								<input type="text"  name="search"  id="search-box" class="form-control" placeholder="검색">
+							</div>
+							<input type="hidden" th:value="${generationNo}"  name="${generationNo}">
+							<div class="col-6 col-md-1" style="margin-top: 5px;">
+								<button type="submit" class="btn btn-outline-dark btn-lg">검색</button>
+							</div>
+						</div>
+					</form>
+                  	
+                  	<ul class="dimage" style="margin-left: 1%">	
+                  	
+						<li class="adogimage" style="cursor: pointer;">							
+							<div class="album-item" style="margin-top: 17px; ">
+								<label class="pNo" style="display: none;">[[${ best3Dog[1].pNo }]]</label>			
+								<th:block th:each=" a : ${aList}">	
+									<div class="album-cover" th:if="${best3Dog[1].pNo} == ${a.attmRefNo}  " th:style="'background-image: url(/image/contestFiles/' + ${a.renameName} + ');'"></div>	
+							<!--  	<div class="dog-thumbnail" id="second" style="background-image: url('https://m1.daumcdn.net/cfile249/image/99DAB3335E0A135C292D12')"></div> -->
+								</th:block>
+								<div class="album-info" style="display: inline-block; ">
+									<p class="album-title">[[${best3Dog[1].pTitle}]]</p>
+								</div>
+								<div style="float: right; margin-top: 8px;" >
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="bi bi-hearts" viewBox="0 0 16 16">
+ 									<path fill-rule="evenodd" d="M4.931.481c1.627-1.671 5.692 1.254 0 5.015-5.692-3.76-1.626-6.686 0-5.015Zm6.84 1.794c1.084-1.114 3.795.836 0 3.343-3.795-2.507-1.084-4.457 0-3.343ZM7.84 7.642c2.71-2.786 9.486 2.09 0 8.358-9.487-6.268-2.71-11.144 0-8.358Z"/></svg>
+									<p class="album-date"> [[${best3Dog[1].pCount}]]</p>
+								</div>
+							</div>
+						</li>
+						
+						
+						<li class="adogimage" style="cursor: pointer;">
+							<div class="album-item" >
+								<label class="pNo" style="display: none;">[[${ best3Dog[0].pNo }]]</label>
+								<th:block th:each=" a : ${aList}">
+									<div class="album-cover" th:if="${best3Dog[0].pNo} == ${a.attmRefNo}  " th:style="'background-image: url(/image/contestFiles/' + ${a.renameName} + ');'">
+									</div>
+								</th:block>
+								<div class="album-info" style="display: inline-block; ">
+									<p class="album-title">[[${best3Dog[0].pTitle}]]</p>
+								</div>
+								<div style="float: right; margin-top: 8px;" >
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="bi bi-hearts" viewBox="0 0 16 16">
+ 									<path fill-rule="evenodd" d="M4.931.481c1.627-1.671 5.692 1.254 0 5.015-5.692-3.76-1.626-6.686 0-5.015Zm6.84 1.794c1.084-1.114 3.795.836 0 3.343-3.795-2.507-1.084-4.457 0-3.343ZM7.84 7.642c2.71-2.786 9.486 2.09 0 8.358-9.487-6.268-2.71-11.144 0-8.358Z"/></svg>
+									<p class="album-date">[[${best3Dog[0].pCount}]]</p>
+								</div>
+							</div>
+						</li>
+						
+						
+						<li class="adogimage" style="cursor: pointer;">
+							<div class="album-item" style="margin-top: 23px;">
+								<label class="pNo" style="display: none;">[[${ best3Dog[2].pNo }]]</label>
+								<th:block th:each=" a : ${aList}">
+									<div class="album-cover" th:if="${best3Dog[2].pNo} == ${a.attmRefNo}  " th:style="'background-image: url(/image/contestFiles/' + ${a.renameName} + ');'">
+									</div>
+								</th:block>	
+								<div class="album-info"style="display: inline-block; ">
+									<p class="album-title">[[${best3Dog[2].pTitle}]]</p>
+								</div>
+								<div style="float: right; margin-top: 8px;" >
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="bi bi-hearts" viewBox="0 0 16 16">
+ 									<path fill-rule="evenodd" d="M4.931.481c1.627-1.671 5.692 1.254 0 5.015-5.692-3.76-1.626-6.686 0-5.015Zm6.84 1.794c1.084-1.114 3.795.836 0 3.343-3.795-2.507-1.084-4.457 0-3.343ZM7.84 7.642c2.71-2.786 9.486 2.09 0 8.358-9.487-6.268-2.71-11.144 0-8.358Z"/></svg>
+									<p class="album-date"> [[${best3Dog[2].pCount}]] </p>
+								</div>
+							</div>
+						</li>						
+					</ul>
+                  	
+						
+					<ul class="dimage">						
+						
+						<li class="dogimage" th:each=" l : ${pList}" style="cursor: pointer;">
+							<div class="album-item">
+								<label class="pNo" style="display: none;">[[${ l.pNo }]]</label>
+								<th:block th:each=" a : ${aList}">
+									<div class="album-cover" th:if="${l.pNo} == ${a.attmRefNo}  " th:style="'background-image: url(/image/contestFiles/' + ${a.renameName} + ');'">
+									</div>
+								</th:block>
+								<div class="album-info" style="display: inline-block; ">
+									<p class="album-title">[[${l.pTitle}]]</p>
+								</div>
+								<div style="float: right; margin-top: 8px;" >
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="bi bi-hearts" viewBox="0 0 16 16">
+ 									<path fill-rule="evenodd" d="M4.931.481c1.627-1.671 5.692 1.254 0 5.015-5.692-3.76-1.626-6.686 0-5.015Zm6.84 1.794c1.084-1.114 3.795.836 0 3.343-3.795-2.507-1.084-4.457 0-3.343ZM7.84 7.642c2.71-2.786 9.486 2.09 0 8.358-9.487-6.268-2.71-11.144 0-8.358Z"/></svg>
+									<p class="album-date"> [[${l.pCount}]] </p>
+								</div>
+							</div>
+						</li>
+						
+					</ul>
+					
+					<div th:replace="~{contest/pageNav :: pageNav}"></div>
+				</div>	
+			</div>
+		</div>
+	</main>
+
+	<script th:inline="javascript">
+		window.onload = () => {
+			const anav = document.getElementById('myNav4')
+			if(anav != null){
+				anav.style.fontWeight = 'bold';
+			}
+			const canav = document.getElementById('cmyNav2')
+			if(canav != null){
+				canav.style.fontWeight = 'bold';
+			}
+			
+			const classes = document.getElementsByClassName('dogimage');
+			
+			for(const c of classes) {
+				c.addEventListener('click', function() {
+					const pNo = this.querySelector('.pNo').innerText;
+					const type = 1;
+					/*<![CDATA[*/
+			        location.href = '/contest/selectContest?pNo=' + pNo  +  "&type="+ type + "&page=" + /*[[${pi.currentPage}]]*/123;
+			        /*]]>*/
+				})
+			}
+			
+			const selctGen = document.getElementById('selectGens');
+			console.log(selctGen);
+			console.log(selctGen.value);
+			
+			selctGen.addEventListener('change', function() {
+				
+				console.log(selctGen.value);
+				const selectValue = selctGen.value;
+				
+		        // 페이지 리다이렉트
+		        /*<![CDATA[*/
+		        var redirectUrl = '/contest/allList?selectValue=' + selectValue + "&page=" + /*[[${pi.currentPage}]]*/123;
+		        /*]]>*/
+		        location.href = redirectUrl;
+			})
+			
+		}
+	</script>
+	
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WOOFLY</title>
+<link rel="icon" href="/image/woofly.png">
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<div class="d-flex justify-content-between mx-5">
+		<div th:replace="~{common/myNav :: myNav}"></div>
+		<!-- 아래만 수정해주세요 -->
+		<!-- 아래만 수정해주세요 -->
+		<!-- 아래만 수정해주세요 -->
+		<!-- 아래만 수정해주세요 -->
+		<!-- 아래만 수정해주세요 -->
+		<!-- 아래만 수정해주세요 -->
+		<div class="col-10 mb-5 pt-3 me-4">
+			<!-- 첫번째 박스 -->
+			<div class="d-flex align-items-center mb-5" style="height: 150px; border: 1px solid black; border-radius: 5px;">
+				
+				<img th:if="${session.loginUser.isKakao == 'N'}" th:src="@{${ '/image/' + session.loginUser.mbPhoto }}" class="ms-3" alt="PROFILE_IMAGE" style="width: 100px; height: 100px; border-radius: 100px; border: 1px solid black">
+				<img th:if="${session.loginUser.isKakao == 'Y'}" th:src="${session.loginUser.mbPhoto}" class="ms-3" alt="PROFILE_IMAGE" style="width: 100px; height: 100px; border-radius: 100px; border: 1px solid black">
+				<div class="ps-3">
+					<p class="mb-1">
+						[[${ session.loginUser.mbEmail }]]
+						<br>
+						[[${ session.loginUser.mbNickName }]]
+					</p>
+					<div>
+						<a class="btn btn-sm btn-outline-secondary" href="/my/profile-edit">프로필 관리</a>
+						<a class="btn btn-sm btn-outline-secondary" href="/pet/petInfo">내 강아지</a>
+					</div>
+				</div>
+				<div class="ms-auto g-5 d-flex justify-content-center me-5" style="width: 300px; height: 90px; border-radius: 5px; border: 1px solid grey;">
+					<div class="text-center my-auto" role="button" onclick="location.href='/my/point'">
+						<svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" class="bi bi-coin mt-2" viewBox="0 0 16 16">
+						  	<path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9H5.5zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518z"/>
+						  	<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+						  	<path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
+						</svg>
+						<p class="text-center">[[${#numbers.formatInteger(session.loginUser.mbPoint, 3, 'COMMA')}]]P</p>
+					</div>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<div class="text-center my-auto" role="button" onclick="location.href='#'">
+						<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-inbox mt-2" viewBox="0 0 16 16">
+  							<path d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4zm9.954 5H10.45a2.5 2.5 0 0 1-4.9 0H1.066l.32 2.562a.5.5 0 0 0 .497.438h12.234a.5.5 0 0 0 .496-.438L14.933 9zM3.809 3.563A1.5 1.5 0 0 1 4.981 3h6.038a1.5 1.5 0 0 1 1.172.563l3.7 4.625a.5.5 0 0 1 .105.374l-.39 3.124A1.5 1.5 0 0 1 14.117 13H1.883a1.5 1.5 0 0 1-1.489-1.314l-.39-3.124a.5.5 0 0 1 .106-.374l3.7-4.625z"/>
+						</svg>
+						<p class="text-center">공지사항</p>
+					</div>
+				</div>
+			</div>				
+			<!-- 두 번째 박스 -->
+			<div class="mb-5">
+				<div class="d-flex justify-content-between">
+					<h3>구매 정보</h3>
+					<div>
+						<button class="btn btn-dark btn-sm" onclick="location.href='/my/buying'">더보기</button>
+					</div>
+				</div>
+				
+				<div class="border-bottom d-flex justify-content-between mb-3 sold" role="button" style="height: 100px" th:each="buying, buyingStat: ${oList}">
+					<input type="hidden" th:value="${ buying.orderId }">
+					<div class="d-flex align-content-center ms-3">
+						<th:block th:each="attm, attmStat: ${paList}" th:if="${attmStat.index == buyingStat.index}">
+							<img class="rounded float-start my-auto" th:src="'/image/shopFiles/' + ${attm.renameName}" style="width: 80px; height: 80px;">
+						</th:block>
+						<th:block th:each="product, productStat : ${pList}" th:if="${productStat.index == buyingStat.index}">
+							<div class="ms-3" style="line-height: 100px;">[[${product.productName}]]<span th:if="${buying.productCount > 1}"> 외 [[${buying.productCount - 1}]]개의 상품</span></div>
+						</th:block>			
+					</div>
+					<div class="d-flex">
+						
+						<div class="me-3" style="width: 100px; line-height: 100px;" th:if="${buying.delStatus} == 0">배송전</div>
+						<div class="me-3" style="width: 100px; line-height: 100px;" th:if="${buying.delStatus} == 1">배송중</div>
+						<div class="me-3" style="width: 100px; line-height: 100px;" th:if="${buying.delStatus} == 2">배송완료</div>
+						<div class="me-3" style="width: 100px; line-height: 100px;">[[|${#numbers.formatInteger(buying.total, 3, 'COMMA')} 원|]]</div>
+					</div>
+				</div>
+				<div class="d-flex justify-content-center align-items-center" style="min-height: 200px" th:if="${ #arrays.isEmpty(oList) }">
+					<div class="d-flex flex-column justify-content-center align-items-center">
+						<p>구매 입찰 내역이 없습니다.</p>
+						<div>
+							<button class="btn btn-outline-dark" onclick="location.href='/'">SHOP 바로가기</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 세 번째 박스 -->
+			<div class="mb-5">
+				<div class="d-flex justify-content-between">
+					<h3>판매 정보</h3>
+					<div>
+						<button class="btn btn-dark btn-sm" onclick="location.href='/my/selling'">더보기</button>
+					</div>
+				</div>
+				<div role="button" th:onclick="|location.href='/board/used/detail?uNo=${u.uNo}'|" class="rounded d-flex justify-content-between mb-3" style="border: 1px solid black; height: 100px" th:each="u : ${uList}">
+					<div class="d-flex align-content-center ms-3">
+						<img th:src="|/image/board/${u.renameName}|"class="rounded float-start my-auto" style="width: 80px; height: 80px; border: 1px solid black;">
+						<div class="ms-3 text-truncate" style="line-height: 100px;">[[${u.uTitle}]]</div>			
+					</div>
+					<div class="d-flex">
+						<div class="me-3" style="width: 100px; line-height: 100px;">[[${#dates.format(u.soldDate, 'yy/MM/dd')}]]</div>
+						<div class="me-3" style="width: 100px; line-height: 100px;">[[${#numbers.formatInteger(u.productPrice, 3, 'COMMA')}]]원</div>
+					</div>
+				</div>
+				<th:block th:if="${#arrays.isEmpty(uList)}">
+					<div class="d-flex justify-content-center align-items-center" style="min-height: 500px">
+						<div class="d-flex flex-column justify-content-center align-items-center">
+							<p>판매 내역이 없습니다.</p>
+							<div>
+								<button class="btn btn-outline-dark" onclick="location.href='/board/used'">SHOP 바로가기</button>
+							</div>
+						</div>
+					</div>
+				</th:block>
+			</div>
+			<!-- 네 번재 박스 -->
+			<div class="mb-5">
+				<div class="d-flex justify-content-between mb-3">
+					<h3>관심 상품</h3>
+					<div>
+						<button class="btn btn-dark btn-sm" onclick="location.href='/my/saved'">더보기</button>
+					</div>
+				</div>
+				<div class="d-flex justify-content-between mb-3 gap-5 flex-wrap">
+					<div class="card" style="width: 20%;" th:each="s: ${sList}" th:onclick="|location.href='/shop/productDetail?pId=${s.productId}&page=1'|" role="button">
+				  		<img th:src="'/image/shopFiles/' + ${s.renameName}" class="card-img-top mx-auto mt-3" alt="..." style="width: 90%; height: auto;">
+				  		<div class="card-body">
+				    		<p class="card-text">[[${s.productName}]]</p>
+				    		<p class="card-text">[[${#numbers.formatInteger(s.price, 3, 'COMMA')}]]원</p>
+				  		</div>
+					</div>
+				</div>
+				<th:block th:if="${#arrays.isEmpty(sList)}">
+					<div class="d-flex justify-content-center align-items-center" style="min-height: 500px">
+						<div class="d-flex flex-column justify-content-center align-items-center">
+							<p>등록된 관심 상품이 없습니다.</p>
+							<div>
+								<button class="btn btn-outline-dark" onclick="location.href='/'">SHOP 바로가기</button>
+							</div>
+						</div>
+					</div>
+				</th:block>
+			</div>
+		<!-- 여기까지가 수정 -->
+		<!-- 여기까지가 수정 -->
+		<!-- 여기까지가 수정 -->
+		<!-- 여기까지가 수정 -->
+		<!-- 여기까지가 수정 -->
+		<!-- 여기까지가 수정 -->
+		<!-- 여기까지가 수정 -->
+		<!-- 여기까지가 수정 -->
+		</div>
+	</div>
+	
+	<script>
+		const solds = document.querySelectorAll('.sold');
+		for (const sold of solds) {
+			sold.addEventListener('click', () => {
+				window.location.href = '/my/buying/' + sold.querySelector('input').value;
+			})
+		}
+		
+	</script>
+</body>
+</html>

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+    <script type="text/javascript" src="https://chir.ag/projects/ntc/ntc.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <!-- 사용자와 관리자에 따라 nav 변경
+         CSS 세세한 조정
+         추가된 기능에 따른 nav 추가 및 변경 -->
+
+<title>Bootstrap demo</title>
+<style>
+    /* 리스트들의 전체 div */
+    .tables {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    /* 각 리스트들의 div */
+    .board-list {
+        flex: 1 1 40%;   
+        margin: 20px; 
+        display: center;
+        text-align: center;
+
+    }
+
+    /* 각 테이블 */
+    .table-bordered {
+       margin: auto;
+       margin-top: 10px;
+       width: 90%;
+
+    }
+
+    .list-name {
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .reportImage {
+        width: auto;
+        height: 100%;
+    }
+    
+    h4 > span {
+    	font-size: 14px;
+    }
+
+
+</style>
+</head>
+<body>
+    <!-- tap -->
+    <div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="container-fluid d-flex mx-5">
+			<div th:replace="~{common/adminNav :: adminNav}"></div>
+			<div class="col-10 pt-3 mb-5">
+                <div class="container mt-4">
+                    <div class="row">
+                        <div class="container mt-4">
+                            <div class="row">
+                                <!-- 첫 번째 div: 신고에 관한 정보 -->
+                                <div class="col-md-12 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h4>
+                                            	신고 정보 <!-- #b88f09 -->
+                                            	 <th:block th:switch="${r.rSituation}">
+												    <span th:case="'A'" style='color:green'>(접수)</span>
+												    <span th:case="'W'" style='color:#b88f09'>(경고)</span>
+												    <span th:case="'R'" style='color:blue'>(반려)</span>
+												    <span th:case="'B'" style='color:red'>(정지)</span>
+												</th:block>
+                                            </h4>
+                                        </div>
+                                        <div class="card-body">
+                                            <table class="table">
+                                                <tbody>
+                                                    <tr>
+                                                        <th>신고자</th>
+                                                        <td>[[${r.mbName}]]([[${r.rAccuser}]])</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>게시글/댓글</th>
+                                                        <td th:text="${ rType == 'B' ? '게시글' : '댓글'}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                    	<th>신고 구분</th>
+                                                    	<td th:text="${#strings.arraySplit(r.rContent, '&^')[0]}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>신고 게시글 타입</th>
+                                                        <td>[[${r.rCategory}]]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>신고 날짜</th>
+                                                        <td>[[${r.rDate}]]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>신고 자세한 내용</th>
+                                                        <td>
+                                                            <textarea class="form-control" rows="4" readonly style="resize: none;" th:text="${#strings.arraySplit(r.rContent, '&^')[1]}">[[${#strings.arraySplit(r.rContent, '&^')[1]}]]</textarea>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    
+                            <div class="row">
+                                <!-- 두 번째 div: 신고를 당한 사람의 정보 -->
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between">
+                                            <h4>피신고자 정보</h4>
+                                            <div class="d-flex gap-3">
+                                                <button class="btn btn-outline-danger bg-danger-subtle" id="stopBtn" th:disabled="${r.rSituation != 'A'}">정지</button>
+                                                <button class="btn btn-outline-warning bg-warning-subtle" id="warningBtn" th:disabled="${r.rSituation != 'A'}">경고</button>
+                                                <button class="btn btn-outline-success bg-success-subtle" id="returnBtn" th:disabled="${r.rSituation != 'A'}">반려</button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="col-md-12 mb-4">
+                                                <div class="card">
+                                                    <table class="table">
+                                                        <tbody>
+                                                            <tr>
+                                                                <th>피신고자</th>
+                                                                <td>[[${r.mbSubName}]]</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>아이디</th>
+                                                                <td>[[${r.rAccused}]]</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>누적경고횟수</th>
+                                                                <td>[[${pileWarning}]]회</td>
+                                                            </tr>        
+                                                            <tr>
+                                                                <th>누적정지횟수</th>
+                                                                <td>[[${pileBanded}]]회</td>
+                                                            </tr>
+                                                            <tr>
+                                                            	<!-- DB에 없는거 같은데 생기면 셀렉할 때 같이 가져와야 함. -->
+                                                                <th>가입날짜</th>
+                                                                <td>[[${r.mbDate}]]</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <h3 class="border-bottom border-black border-2 pb-3 text-center">신고리스트</h3>
+                                                    <table class="table text-center">
+                                                        <thead>
+                                                            <tr class="text-center">
+                                                                <th>번호</th>
+                                                                <th>신고자</th>
+                                                                <th>신고구분</th>
+                                                                <th>내용</th>
+                                                                <th>게시판타입</th>
+                                                                <th>글 구분</th>
+                                                                <th>처리결과</th>      
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="table-group-divider">
+                                                            <tr th:each="rl : ${rList}">
+                                                                <td th:text="${rl.rNo}"></td>
+                                                                <td th:text="${rl.mbName}"></td>
+                                                                <td th:text="${#strings.arraySplit(rl.rContent, '&^')[0]}"></td>
+                                                                <td th:text="${#strings.arraySplit(rl.rContent, '&^')[1]}"></td>
+                                                                <td th:text="${rl.rCategory}"></td>
+                                                                <td th:text="${rl.rType == 'B' ? '게시글' : '댓글'}"></td>
+                                                                <th:block th:switch="${rl.rSituation}">
+																    <td th:case="'A'">접수</td>
+																    <td th:case="'W'">경고</td>
+																    <td th:case="'R'">반려</td>
+																    <td th:case="'B'">정지</td>
+																</th:block>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div class="modal fade" tabindex="-1" role="dialog" id="confirm">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content rounded-1 shadow">
+                <div class="modal-body p-4 text-center fs-4 fw-bold">
+                	
+                </div>
+                <div class="modal-body p-2 fw-bold fs-6">
+                
+                </div>
+                <div class="modal-footer flex-nowrap p-1">
+                    <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 m-0 rounded-0 border-end" id="submitForm">
+                        <strong>네</strong>
+                     </button>
+                     <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 m-0 rounded-0" data-bs-dismiss="modal">아니오</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script th:inline="javascript">
+	// 정지, 경고, 반려에 관한 로직 구성 // 정지는 IS_BANNED
+	// 정지 기믹 구성할 때 생각 좀 해보기 + 처리결과에 대해서 "B" 생긴거 생각하기
+	// 카테고리(게시판타입)에 관해서 스위치문으로 이름으로 바꿔주기
+	// 회원 가입 날짜 생기면 그것도 받아오기(피신고자 정보)
+	
+	// DB에 보낼 때 IF문 
+	//stopBtn
+	
+	// - 사유 작성해야 한다면 modal에 
+	window.onload = () =>{
+		/*<![CDATA[*/
+		const r = /*[[${r}]]*/null;
+		const rContent = r.rcontent.split('&^');
+		const rNo = r.rno;
+		/*]]>*/
+		console.log(r);
+		const modal = document.getElementById('confirm');
+		
+		document.getElementById('stopBtn').addEventListener('click', function(){
+			const modalBody = modal.querySelectorAll('.modal-body');
+			modalBody[0].innerHTML = "<span>정말로 " + r.mbSubName + "님을 <" + rContent[0] + "> 사유로 정지하시겠습니까? </span>";
+			modalBody[1].innerHTML = "<div class='d-flex row stopBtn'><div>신고된 내용 : " + rContent[1] + " </div><div>사유 작성 : <input type='text' name='reason' class='form-control m-2' required></div><input type='hidden' name='rNo' value='" + rNo + "'></div>";
+			
+			$('#confirm').modal('show');
+		});
+		
+		document.getElementById('warningBtn').addEventListener('click', function(){
+			const modalBody = modal.querySelectorAll('.modal-body');
+			modalBody[0].innerHTML = "<span>정말로 " + r.mbSubName + "님을 <" + rContent[0] + "> 사유로 경고를 부여하시겠습니까? </span>";
+			modalBody[1].innerHTML = "<div class='d-flex row warningBtn'><div>신고된 내용 : " + rContent[1] + " </div><div>사유 작성 : <input type='text' name='reason' class='form-control m-2' required></div><input type='hidden' name='rNo' value='" + rNo + "'></div>";
+			
+			$('#confirm').modal('show');
+		});
+		
+		document.getElementById('returnBtn').addEventListener('click', function(){
+			const modalBody = modal.querySelectorAll('.modal-body');
+			modalBody[0].innerHTML = "<span>정말로 " + r.mbSubName + "님의 <" + rContent[0] + "> 사유의 신고를 반려하시겠습니까? </span>";
+			modalBody[1].innerHTML = "<div class='d-flex row returnBtn'><div>신고된 내용 : " + rContent[1] + " </div><div>사유 작성 : <input type='text' name='reason' class='form-control m-2' required></div><input type='hidden' name='rNo' value='" + rNo + "'></div>";
+			
+			$('#confirm').modal('show');
+		});
+		
+		document.getElementById('submitForm').addEventListener('click', function(){
+			const modalBody = modal.querySelectorAll('.modal-body');
+			const target = modalBody[1].querySelector('div');
+			console.log(target);
+			const inputField = target.querySelector('input[name="reason"]');
+			
+			// 사유
+			const reason = inputField.value;
+			
+			const stopBtn = target.classList.contains('stopBtn');
+			const warningBtn = target.classList.contains('warningBtn');
+			const returnBtn = target.classList.contains('returnBtn');
+			
+			if(reason.trim() == '') {
+				alert('사유를 반드시 작성해주세요.');
+				return;
+			}
+			
+			// 사유 저장할 곳 생기거나 로직 생기면 사유도 보내도록 해야함
+			
+			if(stopBtn){
+				$('confirm').modal('hide');
+				location.href="/admin/stopUser.ad?rAccused=" + r.raccused + "&rNo=" + rNo + "&reason=" + reason;
+			}
+			
+			
+			if(warningBtn) {
+				$('confirm').modal('hide');
+				location.href="/admin/warningUser.ad?rAccused=" + r.raccused + "&rNo=" + rNo + "&reason=" + reason;
+			}
+			
+			if(returnBtn) {
+				$('confirm').modal('hide');
+				location.href="/admin/returnReport.ad?rAccused=" + r.raccused + "&rNo=" + rNo + "&reason=" + reason + "&rAccuser=" + r.raccuser;
+			}
+		});
+	}
+	
+	
+</script>
+</html>

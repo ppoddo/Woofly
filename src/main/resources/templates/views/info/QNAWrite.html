@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" th:href="@{/image/woofly.png}">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+	crossorigin="anonymous">
+<style>
+	.board-list {
+		cursor: pointer;
+	}
+</style>
+</head>
+<body>
+    <div th:replace="~{common/top :: top}"></div>
+	<main>
+		<div class="container-fluid d-flex mx-5">
+			
+			<!-- 관리자만 보이게!!!!!!!!!!!!!!!!!!! -->
+			<th:block th:if="${ session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+				<div th:replace="~{common/adminNav :: adminNav}"></div>
+			</th:block>
+			<th:block th:if="${ session.loginUser == null || session.loginUser.isAdmin != 'Y'}">
+				<div th:replace="~{common/infoNav :: infoNav}"></div>
+			</th:block>
+			
+			<div class="col-10 mb-5">
+			 <div class="container mt-4">
+			  <div class="row">
+			   <div class="col-md-12 mb-4">
+			    <div class="card">
+					<div class="card-header">
+						<h4>자주묻는 질문 등록</h4>
+					</div>
+					<div class="card-body">
+						<form action="/info/insertQNA" method="POST">
+							<table class="table">
+								<tbody>
+									<tr>
+										<th>카테고리</th>
+										<td>
+											<select class="form-select" aria-label="Default select example" name="qCategory">
+												<option value="쇼핑몰" selected>쇼핑몰</option>
+												<option value="콘테스트">콘테스트</option>
+												<option value="중고거래">중고거래</option>
+												<option value="도그워커">도그워커</option>
+												<option value="산책메이트">산책메이트</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<th>질문</th>
+										<td>
+											<textarea class="form-control" rows="4" placeholder="질문" style="resize: none;" name="qTitle" required="required"></textarea>
+										</td>
+									</tr>
+									<tr>
+										<th>답</th>
+										<td>
+											<textarea class="form-control" rows="6" placeholder="답변" style="resize: none;" name="qContent" required="required"></textarea>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							<div class="container text-center">
+			                	<button class="btn btn-lg fs-10 col-2 m-0 rounded-2 btn-outline-primary">등록</button>
+				        		<button type="button" class="btn btn-lg fs-10 col-2 m-0 rounded-2 btn-outline-dark" onclick="javascript:history.back();">이전</button>
+							</div>
+						</form>
+					</div>
+			    </div>
+			   </div>
+		 	  </div>
+		 	 </div>
+			</div>
+		</div>
+    </main>
+    
+	<script>
+		window.onload = () => {
+			const aNav = document.getElementById('myNav2')
+			aNav.style.fontWeight = 'bold';
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+    <script type="text/javascript" src="https://chir.ag/projects/ntc/ntc.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+    .fixed-top{
+        position: fixed;
+        top: 0; /* 화면 전체 너비에 맞게 설정 */
+        background-color: white; /* 필요에 따라 배경 색상 추가 */
+        z-index: 100; /* 필요에 따라 z-index 조절 */
+        width:auto;
+    }
+
+	.sumDiv {
+		height: 80%;
+	}
+
+    .product-image {
+    	 width: 100%;
+         height: 100%;
+     }
+
+    .img-thumbnail {
+         height: 800px;
+         width: auto;
+    }
+
+    .btn-outline-success.btn-lg {
+        font-size: 1.5rem;
+        padding: 0.75rem 1.25rem;
+    }
+
+    .product_btns {
+        align-items: center;
+        top: 0;
+        right: 0;
+        margin: 10px;
+    }
+
+    .product_btns > * {
+        margin-bottom: 10px;
+        width: 100%;
+        max-width: 150px;
+    }
+        
+    
+    .colors {
+    	pointer-events: none;
+    }
+    
+    .colorsName{
+    	width: 78px;
+    	height: 27px;
+    	font-size: 12px;
+    	border: none;
+  		background: transparent;
+    }
+
+	.drop-menu {
+      display: none;
+      position: absolute;
+      background-color: #fff;
+      min-width: 80px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      z-index: 1;
+      list-style-type: none;
+      margin: 2px;
+      padding-left: 0px;
+    }
+
+    .drop-menu.show {
+      display: block;
+      
+    }
+
+    .drop-item {
+      display: block;
+      width: 100%;
+      padding: 5px;
+      text-align: left;
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding-left: 15px;
+      
+    }
+    
+    .drop-item:hover{
+    	background: silver;
+    }
+    </style>
+</head>
+<body>
+    <!-- tap -->
+    <div th:replace="~{common/top :: top}"></div>
+    <main>
+        <div class="container">
+            <div class="d-flex justify-content-center">
+                <div class="row">
+                	<th:block th:each="t, i: ${tList}">
+	                    <div class="col"  th:if="${i.index == 0}">
+	                        <img class="product-image img-thumbnail rounded mx-auto d-block" th:src="'/image/shopFiles/' + ${ t.renameName }" alt="상품이름" width="80%">
+	                    </div>
+	                </th:block>
+                    <div class="row" >
+	                    <div class="sumDiv col" th:each="t, i: ${tList}" th:if="${i.index > 0}">
+	                        <img class="product-image m-1 p-1" th:src="'/image/shopFiles/' + ${ t.renameName }" width="20%">
+	                    </div>
+                    </div>
+                </div>
+                
+                <!-- 버튼 따라서 action 변경 -->
+                <div class="product m-2 col-4">
+              		<form id="productForm">
+              			<input type="hidden" th:value="${p.productId}" name="productId">
+              			<input type="hidden" value="N" name="isMove" id="isMove">
+              			<input type="hidden" th:value="${page}" name="page">
+	                    <div class="product_info border-2 border-bottom">
+	                        <div class="fw-bold row">
+	                            <p class="fs-2 col-10" th:text="${p.productName}"></p>
+	                            <!-- 관리자아이디 일 때만 -->
+	                            <p class="col-2" th:if="${ session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+	                            	<button type="button" class="btn btn-outline-dark btn-sm p-1 m-1" id="editBtn">Edit</button>
+	                            </p>
+	                        </div>
+	                        <div id="stampImgParent">
+	                            <p class="fs-4">
+	                            	<span class="reviewWord">리뷰 : [[${rList.size}]]건</span> /
+	                            	<span class="stampWord">찜하기 : [[${savedCount}]]건 </span>
+	                            	<span class="stampImg isFill" th:unless="${stampCount == 0}">❤</span>
+	                            	<span class="stampImg isEmpty" th:if="${stampCount == 0}">🤍</span>
+	                            </p>
+	                        </div>
+	                        <div>
+	                            <p class="fs-4">가격 : [[${#numbers.formatInteger(p.price, 3, 'COMMA')}]]원</p>
+	                        </div>
+	                    </div>
+	                    <ul class="list-unstyled pt-4">
+	                        <li class="fs-3 d-flex p-2 justify-content-between">
+	                            <div class="fw-bold">배송정보</div>
+	                            <div id="deli" class="fs-4"></div>
+	                        </li>
+	                         <li class="fs-3 d-flex p-2 justify-content-between border-2 border-bottom">
+	                        	<div class="fw-bold">현재 남은 수량</div>
+	                        	<div class="fs-4">[[${#numbers.formatInteger(p.quantity, 3, 'COMMA')}]]개</div>
+	                        </li>
+	                        <li class="fs-2 pt-4 d-flex justify-content-between">
+	                            <div class="fw-bold">사이즈</div>
+	                            <div class="sizeSelect" th:if="${p.usedStandard == 'Y'}">
+	                                <input type="radio" class="btn-check" name="pSize" id="optionS" autocomplete="off" value="S" checked>
+	                                <label class="btn btn-outline-success btn" for="optionS">S</label>
+	                                <input type="radio" class="btn-check" name="pSize" id="optionM" autocomplete="off" value="M">
+	                                <label class="btn btn-outline-success btn" for="optionM">M</label>
+	                                <input type="radio" class="btn-check" name="pSize" id="optionL" autocomplete="off" value="L">
+	                                <label class="btn btn-outline-success btn" for="optionL">L</label>
+	                                <input type="radio" class="btn-check" name="pSize" id="optionXL" autocomplete="off" value="XL">
+	                                <label class="btn btn-outline-success btn" for="optionXL">XL</label>
+	                            </div>
+	                            <div class="sizeSelect" th:unless="${p.usedStandard == 'Y'}">
+	                            	<span class="fs-5 fw-bold">사이즈 정보가 없습니다.</span>
+	                            </div>
+	                        </li>
+	                        
+	                        <li class="fs-3 d-flex p-2 justify-content-between">
+	                        	
+	                        	<div class="fw-bold">색상 정보</div>
+	                        	<div class="asdasdasd d-flex">
+		                        	<div th:if="${colors != null}" class="colorSelect">
+		                        		<th:block  th:each="color, i: ${colors}">
+			                        		<input class="colors p-1 m-2" type="color"  th:value="${color}">
+			                        		<input type="text" class="colorsName">
+			                        		<input type="radio" name="colors" th:value="${color}" th:checked="${i.index == 0}">
+		                        		</th:block>
+		                        	</div>
+	                        	</div>
+	                        	<div th:unless="${colors != null}">
+	                            	<span class="fs-5 fw-bold">색상 정보가 없습니다.</span>
+	                            </div>
+	                        </li>
+	                        <li class="fs-3 d-flex p-2 justify-content-between">
+	                        	<div class="fw-bold">수량 선택</div>
+	                        	<div class="quantity">
+	                        		<input type="number" class="form-control" value="1" min="1" max="100" name="quantity">
+	                        	</div>
+	                        </li>
+	                    </ul>
+	                    <div class="p-2 col product_btns text-center mt-5" aria-label="Large button group">
+	                        <button type="button" class="btn btn-outline-success rounded-pill m-1" id="buyBtn">구매하기</button>
+	                        <button type="button" class="btn btn-outline-success rounded-pill m-1" id="stampBtn">찜하기</button>
+	                        <button type="button" class="btn btn-outline-success rounded-pill m-1" id="putBtn">장바구니에 담기</button>
+	                        <button type="button" class="btn btn-outline-success rounded-pill m-1" id="goToReply">리뷰 보기</button>
+	                    </div>
+               		</form>
+                </div>
+            </div>
+            <div class="product-detail pt-4">
+                <table class="table border" th:if="${p.usedStandard == 'Y'}">
+                    <tr>
+                        <th>사이즈 정보</th>
+                        <th>S</th>
+                        <th>M</th>
+                        <th>L</th>
+                        <th>XL</th>
+                    </tr>
+                    <tr>
+                        <th>몸무게</th>
+                        <td>2~3KG</td>
+                        <td>4~5KG</td>
+                        <td>5~7KG</td>
+                        <td>5~7KG</td>
+                    </tr>
+                    <tr>
+                        <th>CHEST</th>
+                        <td>48cm</td>
+                        <td>49cm</td>
+                        <td>51cm</td>
+                        <td>57cm</td>
+                    </tr>
+                    <tr>
+                        <th>NECK</th>
+                        <td>35cm</td>
+                        <td>38cm</td>
+                        <td>43cm</td>
+                        <td>46cm</td>
+                    </tr>
+                </table>
+                <div class="d-flex border-top border-bottom border-3 border-black row">
+                    <div class="pt-2 pb-3 fw-bold fs-4">
+                        상품 유의사항
+                    </div>
+                    <div class="table-bordered m-2">
+                        <div class="d-flex pb-2">
+                            <div class="col-3 fw-bold">
+                                <span>재화등의 배송방법에 관한 정보</span>
+                            </div>
+                            <div class="col-9">
+                                <p>배송방식 및 출고일 등은 상품 상세페이지 참조</p>
+                            </div>
+                        </div>
+                        <div class="d-flex pb-2">
+                            <div class="col-3 fw-bold">
+                                <span>주문 이후 예상되는 배송기간</span>
+                            </div>
+                            <div class="col-9">
+                                <p>주문일로부터 평균 3일 이내에 발송 (천재지변 또는 상품 수급 상황, 택배사 사정 등에 따라 지연될 수 있습니다.)</p>
+                            </div>
+                        </div>
+                        <div class="d-flex pb-2">
+                            <div class="col-3 fw-bold">
+                                <span>제품하자·오배송 등에 따른 청약철회 등의 경우 청약철회 등을 할 수 있는 기간 및 통신판매업자가 부담하는 반품비용 등에 관한 정보</span>
+                            </div>
+                            <div class="col-9">
+                                <p>전자상거래등에서의소비자보호에관한법률 등에 의한 제품의 하자 또는 오배송 등으로 인한 청약철회의 경우에는 상품 수령 후 3개월 이내, 그 사실을 안 날 또는 알 수 있었던 날로부터 30일 이내에 청약철회를 할 수 있으며, 반품 비용은 통신판매업자가 부담합니다.</p>
+                            </div>
+                        </div>
+                        <div class="d-flex pb-2">
+                            <div class="col-3 fw-bold">
+                                <span>제품하자가 아닌 소비자의 단순변심, 착오구매에 따른 청약철회 등의 경우 청약철회 등을 할 수 있는 기간 및 소비자가 부담하는 반품비용 등에 관한 정보</span>
+                            </div>
+                            <div class="col-9">
+                                <p>편도 3,000 원 (최초 배송비가 무료인 경우 왕복으로 부과될 수 있습니다.)</p>
+                            </div>
+                        </div>
+                        <div class="d-flex pb-2">
+                            <div class="col-3 fw-bold">
+                                <span>제품하자가 아닌 소비자의 단순변심, 착오구매에 따른 청약철회가 불가능한 경우 그 구체적 사유와 근거</span>
+                            </div>
+                            <div class="col-9">
+                                <p>전자상거래등에서의 소비자보호에관한법률 등에 의한 청약철회 제한 사유에 해당하는 경우 및 기타 객관적으로 이에 준하는 것으로 인정되는 경우 청약철회가 제한될 수 있습니다.</p>
+                            </div>
+                        </div>
+                        <div class="d-flex pb-2">
+                            <div class="col-3 fw-bold">
+                                <span>재화 등의 교환·반품·보증 조건 및 품질보증기준</span>
+                            </div>
+                            <div class="col-9">
+                                <p>소비자분쟁해결기준(공정거래위원회 고시) 및 관계법령에 따릅니다.</p>
+                            </div>
+                        </div>
+                        <div class="d-flex pb-2" >
+                            <div class="col-3 fw-bold">
+                                <span>대금을 환불받기 위한 방법과 환불이 지연될 경우 지연에 따른 배상금을 지급받을 수 있다는 사실 및 배상금 지급의 구체적 조건 및 절차준</span>
+                            </div>
+                            <div class="col-9">
+                                <p>주문 취소 및 대금의 환불은 마이페이지에서 신청할 수 있으며, 전자상거래 등에서의 소비자보호에 관한 법률에 따라 소비자의 청약철회 후 판매자가 재화 등을 반환 받은 날로부터 3영업일 이내에 지급받은 대금의 환급을 정당한 사유 없이 지연하는 때에는 소비자는 지연기간에 대해서 연 15%의 지연배상금을 판매자에게 청구할 수 있습니다.</p>
+                            </div>
+                        </div>
+                        <div class="d-flex pb-2">
+                            <div class="col-3 fw-bold">
+                                <span>소비자피해보상의 처리, 재화 등에 대한 불만 처리 및 소비자와 사업자 사이의 분쟁처리에 관한 사항</span>
+                            </div>
+                            <div class="col-9">
+                                <p>소비자분쟁해결기준(공정거래위원회 고시) 및 관계법령에 따릅니다.</p>
+                            </div>
+                        </div>
+                        <div class="d-flex pb-2">
+                            <div class="col-3 fw-bold">
+                                <span>거래에 관한 약관의 내용 또는 확인할 수 있는 방법</span>
+                            </div>
+                            <div class="col-9">
+                                <p>페이지 하단의 이용약관 링크를 통해 확인할 수 있습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="product_images pt-4 text-center">
+                    <h1 class="pb-4">상품 상세정보</h1>
+                    <img class="h-auto m-2 p-2" style="width:98%" th:each="con: ${conList}" th:src="'/image/shopFiles/' + ${ con.renameName}">
+                </div>
+                <div class="reply mt-4 border-1 border-dark border-top">
+                    <h1 class="pt-4 text-center">상품 리뷰</h1>
+                    <div class="input-group">
+                        <span class="input-group-text">리뷰<br>내용</span>
+                        <textarea class="form-control" rows="4" placeholder="소중한 리뷰를 남겨주세요." style="resize: none;" id="replyContent"></textarea>
+                        <button type="button" class="btn btn-outline-success btn-lg" id="insertReply">등록</button>                        
+                    </div>                                           
+                    
+                    <!-- 댓글 조회 영역 -->
+                    <!-- 좋아요 버튼 클릭 이벤트, 내 댓글이면 수정 삭제 -->
+                    <div id="replyContents" class="mb-5">
+	                    <div class="comment-container d-flex mt-3 justify-content-center text-center border-top border-black replyOne" th:each="r: ${rList}">
+	                    	<input type="hidden" th:value="${r.rNo}">
+	                        <div class="col-1" style="line-height: 40px;">[[${r.mbNickName}]]</div>
+	                        <div class="col-7 reContent" style="line-height: 40px;">[[${r.reContent}]]</div>
+	                        <div class="col-2" style="line-height: 40px;">[[${r.reDate}]]</div>
+	                        <div class="col-2 d-flex align-items-center justify-content-end m-1 utility" name="devDiv">
+	                        	<div class="mx-2">
+	                        		[[${r.reLike}]]
+	                        	</div>
+	                        	<div class="changeImage">
+								    <th:block th:if="${r.userLiked}">
+								        <!-- 사용자가 좋아요를 누른 경우 -->
+								        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="black" viewBox="0 0 16 16">
+								            <path d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+								        </svg>
+								    </th:block>
+								    <th:block th:unless="${r.userLiked}">
+								        <!-- 사용자가 좋아요를 누르지 않은 경우 -->
+								        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="white" viewBox="0 0 16 16">
+								            <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>
+								        </svg>
+								    </th:block>
+								</div>
+	
+		                        <div class="dropend  me-2">
+		                        	<button type="button" class="btn drop-btn" aria-expanded="false">
+			                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
+			                                <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+			                            </svg>
+		                            </button>
+		                            <ul class="drop-menu">
+		                                <li><button class="drop-item" data-bs-toggle="modal" data-bs-target="#modal1">목차</button></li>
+		                                <th:block th:if="${ session.loginUser != null && session.loginUser.mbId == r.mbId}">
+			                                <li><button class="drop-item replyUpdate" type="button">수정</button></li>
+			                                <li><button class="drop-item replyDelete" type="button">삭제</button></li>
+		                                </th:block>
+		                            </ul>
+		                        </div>
+	                        </div>
+	                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    
+    
+    <!-- 신고 모달 -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="confirm">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content rounded-1 shadow">
+                <div class="modal-body p-4 text-center fs-4 fw-bold">
+                	
+                </div>
+                <div class="modal-body p-2 fw-bold fs-6">
+                
+                </div>
+                <div class="modal-footer flex-nowrap p-1">
+                    <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 m-0 rounded-0 border-end" id="submitForm">
+                        <strong>네</strong>
+                     </button>
+                     <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 m-0 rounded-0" data-bs-dismiss="modal">아니오</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+<script th:inline="javascript">
+
+	let oldData;
+	window.onload = () =>{
+
+		/*<![CDATA[*/
+		const p = /*[[${p}]]*/1;
+		let loginUser = /*[[${session.loginUser}]]*/1;
+		
+		if(loginUser == null) {
+			loginUser = /*[[${isKakao}]]*/null;
+		}
+		
+		let savedCount = /*[[${savedCount}]]*/1; 
+		let reviewCount = /*[[${rList.size}]]*/1;
+		/*]]>*/
+		
+        window.addEventListener('scroll', function () {
+            var scrollY = window.scrollY || document.documentElement.scrollTop;
+            // 일정 y축 좌표를 기준으로 확인
+            var triggerY = 950; // 조정 가능
+
+            // y축 좌표가 triggerY 이상이면 fixed-top으로 변경, 그렇지 않으면 기본 상태로 되돌림
+            if (scrollY > triggerY) {
+                document.querySelector('.product_btns').classList.add('fixed-top');
+            } else {
+                document.querySelector('.product_btns').classList.remove('fixed-top');
+            }
+        });
+        
+        // 내일 날짜 계산
+        const deli = document.getElementById('deli');
+        const today = new Date();
+        const day = today.getMonth()+1  + "월 " 
+					+ (today.getDate()+1)  + "일";
+        
+        deli.innerHTML = "내일 " + day + " 도착 예정";
+        
+        const isMove = document.getElementById('isMove');
+		const form = document.getElementById('productForm');
+		const quantity = document.getElementsByClassName('quantity')[0].querySelector('input');
+		document.getElementById('buyBtn').addEventListener('click', () =>{
+			if(loginUser != null) {
+				if(quantity.value > 100) {
+					alert("수량은 100개를 넘을 수 없습니다.");
+					quantity.focus();
+					event.preventDefault();
+				} else {
+					isMove.value = 'Y';
+					form.action = '/shop/payment';
+					form.submit();
+				}
+			} else {
+				alert("로그인 후 이용해주세요.");
+			}
+			
+			
+		});
+		
+		if(loginUser?.isAdmin == 'Y') {
+			document.getElementById('editBtn').addEventListener('click', () => {
+				form.action = '/shop/moveToUpdate';
+				form.submit();
+			});
+		}
+		
+		
+		document.getElementById('putBtn').addEventListener('click', () =>{
+			// 장바구니에 insert만 해놓기 에이작스로 성공 시 알럿창 정도?
+			if(loginUser != null) {
+				if(quantity.value > 100){
+					alert("수량은 100개를 넘을 수 없습니다.");
+					quantity.focus();
+					event.preventDefault();
+				} else {
+					isMove.value = 'N';
+					
+					let selectedSize;
+					let selectedColor;
+					if(p.usedStandard == 'Y'){
+						const sizeRadio = document.getElementsByClassName('sizeSelect')[0].querySelectorAll('input');
+						for(const selectRadio of sizeRadio) {
+							if(selectRadio.checked) {
+								selectedSize = selectRadio.value;
+								break;
+							}
+						}
+					}
+					if(p.color != 'N') {
+				        const colorRadio = document.getElementsByClassName('colorSelect')[0].querySelectorAll('input');
+				        for(const selectRadio of colorRadio){
+				        	if(selectRadio.checked){
+				        		selectedColor = selectRadio.value;
+				        		break;
+				        	}
+				        }
+					}
+					
+					$.ajax({
+						url: '/shop/payment',
+						data: {productId:/*[[${p.productId}]]*/9999, pSize: selectedSize == undefined ? "N" : selectedSize, colors: selectedColor == undefined ? "N" : selectedColor, quantity:quantity.value, isMove:isMove.value},
+						success: data => {
+							if(data == 'success') {
+								/*<![CDATA[*/
+								alert(p.productName + " 상품 " + quantity.value + "개가 장바구니에 추가되었습니다.");
+								/*]]>*/
+							} else {
+								aleet("장바구니 추가에 실패하여 페이지가 새로고침됩니다.");
+								location.reload();
+							}
+						},
+						error: data => {
+							console.log(data);
+						}
+					});
+				}
+			} else {
+				alert("로그인 후 이용해주세요.");
+			}
+		});
+		
+		
+		document.getElementById('stampBtn').addEventListener('click', () => {
+			const sip = document.getElementById('stampImgParent');
+			const stampWord = sip.children[0].children[1];
+			const stampImg = sip.children[0].children[2];
+			if(loginUser != null){
+				if(stampImg.classList.contains('isEmpty')) {
+					$.ajax({
+						url: "/shop/insertStampProduct",
+						data: {mbId:loginUser.mbId, pId:p.productId, type:'P'},
+						success: data => {
+							console.log(data);
+							if(data == 'success'){
+								alert(p.productName + " 상품을 찜 목록에 추가하셨습니다.");
+								savedCount = savedCount + 1
+								stampWord.innerText = '찜하기 : ' + savedCount + '건';
+								stampImg.innerText = '❤';
+								stampImg.classList.remove('isEmpty');
+								stampImg.classList.add('isFill');
+							} else {
+								alert("알수 없는 오류가 발생하여 페이지를 새로고침합니다.");
+								location.reload();
+							}
+						},
+						error: data => {
+							console.log(data);
+						}
+					});	
+				}
+				
+				if(stampImg.classList.contains('isFill')){
+					$.ajax({
+						url: "/shop/deleteStampProduct",
+						data: {mbId:loginUser.mbId, pId:p.productId, type: 'P'},
+						success: data => {
+							console.log(data);
+							if(data == 'success'){
+								alert(p.productName + " 상품을 찜 목록에서 제거하셨습니다.");
+								savedCount = savedCount - 1
+								stampWord.innerText = '찜하기 : ' + savedCount + '건';
+								stampImg.innerText = '🤍';
+								stampImg.classList.remove('isFill');
+								stampImg.classList.add('isEmpty');
+							} else {
+								alert("알수 없는 오류가 발생하여 페이지를 새로고침합니다.");
+								location.reload();
+							}
+						},
+						error: data => {
+							console.log(data);
+						}
+					})
+				}
+					
+			} else {
+				alert("로그인 후 이용해주세요.");
+			}
+		});
+		
+		
+		
+		function colorNameMath(color) {
+        	var match = ntc.name(color);
+        	const colorName = match[1];
+        	return colorName;
+        }
+        
+		const colorsName = document.getElementsByClassName('colorsName');
+		/*<![CDATA[*/
+		
+		let colors = /*[[${colors}]]*/1;
+		if(colors == null) {
+			colors = 'N';
+		}
+		
+		if(colors != 'N') {
+			let i = 0;
+			for(const color of colors) {
+				const colorName = colorNameMath(color);
+				colorsName[i].value = colorName;
+				i++;
+			}
+		}
+			
+		/*]]>*/
+		
+		// 리뷰 바로 보러가기
+		document.getElementById('goToReply').addEventListener('click', () =>{
+			document.getElementById('replyContent').focus();			
+		})
+        
+        // 댓글 시작
+        const insertBtn = document.getElementById('insertReply');
+        
+		const topReply = document.getElementById('replyContents');
+		const reviewWord = document.getElementsByClassName('reviewWord')[0];
+        /*<![CDATA[*/
+        const isBought = /*[[${isBought}]]*/2;
+        console.log(isBought);
+		$(document).on('click', '#insertReply', function() {
+			// 로그인 유저 다루는 로직 짜기
+			const textarea = document.getElementById('replyContent');
+			const replyContent = textarea.value;
+			const p = /*[[${p}]]*/2;
+			const boardNo = p.productId;
+			const loginUserId = /*[[${ session.loginUser?.mbId}]]*/id;
+			
+			textarea.value = '';
+			
+			if(replyContent != '' && loginUserId != null) {
+				if(isBought == 'Y') {
+					$.ajax({
+						url: '/shop/insertReply',
+						data: {reContent:replyContent, bNo:boardNo, mbId:loginUserId},
+						success: data => {
+							topReply.innerHTML = '';
+							for(const r of data.rList){
+								const isLiked = r.userLiked;
+								const newReply = `
+									<div class="comment-container d-flex mt-3 justify-content-center text-center border-top border-black replyOne">
+				                    	<input type="hidden" value="${r.rNo}">
+				                        <div class="col-1" style="line-height: 40px;">${r.mbNickName}</div>
+				                        <div class="col-7 reContent" style="line-height: 40px;">${r.reContent}</div>
+				                        <div class="col-2" style="line-height: 40px;">${r.reDate}</div>
+				                        <div class="col-2 d-flex align-items-center justify-content-end m-1 utility" name="devDiv">
+				                        	<div class="mx-2">
+				                        		${r.reLike}
+				                        	</div>
+				                        	<div class="changeImage">
+				                        		${isLiked ? 
+					                                `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="black" viewBox="0 0 16 16">
+					                                    <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+					                                </svg>`
+			                        				: 
+					                                `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="white" viewBox="0 0 16 16">
+					                                    <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>
+					                                </svg>`
+				                        		}
+				                        	</div>
+				
+					                        <div class="dropend me-2">
+						                        <button type="button" class="btn drop-btn" aria-expanded="false">
+						                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
+						                                <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+						                            </svg>
+												</button>
+					                            <ul class="drop-menu">
+					                                <li><button class="drop-item" data-bs-toggle="modal" data-bs-target="#modal1">신고</button></li>
+					                                <th:block th:if="${ loginUser != null && loginUser.mbId == r.mbId}">
+					                                ${loginUser != null && loginUser.mbId == r.mbId ? ` 
+						                                <li><button class="drop-item replyUpdate" type="button">수정</button></li>
+						                                <li><button class="drop-item replyDelete" type="button">삭제</button></li>
+						                                `
+						                                :
+						                                ``	
+					                                }
+					                                </th:block>
+					                            </ul>
+					                        </div>
+				                        </div>
+			                    	</div>
+									`;
+								
+								topReply.innerHTML += newReply;
+								
+							}
+							reviewCount = reviewCount + 1;
+							reviewWord.innerText = '리뷰 : ' + reviewCount + '건';
+							
+						},
+						error : data => {
+							console.log(data);
+						}
+						
+					})
+					
+				} else {
+					alert("결제하신 상품만 리뷰 작성이 가능합니다.");
+				}
+			} else {
+				alert("로그인 후 이용해주세요.");
+			}
+		});
+        /*]]>*/
+        // 받아오는 데이터 userLiked로 비교 
+        // 본문으로 생기는 검정색 하트 점검
+        topReply.addEventListener('click', function(event){
+        	let target = event.target;
+        	const changeDiv = target.closest('.changeImage');
+        	const dropEnd = target.closest('.drop-btn');
+        	const updateBtn = target.closest('.replyUpdate');
+        	const deleteBtn = target.closest('.replyDelete');
+        	const newUpdate = target.closest('.newUpdate');
+        	const rollback = target.closest('.rollback');
+        	//let isOut = true;
+        	if(changeDiv) {
+        		if(loginUser != null) {
+        			const svg = changeDiv.children[0];
+                	const isWhite = svg.classList.contains('white');
+                	const isBlack = svg.classList.contains('black');
+                	const rNo = changeDiv.parentElement.parentElement.children[0].value;
+                	let likeDiv = changeDiv.parentElement.children[0];
+                	let like = parseInt(likeDiv.innerText);
+                	
+                	if(isWhite || isBlack){
+                		const ajaxURL = isWhite ? "/shop/insertReplyCount" : "/shop/downReplyCount";
+                		$.ajax({
+                			url: ajaxURL,
+                			data: {mId:loginUser.mbId, rNo:rNo},
+                			success: data => {
+                				svg.classList.toggle('white');
+                				svg.classList.toggle('black');
+                				
+                				if(isWhite) {
+          						  svg.innerHTML = `<path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>`;
+    	      					} else {
+    	      						svg.innerHTML = `<path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>`;
+    	      					}
+                				
+                				like = isWhite ? like + 1 : like - 1;
+                				likeDiv.innerText = like;
+                			},
+                			error: data => {
+                				console.log(data)
+                			}
+                		});
+                	}
+        		} else {
+        			alert("로그인 후 이용해주세요.");
+        		}
+        		
+        	}
+        	
+        	if(dropEnd) {
+        		const menu = dropEnd.parentElement.children[1];
+        		menu.classList.toggle('show');
+        	}
+        	
+        	
+        	if(updateBtn) {
+        		const replyRow = updateBtn.closest('.utility').parentElement;
+        		const reConArea = replyRow.children[2];
+        		oldData = reConArea.innerText;
+        		reConArea.innerHTML = '<div class="d-flex mt-1 px-2" width="85%"><input type="text" class="form-control p-5 newContent" value="' + oldData + '"><div class="row"><button type="button" class="btn btn-sm btn-success newUpdate">제출</button><button type="button" class="btn btn-sm btn-light rollback">취소</button></div></div>';
+        		
+        		updateBtn.parentElement.parentElement.classList.remove('show');
+        	}
+        	
+        	if(newUpdate) {
+        		const newContent = newUpdate.parentElement.previousElementSibling.value;
+        		const updateNo = newUpdate.closest('.replyOne').children[0].value;
+        		const reConArea = newUpdate.closest('.reContent');
+        		if(newContent != '' && loginUser != null) {
+        			$.ajax({
+        				url: '/shop/updateReply',
+        				data: {rNo: updateNo, reContent:newContent},
+        				success: data => {
+        					if(data == 'success'){
+        						reConArea.innerHTML = newContent;
+        						oldData = '';
+        					}
+        				},
+        				error: data => {
+        					console.log(data);
+        				}
+        			});
+        		}
+        	}
+        	
+        	if(rollback) {
+        		const reConArea = rollback.closest('.reContent');
+        		reConArea.innerHTML = oldData;
+        	}
+        	
+        	if(deleteBtn) {
+        		const rNo = deleteBtn.closest('.replyOne').children[0].value;
+        		const rContent = deleteBtn.closest('.replyOne').children[2].innerText;
+        		const modal = document.getElementById('confirm');
+        		deleteBtn.parentElement.parentElement.classList.remove('show');
+        		
+        		const modalBody = modal.querySelectorAll('.modal-body');
+        		modalBody[0].innerHTML = "리뷰 삭제 시 복구할 수 없습니다. <br> 정말 삭제하시겠습니까?";
+        		modalBody[1].innerHTML = "리뷰 내용 : " + rContent + "<input type='hidden' value='" + rNo + "'>";
+        		
+        		$('#confirm').modal('show');
+        	}
+        	
+        })
+        
+        const submitModal = document.getElementById('submitForm');
+        submitModal.addEventListener('click', function(){
+        	
+        	const rNo = this.parentElement.previousElementSibling.querySelector('input').value;
+        	
+        	$('#confirm').modal('hide');
+        	$.ajax({
+        		url:'/shop/deleteReply',
+        		data: {rNo:rNo},
+        		success: data => {
+        			// 데이터 성공 시 알럿창
+        			if(data == 'success'){
+        				alert("리뷰가 성공적으로 삭제되었습니다.");
+        				location.reload();
+        			}
+        		},
+        		error: data => {
+        			console.log(data);
+        		}
+        	
+        	})
+        })
+	}
+        
+</script>
+</html>

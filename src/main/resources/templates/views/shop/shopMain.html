@@ -1,0 +1,418 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WOOFLY</title>
+<link rel="icon" href="${ contextPath }/resources/image/woofly.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+	.btn-sm {
+		border-radius: 23px !important; 
+	}
+	.album .col{cursor: pointer;}
+	.card *:hover{cursor: pointer;}
+	
+	.card img {
+      width: 100%; /* Make the image fill its container */
+      height: auto; /* Maintain aspect ratio */
+   }
+   
+   .emp {
+   		font-weight: bold; 
+   		font-size: 20px;
+   }
+   
+   .arrayGroup li:hover{
+   		cursor: pointer;
+   }
+</style>
+<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+</head>
+<body>
+
+    <div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="container-fluid d-flex mx-5">
+			<div class="navbar w-20 ">
+				<div class="container-fluid flex-column align-items-start mb-auto">
+					<a class="navbar-brand" href="/shopMain"><h2>쇼핑몰 카테고리</h2></a>
+					<th:block th:each="b : ${bList}">
+						<h4 class="mt-5" th:text="${b.productCategory}"></h4>
+						<ul class="nav flex-column">
+							<li th:each="c : ${cList}" th:if="${b.productCategoryNo == c.productCategoryNo}">
+								<button type="button" class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" th:id="${c.productDetailNo}">[[${c.productDetailCategory}]]</button>
+							</li>
+						</ul>
+					</th:block>
+				</div>
+			</div>
+			
+			<div class="col-10 pt-3 mb-5">
+				<div class="col-10 mb-5 pt-3 me-4">
+					<div class="d-flex justify-content-between border-bottom border-black border-2 pb-3 mb-3">
+						<h3 class="col-10">쇼핑몰</h3>
+						<th:block th:if="${ session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+							<button class="btn btn-outline-dark" id="productWrite">등록</button>
+						</th:block>
+					</div>
+					
+					<div class="d-flex mb-4 justify-content-between">
+						<div class="d-flex">
+							<div class="p-3" th:if="${sList.size != 0}">
+								<span class="fw-bold" style="font-size: 15px;">선택된 카테고리 ▶ </span>
+							</div>
+							<div class="p-3" th:unless="${sList.size != 0}">
+								<span class="fw-bold">선택된 카테고리가 없습니다. ㅠ.ㅠ </span>
+							</div>
+							<div class="p-2" th:each="s: ${sList}">
+								<button class="btn btn-outline-dark topCategory btn-sm p-2" th:text="${s.productDetailCategory}" th:value="${s.productDetailNo}"></button>
+							</div>
+						</div>
+						
+						<!-- descending ascending-->
+						 <div class="arraysBtn" id="arrayBtn">
+						 	<ul class="d-flex m-2 arrayGroup" style="list-style:none;">
+						 		<th:block th:if="${sort == null}">
+								 	<li class="popularity descending">
+								 		인기순 ↓↓ &nbsp;&nbsp;
+								 	</li>
+								 	<li class="sales descending">
+								 		판매순 ↓↓ &nbsp;&nbsp;
+								 	</li>
+								 	<li class="price descending">
+								 		가격순 ↓↓ 
+								 	</li>
+							 	</th:block>
+							 	<th:block th:unless="${sort == null}">
+							 		<th:block th:if="${sort == 'popularity'}">
+									 	<li th:class="'popularity ' + ${direction == 'DESC' ? 'descending emp' : 'ascending emp'}">
+									 		<th:block th:if="${direction == 'DESC'}">
+									 			인기순 ↓↓
+									 		</th:block>
+									 		<th:block th:unless="${direction == 'DESC'}">
+									 			인기순 ↑↑
+									 		</th:block>
+									 	</li>
+								 	</th:block>
+								 	<th:block th:unless="${sort == 'popularity'}">
+									 	<li class="popularity descending">
+									 		인기순 ↓↓
+									 	</li>
+									 </th:block>
+									 
+									 <th:block th:if="${sort == 'sales'}">
+									 	<li th:class="'sales ' + ${direction == 'DESC' ? 'descending emp' : 'ascending emp'}">
+									 		<th:block th:if="${direction == 'DESC'}">
+									 			판매순 ↓↓
+									 		</th:block>
+									 		<th:block th:unless="${direction == 'DESC'}">
+									 			판매순 ↑↑
+									 		</th:block>
+									 	</li>
+								 	</th:block>
+								 	<th:block th:unless="${sort == 'sales'}">
+									 	<li class="sales descending">
+									 		판매순 ↓↓
+									 	</li>
+									 </th:block>
+									 
+									  <th:block th:if="${sort == 'price'}">
+									 	<li th:class="'price ' + ${direction == 'DESC' ? 'descending emp' : 'ascending emp'}">
+									 		<th:block th:if="${direction == 'DESC'}">
+									 			가격순 ↓↓
+									 		</th:block>
+									 		<th:block th:unless="${direction == 'DESC'}">
+									 			가격순 ↑↑
+									 		</th:block>
+									 	</li>
+								 	</th:block>
+								 	<th:block th:unless="${sort == 'price'}">
+									 	<li class="price descending">
+									 		가격순 ↓↓
+									 	</li>
+									 </th:block>
+							 	</th:block>
+						 	</ul>
+						 </div>
+						 
+					</div>
+					
+					<!-- 상품화면 시작 -->
+					
+					<div class="album py-5" th:if="${pList.size != 0}">
+						<div class="container">
+							<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3" id="productContainer">
+								<div class="col-md-3" th:each="p: ${pList}" th:value="${p.productId}" >	<!-- pList : aList 매칭 되는거 없으면 div하나만 생성됨; -->
+									<div class="card shadow-sm products" th:each="a: ${aList}" th:if="${p.productId == a.attmRefNo}">
+										<input type="hidden" name="productId" th:value="${p.productId}">
+										<img alt="..." th:src="'/image/shopFiles/' + ${ a.renameName}"  style="height: 200px;">
+										<div class="card-body">
+											<div class="category fw-bold mb-2" th:each="c: ${cList}" th:if="${p.productDetailNo == c.productDetailNo}">
+												[[${c.productDetailCategory}]]
+											</div>
+											<p class="card-text mb-1" style="font-size: 12px;">[[${p.productName}]]</p>
+											<p class="card-text fw-bold" >[[${#numbers.formatInteger(p.price, 3, 'COMMA')}]]원</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="container text-center mt-5" th:unless="${pList.size != 0}">
+						<br><br><br><br>
+						<h1>죄송합니다. 준비된 상품이 없습니다.</h1>
+					</div>
+					
+					<th:block th:if="${isDetail == null}">
+						<nav class="center" aria-label="Standard pagination example" style="float: right;" th:if="${pList.size != 0}" th:with="loc=${loc}">
+				        	<ul class="pagination">
+				        		<th:block th:if="${ pi.currentPage <= 1}">
+				        			<li class="page-item">
+				        				<a class="page-link disable" aria-label="Previous">
+				        					<span aria-hidden="true">&laquo;</span>
+				        				</a>
+				        			</li>
+				        		</th:block>
+				        		<th:block th:unless="${ pi.currentPage <= 1}">
+					        		<li class="page-item">
+							            <a class="page-link" th:href="@{${loc}(page=${pi.currentPage - 1})}" aria-label="Previous">
+							            	<span aria-hidden="true">&laquo;</span>
+							            </a>
+							        </li>
+							    </th:block>
+						        
+				                  <li class="page-item" th:each="p : ${#numbers.sequence(pi.startPage, pi.endPage)}">
+				                      <a class="page-link" th:href="@{${loc}(page=${p})}" th:text="${p}"></a>
+				                  </li>
+						           	
+					           	<li class="page-item" th:if="${ pi.currentPage >= pi.maxPage }">
+					            	<a class="page-link" aria-label="Next">
+					            		<span aria-hidden="true">&raquo;</span>
+					            	</a>
+				         		 </li>
+					           	<th:block th:unless="${ pi.currentPage >= pi.maxPage }")>
+					          	 	<li class="page-item">
+					            		<a class="page-link" th:href="@{${loc}(page=${pi.currentPage + 1})}" aria-label="Next">
+					            			<span aria-hidden="true">&raquo;</span>
+					            		</a>
+					            	</li>
+				            	</th:block>
+					    	</ul>
+				        </nav>
+			        </th:block>
+			        
+			        <!-- productDetailNo 유지해야함.. -->
+			        <th:block th:unless="${isDetail == null}">
+				        <nav class="center" aria-label="Standard pagination example" style="float: right;" th:if="${pList.size != 0}" th:with="loc=${loc}">
+				        	<ul class="pagination">
+				        		<th:block th:if="${ pi.currentPage <= 1}">
+				        			<li class="page-item">
+				        				<a class="page-link disable" aria-label="Previous">
+				        					<span aria-hidden="true">&laquo;</span>
+				        				</a>
+				        			</li>
+				        		</th:block>
+				        		<th:block th:unless="${ pi.currentPage <= 1}">
+					        		<li class="page-item">
+							            <a class="page-link" th:href="@{${loc}(productDetailNo=${isDetail}, page=${pi.currentPage - 1})}" aria-label="Previous">
+							            	<span aria-hidden="true">&laquo;</span>
+							            </a>
+							        </li>
+							    </th:block>
+						        
+				                  <li class="page-item" th:each="p : ${#numbers.sequence(pi.startPage, pi.endPage)}">
+				                      <a class="page-link" th:href="@{${loc}(productDetailNo=${isDetail}, page=${p})}" th:text="${p}"></a>
+				                  </li>
+						           	
+					           	<li class="page-item" th:if="${ pi.currentPage >= pi.maxPage }">
+					            	<a class="page-link" aria-label="Next">
+					            		<span aria-hidden="true">&raquo;</span>
+					            	</a>
+				         		 </li>
+					           	<th:block th:unless="${ pi.currentPage >= pi.maxPage }")>
+					          	 	<li class="page-item">
+					            		<a class="page-link" th:href="@{${loc}(productDetailNo=${isDetail}, page=${pi.currentPage + 1})}" aria-label="Next">
+					            			<span aria-hidden="true">&raquo;</span>
+					            		</a>
+					            	</li>
+				            	</th:block>
+					    	</ul>
+				        </nav>
+			        </th:block>
+			        <div class="text-center mt-5"  th:unless="${pList.size != 0}">
+			        	<a class="btn btn-dark mt-5" type="button" href="javascript:history.back()">이전 상품으로 돌아가기</a>
+			        </div>
+				</div>
+			</div>
+		</div>
+	</main>
+	<script th:inline="javascript">
+	
+		/*<![CDATA[*/
+		const categoryAll = /*[[${cList}]]*/0;	
+		const pList = /*[[${pList}]]*/null;
+		const isDetail = /*[[${isDetail}]]*/null;
+		const admin =/*[[${session.loginUser}]]*/null;
+
+		/*]]>*/
+		window.onload = () => {
+			if(admin !=null && admin.isAdmin == 'Y') {
+				
+	            const write = document.getElementById('productWrite');
+	            write.addEventListener('click', () =>{
+	               location.href='/shop/shopWrite';
+	            });
+	         }
+			const products = document.querySelectorAll('.products');
+			for(product of products) {
+				product.addEventListener('click', function(){
+					const productId = this.querySelector('img').previousElementSibling.value;
+					
+					/*<![CDATA[*/
+					location.href = '/shop/productDetail?pId=' + productId + "&page=" + /*[[${pi.currentPage}]]*/1;
+					/*]]>*/
+				})
+			}
+			
+			// 카테고리
+			
+			for(const categoryOne of categoryAll) {
+				document.getElementById(categoryOne.productDetailNo).addEventListener('click', function() {
+					location.href = '/shop/selectDetail?productDetailNo=' + this.id;
+				})
+			}
+			
+			const topCategory = document.getElementsByClassName('topCategory');
+			
+			for(const cate of topCategory){
+				cate.addEventListener('click', function() {
+					location.href = '/shop/selectDetail?productDetailNo=' + this.value;
+				});
+			}
+			
+			// ↑↑↓↓   popularity(인기순) sales(판매순) price(가격순)  descending ascending
+			const arrayBtns = document.getElementById('arrayBtn');
+			arrayBtns.addEventListener('click', function(event) {
+				const target = event.target;
+				const isPopular = target.classList.contains('popularity');
+				const isSales = target.classList.contains('sales');
+				const isPrice = target.classList.contains('price');
+				
+				let sort;
+				let direction;
+				
+				if(isPopular){
+					sort = 'popularity';
+					if(target.classList.contains('ascending')){
+						direction = 'DESC'
+					} else if(target.classList.contains('descending')){
+						direction = 'ASC'
+					} else {
+						direction = 'DESC'
+					}
+				}
+				
+				if(isSales){
+					sort = 'sales';
+					if(target.classList.contains('ascending')){
+						direction = 'DESC'
+					} else if(target.classList.contains('descending')){
+						direction = 'ASC'
+					} else {
+						direction = 'DESC'
+					}
+				}
+				
+				if(isPrice){
+					sort = 'price';
+					if(target.classList.contains('ascending')){
+						direction = 'DESC'
+					} else if(target.classList.contains('descending')){
+						direction = 'ASC'
+					} else {
+						direction = 'DESC'
+					}
+				}
+				
+				
+				if(isPopular || isSales || isPrice) {
+					if(isDetail == null) {
+						
+						location.href="/shopMain?sort="+ sort + "&direction=" + direction
+					} else {
+						
+						location.href="/shop/selectDetail?productDetailNo="+ isDetail +"&sort=" + sort + "&direction=" + direction;
+					}
+				}
+				
+			});
+			
+		}
+		
+		
+		
+		
+		
+		
+		
+
+		// 페이지 번호 초기화
+		/* let pageNumber = 2;  // 첫 번째 페이지는 이미 로드됨
+
+		function fetchData() {
+		    $.ajax({
+		        url: "/shopMain",
+		        data: {page:pageNumber},
+		        dataType: 'json',  // 응답 데이터 타입 (JSON으로 기대)
+		        success: function(data) {
+		            const productList = $('#productList');
+		            data.forEach(product => {
+		                const productDiv = $('<div>').addClass('product').text(product.name);
+		                productList.append(productDiv);
+		            });
+		            pageNumber++;
+		        },
+		        error: function(error) {
+		            console.error('Error fetching data:', error);
+		        }
+		    });
+		}
+
+		// 초기 데이터 로드
+		$(document).ready(function() {
+		    fetchData();
+		});
+
+		// IntersectionObserver를 사용하여 무한 스크롤링 로직 추가 (선택 사항)
+		const observer = new IntersectionObserver((entries, observer) => {
+		    entries.forEach(entry => {
+		        if (entry.isIntersecting) {
+		            fetchData();
+		        }
+		    });
+		}, {
+		    root: null,
+		    rootMargin: '0px',
+		    threshold: 0.1
+		});
+
+		observer.observe($('#productList .product:last-child')[0]); */
+
+
+		
+		//list: 이후 새로운 요소를 추가할 때 사용될 부모 요소입니다.
+		//items: 현재 화면에 출력되고 있는 카드 아이템들을 담은 배열입니다. (최초 8개의 아이템)
+		//skeletonItems: 8개의 스켈레톤 요소를 담고 있는 배열입니다.
+		//spinner: 신규 콘텐츠 로드 중 스켈레톤 UI와 함께 출력할 스피너 요소입니다.
+		
+				
+	</script>
+</body>
+</html>

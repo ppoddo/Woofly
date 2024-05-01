@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+<link rel="icon" href="/image/woofly.png">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+</style>
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+			<div class="d-flex justify-content-between mx-5">
+				<div th:replace="~{common/myNav :: myNav}"></div>
+				<!-- 아래만 수정해주세요 -->
+				<!-- 아래만 수정해주세요 -->
+				<!-- 아래만 수정해주세요 -->
+				<!-- 아래만 수정해주세요 -->
+				<!-- 아래만 수정해주세요 -->
+				<!-- 아래만 수정해주세요 -->
+				<div class="col-10 pt-3 mb-5 me-4">
+					<div class="border-bottom border-3 border-black mb-3">
+						<h3>마이펫 사진첩 편집</h3>
+					</div>
+					<br>
+					<form action="/petPhotoEdit.dw" method="POST" enctype="multipart/form-data">
+						<input type="hidden" name="abNumber" th:value="${a.abNo}">
+						<div class="col-8">
+						  <p class="text-secondary">마이펫 선택</p>
+						  <select class="form-select" name="petId" style="width: 160px;" required>
+							  <option selected disabled>마이펫 선택</option>
+						  	  <option th:each="p : ${pList}" th:value="${p.petId}" th:text="${p.petName}" th:selected="${p.petId eq a.petId}">
+						  </select>
+							<p class="text-secondary mt-3">사진 첨부</p>
+				               <div class="d-flex">
+				   			   	 <button type="button" class="btn btn-sm btn-dark" onclick="fileAdd()">파일 찾기</button>&nbsp;&nbsp; 
+							     <input type="file" id="photo" name="file" style="display: none;" accept="image/*" value="123" multiple onchange="setThumbnail(event)"/>
+     						     <input type="file" id="photo" style="display: none;" name="saveFile" accept="image/*" value="123" multiple/>
+							     
+								 <button type="button" id="deleteAll" class="btn btn-outline-dark btn-sm">전체 삭제</button>
+				   			   </div>
+				               <div class="d-flex gap-3 flex-wrap align-items-center mt-2 mb-4" id="imgCont">
+				               		<th:block th:each="a : ${aList}"> 
+							       		<img th:src="'/image/' + ${a.renameName}" class="rounded" style="width: 150px; height: 150px; border: 1px solid black;">
+							       		<button class="btn btn-sm align-items-start" style="border: none;" type="button" th:data-index="${ a.renameName }" onclick="deleteImage(this);">x</button>
+							       	</th:block>	
+   									<div class="d-flex gap-3 flex-wrap align-items-center mt-2 mb-4" id="preview"></div>
+						   	   </div>
+				   		</div>
+						<div class="col-8 mt-4">
+							  <p class="text-secondary"><p>
+							  <label for="exampleFormControlTextarea1" class="form-label"></label>
+							  <textarea th:text="${a.abContent}" name="abContent" class="form-control" id="exampleFormControlTextarea1" rows="10" style="resize:none;"></textarea>
+						</div>
+						<div class="d-flex justify-content-end mt-5 mx-5">
+						    <button class="btn btn-dark btn-sm">수정</button>
+						</div>
+					</form>
+				</div>
+				<!-- 여기까지가 수정 -->
+				<!-- 여기까지가 수정 -->
+				<!-- 여기까지가 수정 -->
+				<!-- 여기까지가 수정 -->
+				<!-- 여기까지가 수정 -->
+				<!-- 여기까지가 수정 -->
+				<!-- 여기까지가 수정 -->
+				<!-- 여기까지가 수정 -->
+			</div>
+	</main>
+	<script>
+		const myNav = document.getElementById("myPet2");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+		
+		const fileAdd = () => {
+			const photo = document.getElementById("photo");
+			photo.click();
+		}
+		
+		const deleteImage = (target) => {
+			$.ajax({
+				url: '/deleteImage.dw',
+				data: {renameName: target.dataset.index},
+				success: data => {
+					console.log(data);
+					if (data == 'good') {
+						$('#imgCont').load(location.href + ' #imgCont > *');
+					}
+				},
+				error: data => console.log(data)
+				
+			})
+		}
+		
+		//파일 미리보기2
+		let count = 0;
+		function setThumbnail(event) {
+		    const photo = document.getElementById("photo");
+		    
+		    const saveFile = document.getElementsByName('saveFile')[0];
+            let fileTransfer = new DataTransfer();
+        	const files = photo.files;
+        	for(let i=0; i < saveFile.files.length; i++) {
+        		fileTransfer.items.add(saveFile.files[i]);
+        	}
+            for(let i=0; i < files.length; i++) {
+            	fileTransfer.items.add(files[i]);
+            }
+            saveFile.files = fileTransfer.files;
+		    
+		    
+		    for (var image of event.target.files) {
+		        var reader = new FileReader();
+			
+		        reader.onload = function (event) {
+		        	
+		            var img = document.createElement("img");
+		            img.setAttribute("src", event.target.result);
+		            img.className = 'rounded';
+		            img.style.width = '150px';
+		            img.style.height = '150px';
+		            img.style.border = '1px grey';
+		
+		            // 썸네일을 감싸는 div 생성
+		            let thumbnailDiv = document.createElement("div");
+		            thumbnailDiv.appendChild(img);
+		            // 삭제 버튼 생성 및 이벤트 바인딩
+		            let deleteButton = document.createElement("button");
+		            
+		            deleteButton.className = 'btn btn-sm align-items-start';
+		            deleteButton.style.border = 'none';
+		            deleteButton.type = 'button';
+		            deleteButton.dataset.index = count++;
+		            deleteButton.innerHTML = 'x';
+		            thumbnailDiv.appendChild(deleteButton);
+		            
+		            deleteButton.addEventListener("click", function () {
+		            	const removeTargetId = this.dataset.index;
+		             	const files = saveFile.files;
+		                const dataTransfer = new DataTransfer();
+		                 
+						count--;		                
+		                for(let i=0; i < files.length; i++) {
+		                	if(i != removeTargetId) {
+		                    	dataTransfer.items.add(files[i]);
+		                 	}
+		                }
+		                saveFile.files = dataTransfer.files;
+		                thumbnailDiv.remove(); // 썸네일 삭제
+		    			console.log(saveFile.files);
+		    		});
+		            
+		            document.querySelector("div#preview").appendChild(thumbnailDiv);
+					console.log(saveFile.files);
+	            }
+		        reader.readAsDataURL(image);
+	            // 썸네일 div에 삭제 버튼 추가
+	
+	            // 썸네일을 미리보기 영역에 추가
+        	};
+
+	    }
+
+	</script>
+</body>
+</html>

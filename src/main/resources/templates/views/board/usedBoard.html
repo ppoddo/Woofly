@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" href="/image/woofly.png">
+<style>
+   .card {
+      cursor: pointer;
+   }
+</style>
+</head>
+<body>
+   <div th:replace="~{common/topAdd :: topAdd}"></div>
+    <div class="container mt-5 mb-3">
+         <div class="container d-flex px-0 mb-4 border-bottom border-black border-3 justify-content-between align-items-center">
+         <h1>중고게시판</h1>
+         <a role="button" href="/board/used/write" class="btn btn-dark btn-sm h-50" th:if="${ session.loginUser != null}">글 작성</a>
+      </div>
+      <div>
+         <a class="btn btn-outline-secondary btn-sm px-3 active" >중고거래게시판</a>
+          <a class="btn btn-outline-secondary btn-sm px-3" href="/board/usedReview">중고거래후기</a>
+      </div>
+      
+      <!--게시글 검색 카테고리 및 검색창-->
+      <div class="mt-3" id="searchArea" >         
+         <div class="row">
+            <label for="search-box" class="form-label">게시글 검색</label>
+            <form action="/board/used" method="get" id="searchForm" name="search-form" class="row"> 
+               <!--select의 부모 div-->
+               <div class="col-auto">
+               <select class="form-select" name="searchType" id="selectOption">
+                  <option value="" disabled selected>검색조건</option>
+                  <option value="u_title">제목</option>
+                  <option value="mb_nickname">작성자</option>
+                  <option value="mn">작성자 + 제목</option>
+               </select>
+               </div>
+            <!--input의 부모 div-->
+            <div class="col">                  
+                <input type="text" class="form-control" name="searchKeyword" id="search-box" placeholder="검색어를 입력해주세요">
+            </div>
+            <!--button의 부모 div-->
+            <div class="col-auto">
+               <button type="submit" class="btn btn-dark" id="searchButton">검색 하기</button>
+            </div>
+            </form>
+         </div>
+      </div>
+      <br>
+      <!--게시글-->
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+           <div class="col" th:each="u : ${uList}">
+              <div class="card shadow-sm" style="width: 20rem;"> 
+                 <th:block th:each="a: ${aList}" th:if="${a.attmRefNo eq u.uNo}">
+                    <img th:src="'/image/board/' + ${a.renameName}" style="width: 318px; height: 318px;">
+                 </th:block> 
+                 <div class="card-body">
+                    <p class="card-text">
+                   <label class="bId" th:text="${u.uNo}">No. [[${ u.uNo }]]</label> | 
+                   <label class="writer" th:text="${u.mbNickName}">[[${ u.mbNickName }]]</label>
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                  <h6 th:text="${u.uTitle}">글제목</h6>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+         
+         <!--페이지네이션-->
+         <nav class="center mt-5" aria-label="Standard pagination example" style="text-align: center;" th:with="loc=${loc}">
+             <ul class="pagination justify-content-center">
+             <!-- << -->
+                <th:block th:if="${ pi.currentPage <= 1}">
+                   <li class="page-item">
+                      <a class="page-link disable" aria-label="Previous">
+                         <span aria-hidden="true">&laquo;</span>
+                      </a>
+                   </li>
+                </th:block>
+                <th:block th:unless="${ pi.currentPage <= 1}">
+                   <li class="page-item">
+                       <a class="page-link" th:href="@{${loc}(page=${pi.currentPage - 1})}" aria-label="Previous">
+                          <span aria-hidden="true">&laquo;</span>
+                       </a>
+                   </li>
+               </th:block>
+                   <!--[1] [2] [3]...-->
+                    <li class="page-item" th:each="p : ${#numbers.sequence(pi.startPage, pi.endPage)}">
+                        <a class="page-link" th:href="@{${loc}(page=${p})}" th:text="${p}"></a>
+                    </li>
+                   <!-- >> -->
+                   <li class="page-item" th:if="${ pi.currentPage >= pi.maxPage }">
+                    <a class="page-link" aria-label="Next">
+                       <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+               <th:block th:unless="${ pi.currentPage >= pi.maxPage }")>
+                  <li class="page-item">
+                   <a class="page-link" th:href="@{${loc}(page=${pi.currentPage + 1})}" aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                   </a>
+                </li>
+             </th:block>
+            </ul>
+          </nav>
+          <!--페이지네이션 끝-->
+      </div>
+      
+   
+   
+   <script>
+      // 해당 페이지 nav bar 강조 넣기
+      // 페이지 별로 id만 수정 하면 됨 eg.) topAdd1, topAdd2, ...
+      const boardNav = document.getElementById("topAdd6");
+      $(boardNav).addClass('active');
+      
+       // 카드에 클릭 이벤트 넣어주는 부분
+       const cards = document.getElementsByClassName("card");
+       for (const card of cards) {
+           card.addEventListener('click', function() {
+               const boardId = this.querySelector('.bId').textContent; // 카드에서 boardId 가져오기
+               
+                  // boardId 및 currentPage 값을 사용하여 세부 페이지로 이동
+               window.location.href = `/board/used/detail?uNo=${boardId}`;
+           });
+       }
+      
+      /* document.getElementById('searchArea').querySelector('button').addEventListener('click', function(){
+         const value = this.previousElementSibling.value; //검색할 값
+         const condition = this.previousElementSibling.previousElementSibling.value;  // 검색할 조건
+         location.href='${contextPath}/search.bo?value=' +value+ "&condition=" + condition;
+      }) */
+      
+      // 검색 버튼 클릭하면 옵션(셀렉트)를 검사해서 만약 셀렉트가 셀렉티드를 false면 선택이 안된거야
+         // 그때는 폼 서브밋이 안되게 하는거고
+         // 반대면 그때 되게하며돼
+         //폼아이ㅣ값, 검색 아이디값, 셀렉티드 아이디 값 받아놓기
+         const form = document.getElementById('searchForm');
+         const searchBtn = document.getElementById('searchButton');
+         
+         searchBtn.addEventListener('click', () => {
+             const selectDiv = document.getElementById('selectOption');
+             const searchContent = document.getElementById('search-box');
+         
+             let categorySelected = false;
+         
+             for (const option of selectDiv.children) {
+                 if (option.value !== '' && option.selected) {
+                     categorySelected = true;
+         
+                     if (searchContent.value.trim() !== '') {
+                         form.submit();
+                     } else {
+                         alert("검색어를 입력해주세요.");
+                         break;
+                     }
+                 }
+             }
+         
+             if (!categorySelected) {
+                 alert("카테고리를 선택해주세요.");
+             }
+         });
+   </script>
+</body>
+</html>

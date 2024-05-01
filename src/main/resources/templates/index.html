@@ -1,0 +1,202 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+	@font-face{
+	font-family:'DNFBitBitv2';
+	font-style:normal;font-weight:400;src:url('//cdn.df.nexon.com/img/common/font/DNFBitBitv2.otf')format('opentype')}
+	
+	* {
+	font-family: 'DNFBitBitv2';
+	font-weight: lighter;
+	}
+	
+	.carousel-item {
+		position: relative;
+		width: 100%;
+		height: 750px;
+		overflow: hiddden;
+	}
+	
+	.carousel-item > img {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 750px;
+	}
+	
+	.topActive {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+	
+	
+</style>
+<title>WOOFLY</title>
+<link rel="icon" href="image/woofly.png">
+<script src="https://js.tosspayments.com/v1/payment-widget"></script>
+
+</head>
+<body>
+	
+	<!-- top navigation bar -->
+	<!-- 모든 페이지에 공통으로 들어가는 navigation bar -->
+	<!-- 추후에 common folder로 이동 -->
+	<div th:replace="~{common/topAdd :: topAdd}"></div>
+	<!-- 메인페이지에 광고 사진 등등일 들어가는 carousel 영역 -->
+	<header>
+		<div id="carousel" class="carousel slide" data-bs-ride="carousel" style="width:100%;">
+		  	<div class="carousel-indicators">
+			    <button type="button" data-bs-target="#carousel" data-bs-slide-to="0" class="active"></button>
+			    <button type="button" data-bs-target="#carousel" data-bs-slide-to="1"></button>
+			    <button type="button" data-bs-target="#carousel" data-bs-slide-to="2"></button>
+		  	</div>
+  			<div class="carousel-inner bg-black text-center" style="width:100%;">
+			    <div class="carousel-item active">
+
+			      	<img src="https://pethroom.com/web/upload/images/1F_playroom_web.gif" class="margin-auto" >
+
+			    </div>
+    			<div class="carousel-item">
+      				<img src="https://pethroom.com/web/upload/images/3F_restaurant_web.gif" class="">
+    			</div>
+    			<div class="carousel-item">
+      				<img src="https://pethroom.com/web/upload/images/2F_dress_room.gif" class="">
+    			</div>
+  			</div>
+		  	<button class="carousel-control-prev" type="button" data-bs-target="#carousel" data-bs-slide="prev">
+			    <span class="carousel-control-prev-icon"></span>
+		  	</button>
+		  	<button class="carousel-control-next" type="button" data-bs-target="#carousel" data-bs-slide="next">
+			    <span class="carousel-control-next-icon"></span>
+		  	</button>
+		</div>
+	</header>
+
+	<!-- 카드 댁 형식으로 강아지 컨테스트/추천 상품 등을 보여주는 메인 부분-->
+	<main>
+		<!-- 강아지 컨테스트 -->
+		<div class="container mx-5 mt-5 pt-5 border-top mx-auto">
+			<div class="row justify-content-center">
+				<div class="col-sm-10">
+					<h4>강아지 컨테스트</h4>
+				</div>
+				<div class="col-sm-1 text-end"><a class="nav-link text-black" href="#"><h6><small></small></h6></a></div>
+			</div>
+			<div class="row gap-5 justify-content-center mt-3">
+				<th:block th:each="c: ${participantsList}">
+					<div class="card" style="width: 20%;" th:each="a: ${cAttmList}"  th:if="${c.pNo == a.attmRefNo}" >
+						<img th:src="'/image/contestFiles/' + ${ a.renameName }" class="card-img-top mt-3" style="width: auto; height: 200px;" alt="...">
+					  	<div class="card-body">
+					    	<p class="card-text">[[${c.pTitle}]]</p>
+					  	</div>
+					</div>
+				</th:block>
+			</div>
+			<div class="d-flex justify-content-center mt-5 pb-5 border-bottom">
+				<a href="/contest/list" type="button" class="btn btn-outline-secondary">더보기</a>
+			</div>
+			<!-- 최근 발매 -->
+			<div class="row justify-content-center pt-5">
+				<div class="col-sm-10">
+					<h4>최근에 등록된 상품</h4>
+				</div>
+				<div class="col-sm-1 text-end"><a class="nav-link text-black" href="#"><h6><small></small></h6></a></div>
+			</div>
+			<div class="row gap-5 justify-content-center mt-3">
+				<th:block  th:each="p: ${recentlyProducts}">
+					<div class="card" style="width: 16%;" th:each="a : ${pAttmList}" th:if="${p.productId == a.attmRefNo}">
+						<img th:src="'/image/shopFiles/' + ${ a.renameName }" class="card-img-top mt-3"  style="width: 100%; height: auto;" alt="...">
+					  	<div class="card-body">
+					    	<p class="card-text mb-1">[[${p.productName}]]</p>
+					    	<p class="card-text fw-bold">[[${#numbers.formatInteger(p.price, 3, 'COMMA')}]]원</p>
+					  	</div>
+					</div>
+				</th:block>
+			</div>
+			<div class="d-flex justify-content-center mt-5 pb-5 border-bottom">
+				<a href="/shopMain" type="button" class="btn btn-outline-secondary">더보기</a>
+			</div>
+			<!-- 인기 상품 -->
+			<div class="row justify-content-center pt-5">
+				<div class="col-sm-10">
+					<h4>인기 상품</h4>
+				</div>
+				<div class="col-sm-1 text-end"><a class="nav-link text-black" href="#"><h6><small></small></h6></a></div>
+			</div>
+			<div class="row gap-5 justify-content-center mt-3">
+				<th:block  th:each="p: ${popularityProducts}">
+					<div class="card" style="width: 16%;" th:each="a : ${pAttmList}" th:if="${p.productId == a.attmRefNo}">
+						<img th:src="'/image/shopFiles/' + ${ a.renameName }" class="card-img-top mt-3"  style="width: 100%; height: auto;" alt="...">
+					  	<div class="card-body">
+					    	<p class="card-text mb-1">[[${p.productName}]]</p>
+					    	<p class="card-text fw-bold">[[${#numbers.formatInteger(p.price, 3, 'COMMA')}]]원</p>
+					  	</div>
+					</div>
+				</th:block>
+			</div>
+			<div class="d-flex justify-content-center mt-5 pb-5 border-bottom">
+				<a href="/shopMain" type="button" class="btn btn-outline-secondary">더보기</a>
+			</div>
+			<!-- Pawlebrity -->
+<!-- 			<div class="row justify-content-center pt-5"> -->
+<!-- 				<div class="col-sm-10"> -->
+<!-- 					<h4>유명 댕댕이</h4> -->
+<!-- 				</div> -->
+<!-- 				<div class="col-sm-1 text-end"><a class="nav-link text-black" href="#"><h6><small>더보기</small></h6></a></div> -->
+<!-- 			</div> -->
+<!-- 			<div class="row gap-5 justify-content-center mt-3"> -->
+<!-- 				<div class="card" style="width: 16%;"> -->
+<!-- 					<img src="https://www.fitpetmall.com/wp-content/uploads/2022/11/shutterstock_196467692-1024x819.jpg" class="card-img-top" alt="..."> -->
+<!-- 				  	<div class="card-body"> -->
+<!-- 				    	<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+<!-- 				  	</div> -->
+<!-- 				</div> -->
+<!-- 				<div class="card" style="width: 16%;"> -->
+<!-- 					<img src="https://mblogthumb-phinf.pstatic.net/MjAyMjAyMDdfMjEy/MDAxNjQ0MTk0Mzk2MzY3.WAeeVCu2V3vqEz_98aWMOjK2RUKI_yHYbuZxrokf-0Ug.sV3LNWlROCJTkeS14PMu2UBl5zTkwK70aKX8B1w2oKQg.JPEG.41minit/1643900851960.jpg?type=w800" class="card-img-top" alt="..."> -->
+<!-- 				  	<div class="card-body"> -->
+<!-- 				    	<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+<!-- 				  	</div> -->
+<!-- 				</div> -->
+<!-- 				<div class="card" style="width: 16%;"> -->
+<!-- 					<img src="https://mblogthumb-phinf.pstatic.net/MjAyMTEyMTJfMjg2/MDAxNjM5MjQ5ODI1NTU3.bEgs_j_ZaQgWAgAnjJ2daUIQlUzKuAud4l6KRXgqiw0g.qt0LjkvDb9WRPR1j_WEOjwZS642aXaI36iWDxvsqW2Ug.JPEG.41minit/1639153272211%EF%BC%8D4.jpg?type=w800" class="card-img-top" alt="..."> -->
+<!-- 				  	<div class="card-body"> -->
+<!-- 				    	<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+<!-- 				  	</div> -->
+<!-- 				</div> -->
+<!-- 				<div class="card" style="width: 16%;"> -->
+<!-- 					<img src="https://mblogthumb-phinf.pstatic.net/MjAyMTEyMTJfMjAy/MDAxNjM5MjQ5ODI2MTU1.iPx-ZkSbFWhd4XPRwNbkePRKQn8r4ynm86zpqRNQNtUg.VnCCLmcPkMVZepUITvxiGfEX3q742ZCOJHjzDnqW3PQg.JPEG.41minit/1639153272211%EF%BC%8D5.jpg?type=w800" class="card-img-top" alt="..."> -->
+<!-- 				  	<div class="card-body"> -->
+<!-- 				    	<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+<!-- 				  	</div> -->
+<!-- 				</div> -->
+<!-- 				<div class="card" style="width: 16%;"> -->
+<!-- 					<img src="https://mblogthumb-phinf.pstatic.net/MjAyMjAxMTBfMzYg/MDAxNjQxNzk3NjA2NjA5.ch2knv1PXnZ2aEY1Km2yuTGM5Qa2BbhQYKcXBieFaiUg.YFmYJPHHuanrPjbasVR3fJdlaF8RUGADAtcbpENkDD4g.JPEG.41minit/1641631265233.jpg?type=w800" class="card-img-top" alt="..."> -->
+<!-- 				  	<div class="card-body"> -->
+<!-- 				    	<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+<!-- 				  	</div> -->
+<!-- 				</div> -->
+<!-- 			</div> -->
+<!-- 			<div class="d-flex justify-content-center mt-5 pb-5 border-bottom"> -->
+<!-- 				<button type="button" class="btn btn-outline-secondary">더보기</button> -->
+<!-- 			</div> -->
+		</div>
+	</main>
+	
+	<script>
+		// 해당 페이지 nav bar 강조 넣기
+		// 페이지 별로 id만 수정 하면 됨 eg.) topAdd1, topAdd2, ...
+		const addNavSelect = document.getElementById("topAdd1");
+		$(addNavSelect).addClass('active');
+		
+		const navSelect = document.getElementById("top1");
+		$(navSelect).removeClass('text-black');
+		$(navSelect).addClass('topActive');
+		
+	</script>
+</body>
+</html>

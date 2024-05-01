@@ -1,0 +1,145 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WOOFLY</title>
+<link rel="icon" href="image/woofly.png">
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+</style>
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-between mx-5">
+			<div th:replace="~{common/myNav :: myNav}"></div>
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<div class="col-10 mb-5 pt-3 me-4">
+				<h3>종료된 거래</h3>
+				<br>
+				<h5 class="pb-3 mb-3 border-bottom border-black border-2">주문번호 [[${order.orderId}]]</h5>
+				<div class="d-flex justify-content-between pb-3 mb-3 border-bottom" th:each="detail: ${details}">
+					<div class="d-flex gap-3 align-items-center">
+						<th:block th:each="attm : ${paList}" th:if="${attm.attmRefNo == detail.productId}">
+							<img class="rounded border" alt="" th:src="'/image/shopFiles/' + ${attm.renameName}" style="width: 120px; height: 120px">
+						</th:block>						
+						<div>
+							<p class="mb-1">상품 번호 <strong>[[${detail.productId}]]</strong></p>
+							<p class="mb-1"></p>[[${detail.productName}]]
+							<p class="mb-1"><strong></strong></p>
+						</div>
+					</div>
+					<div class="d-flex align-items-center">
+						<button class="btn btn-outline-dark" th:onclick="|location.href='/shop/productDetail?pId=${detail.productId}&page=1'|">상품 상세</button>
+					</div>
+				</div>
+				<div class="border border-start-0 border-end-0 border-2 bg-danger-subtle mb-5">
+					<p class="col-11 mx-auto mt-3"><strong>진행 상황</strong></p>
+					<div class="progress mx-auto col-11" role="progressbar" style="height: 10px;">
+						<div class="progress-bar bg-dark"></div>
+					</div>
+					<div class="d-flex col-11 mx-auto justify-content-between mt-2">
+						<p>배송전</p>
+						<p>배송중</p>
+						<p>배송완료</p>
+					</div>
+				</div>
+				<div class="border-top border-black border-2 bg-body-tertiary">
+					<div class="d-flex align-items-center mx-3" style="height: 100px;">
+						<p class="col-2 mb-0">총 결제금액</p>
+						<h3>[[${#numbers.formatInteger(order.total, 3, 'COMMA')}]] 원</h3>
+					</div>
+				</div>
+				<div class="border-top">
+					<div class="mx-3 border-bottom">
+						<div class="d-flex align-items-center pt-3">
+							<p class="col-2">구매가</p>
+							<p>[[${#numbers.formatInteger(order.total - order.transFee, 3, 'COMMA')}]]원</p>
+						</div>
+						<div class="d-flex align-items-center">
+							<p class="col-2 text-secondary">배달비</p>
+							<p>[[${#numbers.formatInteger(order.transFee, 3, 'COMMA')}]]원</p>
+						</div>
+						<div class="d-flex align-items-center">
+							<p class="col-2 text-secondary">포인트</p>
+							<p>[[${order.usedPoints > 0 ? '-' + #numbers.formatInteger(order.usedPoints, 3, 'COMMA') : '-'}]]</p>
+						</div>
+					</div>
+				</div>
+				<div class="border-bottom">
+					<div class="d-flex align-items-center pt-3 mx-3">
+						<p class="col-2">거래일시</p>
+						<p>[[${#dates.format(order.orderDate, 'yy/MM/dd HH:mm')}]]</p>
+					</div>
+				</div>
+				<h3 class="border-bottom border-black border-2 mt-3 pb-3">배송 주소</h3>
+				<div class="d-flex align-items-center pt-3 border-bottom">
+					<p class="col-2">받는 사람</p>
+					<p>[[|${#strings.substring(order.orderOwner, 0, 1)}**|]]</p>
+				</div>
+				<div class="d-flex align-items-center pt-3 border-bottom">
+					<p class="col-2">휴대폰 번호</p>
+					<p>[[|010-${#strings.substring(order.mbTel, 3, 4)}***-*${#strings.substring(order.mbTel, 8)}|]]</p>
+				</div>
+				<div class="d-flex align-items-center pt-3 border-bottom">
+					<p class="col-2">주소</p>
+					<p>[[${order.addr}]]</p>
+				</div>
+				<h3 class="border-bottom border-black border-2 mt-3 pb-3">배송 요청 사항</h3>
+				<div class="d-flex align-items-center pt-3 border-bottom">
+					<p class="col-2">요청사항</p>
+					<p>[[${order.orderRequest != null ? order.orderRequest : '-'}]]</p>
+				</div>
+				<h3 class="mt-3">결제 정보</h3>
+				<p class="text-secondary border-bottom border-black border-2 pb-1" style="font-size: 10px;">체결 후 결제 정보 변경은 불가하며, 할부 전환은 카드사 문의 바랍니다.</p>
+				<div class="d-flex align-items-center pt-2 border-bottom">
+					<p class="col-2">[[${order.paymentMethod}]]</p>
+				</div>
+				<br><br><br><br><br>
+				<div class="d-flex justify-content-center mt-5">
+					<button class="btn btn-outline-dark" onclick="location.href='/my/buying'">목록 보기</button>
+				</div>
+			</div>
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+		</div>
+	</main>
+	<script th:inline="javascript">
+		const myNav = document.getElementById("myNav1");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+		
+		const progressBar = document.getElementsByClassName('progress-bar')[0];
+		/*<![CDATA[*/
+		const delStatus = /*[[${order.delStatus}]]*/null;
+		console.log(delStatus);
+		console.log(progressBar);
+		if (delStatus == 0) {
+			$(progressBar).addClass('w-0');
+		} else if (delStatus == 1) {
+			$(progressBar).addClass('w-50');
+		} else if (delStatus == 2) {
+			$(progressBar).addClass('w-100');
+		}
+		/*]]>*/
+	</script>
+</body>
+</html>

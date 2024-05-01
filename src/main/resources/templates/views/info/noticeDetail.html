@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+	crossorigin="anonymous">
+
+    <!-- 사용자와 관리자에 따라 nav 변경
+         CSS 세세한 조정
+         추가된 기능에 따른 nav 추가 및 변경 -->
+<link rel="stylesheet" type="text/css" th:href="@{/css/yh/modal.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/css/yh/noticeDetail.css}" /> 
+
+<title>Bootstrap demo</title>
+</head>
+<body>
+<div th:replace="~{common/top :: top}"></div>
+	<main>
+		<div class="container-fluid d-flex mx-5">
+			<!-- 관리자만 보이게!!!!!!!!!!!!!!!!!!! -->
+			<th:block th:if="${session.loginUser == null or session.loginUser.isAdmin == 'N'}">
+				<div th:replace="~{common/infoNav :: infoNav}"></div>
+			</th:block>
+			<th:block th:if="${session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+				<div th:replace="~{common/adminNav :: adminNav}"></div>
+			</th:block>
+			
+			<div class="col-10 mb-5">
+				<div class="container mt-4">
+					<div class="col-md-12 mb-4">
+						<div class="card">
+							<form action="/info/NoticeEdit" method="POST">
+								<div class="card-header d-flex justify-content-between" >
+									<h5>[[${n.nCategory}]]</h5>
+									<h4>공지사항</h4>
+									<input type="hidden" th:value="${ page }" name="page">
+									<input type="hidden" th:value="${ n.nNo }" name="nNo">
+									<div>
+										<div class="d-flex gap-3" th:if="${admin == 'Y'}">
+											<button class="btn btn-outline-warning bg-warning-subtle">수정</button>
+											<button type="button" id="modalOpen" class="btn btn-outline-danger bg-danger-subtle">삭제</button>                                                
+										</div>
+									</div>
+								</div>
+							</form>
+							<div class="card-body">
+								<div class="board_view_wrap">
+									<div class="board_view">
+										<div class="title"> <!--글 제목-->
+											제목[[${ n.nTitle }]]
+										</div>
+										<div class="info">
+											<dl style="margin-left: 60%; margin-bottom: 5px">
+												<dt>글쓴이</dt>
+					                            <dd>[[${ n.nWriter }]]</dd>
+											</dl>
+											<dl style="margin-bottom: 5px">
+												<dt>작성일</dt>
+												<dd>[[${ n.nCreateDate }]]</dd>
+											</dl>
+											<!-- 파일 있을때만!!!!!!!!!!!!!!!!!! -->
+											<div style="display: inline-block; margin-left: 75%">
+												<span style="font-size: 15px; ">첨부 파일</span><br>
+												<div style="font-size: 12px;  " th:each="a : ${aList}">
+												
+													<a th:href="'/image/noticeFiles/' + ${a.renameName}" th:download="${a.originalName}">[[${a.originalName}]]</a><br>
+												</div>
+											</div>
+											<br>
+											
+										</div>
+										<div class="text"> <!--글 내용-->
+											<div style="margin-left: 40px">[[${ n.nContent }]]</div>
+										</div>
+										<!-- 사진  있을때만!!!!!!!!!!!!!!!!!!-->
+										<div class="text1" th:each="i : ${iList}"> <!--공지 사진-->
+											<img th:src="'/image/noticeFiles/' + ${i.renameName}" alt="공지사진" style="height: 100%; width: 100%">
+										</div>
+									</div>
+									<div style="text-align: center; margin-top: 10px;">
+										<input class="btn btn-outline-dark" type="button" value="목 록" onclick="javascript:history.back();">
+									</div>
+								</div>
+							</div>     
+						</div>
+					</div>
+					<div id="modalContainer" class="hidden">
+						<div id="modalContent" class="modalContentCss">
+					    	<br>
+					    	<h1 style="text-align: center;">정말 삭제하시겠습니까?</h1>
+					    	<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+						    <button id="delete" type="button" class="btn btn-lg rounded-2 btn-outline-danger">삭제</button>
+							&emsp;&emsp;&emsp;&emsp;
+						    <button id="modalClose" type="button" class="btn btn-lg rounded-2 btn-outline-dark">닫기</button>	
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+	<script th:inline="javascript">
+		window.onload = () => {
+			const mbt = document.getElementById('modalOpen');
+			const modalCloseButton = document.getElementById('modalClose');
+			const modal = document.getElementById('modalContainer');
+			const del = document.getElementById('delete');
+			
+			mbt.addEventListener('click', (event) => {
+			    modal.classList.remove('hidden');
+			    
+			    del.addEventListener('click', () => {
+			        location.href = '/info/deleteNotice?nNo=' /*<![CDATA[*/ + /*[[${n.nNo}]]*/123/*]]>*/ + "&page=" /*<![CDATA[*/ + /*[[${ page}]]*/123;/*]]>*/
+			   
+			    });
+			});
+			
+			modalCloseButton.addEventListener('click', () => {
+			  modal.classList.add('hidden');
+			});
+			
+		    const anav = document.getElementById('myNav1')
+			anav.style.fontWeight = 'bold';
+			
+		}
+	</script>
+</body>
+</html>

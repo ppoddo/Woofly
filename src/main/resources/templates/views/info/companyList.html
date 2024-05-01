@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" th:href="@{/image/woofly.png}">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+	crossorigin="anonymous">
+<style>
+	.board-list { cursor: pointer;}
+</style>
+</head>
+<body>
+    <div th:replace="~{common/top :: top}"></div>
+	<main>
+		<div class="container-fluid d-flex mx-5">
+			
+			<!-- 관리자만 보이게!!!!!!!!!!!!!!!!!!! -->
+			<th:block th:if="${session.loginUser == null or session.loginUser.isAdmin == 'N'}">
+				<div th:replace="~{common/infoNav :: infoNav}"></div>
+			</th:block>
+			<th:block th:if="${session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+				<div th:replace="~{common/adminNav :: adminNav}"></div>
+			</th:block>
+			
+			<div class="col-10 mb-5">
+				<div class="container mx-5 mt-5">
+					<div class="container d-flex px-0 border-bottom border-black border-3 justify-content-between align-items-center">
+						<h1>협력업체</h1>
+						<!-- 관리자만 보이도록 -->
+						<th:block th:if="${ session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+							<a role="button" href="/info/companyEnroll" class="btn btn-dark btn-sm h-50">업체 등록</a>
+						</th:block>
+					</div>
+					
+					
+					<form action="/info/searchCompany">
+						<input type="hidden" th:value="${ value }" name="value" id="aaaa" >
+						<div class="row col-auto mt-3">
+							<label for="search-box" class="form-label">업체 검색</label>
+						</div>
+						<div class="row g-0 text-center">
+							<div class="col-2 col-md-1">
+								<select  class="form-select-lg" th:value="${ comCategory }" name=comCategory style="display: inline-block;">
+									<option value="all" th:selected="${ comCategory == 'all' }"> 전 체 </option>
+									<option value="동물병원" th:selected="${ comCategory == '동물병원'}"> 병 원 </option>
+									<option value="애견 카페" th:selected="${ comCategory == '애견 카페'}"> 카 페 </option>
+									<option value="애견 유치원" th:selected="${ comCategory == '애견 유치원'}"> 유치원 </option>
+									<option value="애견 쇼핑몰" th:selected="${ comCategory == '애견 쇼핑몰'}"> 쇼핑몰</option>
+								</select>
+							</div>
+							<div class="col-2 col-md-2">
+								<select  class="form-select-lg" name="Category" style="display: inline-block; margin-right: 30px">
+									<option value="com_Name" th:selected="${ Category == 'com_Name'}">업체명 </option>
+									<option value="com_Addr" th:selected="${ Category == 'com_Addr'}">업체 주소 </option>
+								</select>
+							</div>
+							<div class="col-sm-6 col-md-7 input-group-lg" style="margin-right: 50px" >
+								<input type="text" id="search-box" class="form-control" placeholder="검색" name="search" th:value="${ search }" >
+							</div>
+							<div class="col-6 col-md-1">
+								<button class="btn btn-outline-dark btn-lg">검색</button>
+							</div>
+						</div>
+					</form>
+					
+					
+					<div class="container board-list" id="board-list" style="margin-top: 10px">
+						<div name="list" class="row border-top border-secondary text-center board-liste" style="height: 80px;" th:each="l : ${list}">							
+							<label class="comNo" style="display: none;">[[${ l.comNo }]]</label>
+							<div class="col-2" style="line-height: 80px;">[[${ l.comName }]]</div>
+							<div class="col-2" style="line-height: 80px;">[[${ l.comCategory }]]</div>                         
+							<div class="col-5" style="line-height: 80px;">[[${ #strings.arraySplit(l.comAddr, '@')[1] }]]</div>							
+							<div class="col-3" style="line-height: 80px;">[[${ l.comPhone }]]</div>
+						</div>
+					</div>
+					<div th:replace="~{info/pageNav :: pageNav}"></div>
+				</div>	
+			</div>
+		</div>
+    </main>
+	
+	<script th:inline="javascript">
+		window.onload = () => {
+			const divs = document.getElementsByName('list');
+			for(const div of divs) {
+				div.addEventListener('click', function() {
+					const comNo = this.querySelector('.comNo').innerText;
+					/*<![CDATA[*/
+			        location.href = '/info/selectCompany?comNo=' + comNo + "&page=" + /*[[${pi.currentPage}]]*/123;
+			        /*]]>*/
+				})
+			}
+			
+			const pbts = document.getElementsByName('pagebtn');
+			
+			for(const pbt of pbts) {
+				const cp1 = "[[${pi.currentPage}]]"
+				const cp2 = pbt.innerText
+				if(cp1 == cp2) {
+					pbt.style.background = 'lightgrey';
+				}
+			}
+			
+		    const anav = document.getElementById('myNav3')
+			anav.style.fontWeight = 'bold';
+		}
+	</script>
+</body>
+</html>

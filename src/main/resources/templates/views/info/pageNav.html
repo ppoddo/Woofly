@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="pageNav">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+</head>
+<body>
+	<nav class="border-top border-black pt-5" th:with="loc=${loc}">
+		<ul class="pagination justify-content-center">
+		
+			<li class="page-item" th:if="${ pi.currentPage <= 1 }">
+				<a class="page-link disable" >
+					<span aria-hidden="true">&laquo;</span>
+				</a>
+			</li>
+			<li class="page-item" th:if="${ pi.currentPage > 1 }" >	
+				<a class="page-link" th:href="@{${loc}(page=${pi.currentPage-1}, Category=${Category}, search=${search}, value=${value}, comCategory=${comCategory})}">
+					<span aria-hidden="true">&laquo;</span>
+				</a>
+			</li>
+			
+			<li class="page-item" th:if="${ pi.listCount != 0 }" th:each="p : ${#numbers.sequence(pi.startPage, pi.endPage)}">
+				<a class="page-link" name="pagebtn" th:href="@{${loc}(page=${p}, Category=${Category}, search=${search}, value=${value}, comCategory=${comCategory})}">[[${ p }]]</a>
+			</li>
+			
+			<li class="page-item" th:if="${ pi.currentPage >= pi.maxPage }">
+				<a class="page-link disable" >
+					<span aria-hidden="true">&raquo;</span>
+				</a>
+			</li>
+			<li class="page-item" th:if="${ pi.currentPage < pi.maxPage }">	 
+				<a class="page-link" th:href="@{${loc}(page=${pi.currentPage+1}, Category=${Category}, search=${search}, value=${value}, comCategory=${comCategory})}">
+					<span aria-hidden="true">&raquo;</span>
+				</a>
+			</li>							
+		</ul>
+	</nav>
+	
+	
+</body>
+</html>

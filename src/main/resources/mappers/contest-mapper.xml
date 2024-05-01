@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.kh.woofly.contest.model.dao.ContestDAO">
+	
+	<insert id="contestOpen">
+		insert into contest
+		values ( CONTEST_SEQ.NEXTVAL , #{conGen}, #{conName}, #{conStartDate}, #{conEndDate}, default)
+	</insert>
+	
+	<select id="contestNewList" resultType="Contest">
+		select *
+		from(
+			select *
+			from contest
+			ORDER BY CON_NO DESC
+		)
+		where ROWNUM= 1
+	</select>
+	
+	<select id="contestList" resultType="Contest">
+		select *
+		from contest
+		ORDER BY CON_NO DESC
+	</select>
+	
+	<update id="contestUpdate">
+		UPDATE contest
+		SET CON_GEN = #{conGen},  CON_NAME = #{conName}, CON_START_DATE = #{conStartDate}, CON_END_DATE = #{conEndDate}
+		WHERE CON_NO = #{conNo}
+	</update>
+	
+	<update id="updateContestStatus">
+		UPDATE contest
+		SET CON_STATUS = 'N'
+		<![CDATA[
+		where CON_END_DATE < #{today}
+		]]>
+	</update>
+	
+	<select id="updateBestContest" resultType="Contest">
+		select *
+		from contest
+		<![CDATA[
+		where CON_START_DATE <= #{today} AND CON_END_DATE >= #{today}
+		]]>
+	</select>
+	<!-- 콘테스트 참가 -->
+	<insert id="contestEnroll">
+		insert into Participants
+		values ( PARTICIPANTS_SEQ.NEXTVAL, #{pTitle}, #{pPet}, #{pContent}, default, default, #{petId}, #{contestId}, #{pProduct}, #{mbId} )
+	</insert>
+	
+	<select id="contestId" resultType="Contest">
+		SELECT *
+    	FROM contest
+    	<![CDATA[
+   		WHERE CON_START_DATE <= #{today} AND CON_END_DATE >= #{today}
+   		]]>
+	</select>
+	
+	<select id="searchItem" resultType="ContestItem">
+		select *
+		from PRODUCT
+		WHERE PRODUCT_NAME LIKE '%${pSearch}%' AND PRODUCT_STATUS = 'Y'
+	</select>	
+	
+	<!-- count -->
+	<select id="getListCount" resultType="_int">	
+		SELECT COUNT(*)
+		FROM Participants
+		WHERE P_STATUS ='Y' AND contest_Id = #{cNo}
+	</select>
+	
+	<select id="itemList" resultType="ContestItem">
+		SELECT p.product_name, d.order_detail_id,  o.customer_id, d.order_id, d.product_id,p.price, p.product_status
+	    FROM ORDERS o, ORDER_DETAIL d, PRODUCT p
+	    WHERE o.CUSTOMER_ID = #{id} AND o.ORDER_ID = d.order_id AND d.product_id = p.product_id
+	    ORDER BY d.order_detail_id DESC
+	</select>
+	
+	<insert id="insertAttm">
+		INSERT ALL
+		<foreach collection="list" item="a">
+			INTO ATTACHMENT
+			VALUES (NEW_AID, #{a.originalName}, #{a.renameName}, SYSDATE, SYSDATE, #{a.attmPath}, DEFAULT, 'C', #{a.attmRefNo} , #{a.attmLevel})
+		</foreach>
+		SELECT *
+		FROM DUAL
+	</insert>
+	
+	<select id="memberNick" resultType="String">
+		SELECT MB_NICKNAME
+	    FROM MEMBER
+	    WHERE mb_id = #{id}
+	</select>
+	
+	<select id="petList" resultType="map">
+		SELECT PET_NAME, PET_ID
+	    FROM PET
+	    WHERE OWNER_ID = #{id} AND PET_STATUS = 'Y'
+	</select>
+	
+	<select id="petName" resultType="String">
+		SELECT PET_NAME
+	    FROM PET
+	    WHERE PET_ID = #{pId}
+	</select>
+	
+	<select id="thisParticipant" resultType="Participants">
+	    SELECT *
+	    FROM (
+	        SELECT *
+	        FROM Participants
+	        WHERE PET_ID = #{pId}
+	        ORDER BY P_NO DESC
+	    )
+	    <![CDATA[
+	    WHERE ROWNUM <= 1
+	    ]]>
+	</select>
+	
+	<select id="todayContestNo" resultType="Integer">
+	    SELECT NVL(CON_NO, 0)
+	    FROM contest
+	    <![CDATA[
+	    WHERE CON_START_DATE <= sysdate AND CON_END_DATE >= sysdate
+	    ]]>
+	</select>
+	
+	<select id="allContestNo" resultType="Integer">
+         SELECT CON_NO
+	     FROM contest
+	     <![CDATA[
+	     WHERE CON_END_DATE <= sysdate
+	     ]]>
+	     ORDER BY CON_NO DESC
+	</select>
+	
+	<select id="participantstList" resultType="Participants">
+        SELECT *
+        FROM Participants
+        WHERE CONTEST_ID = #{cNo}
+        ORDER BY P_NO DESC
+	</select>
+	
+	<select id="allTimeBestList" resultType="Participants">
+        SELECT *
+        FROM Participants
+        WHERE CONTEST_ID = #{generationNo}
+        ORDER BY P_COUNT DESC
+	</select>
+	
+	<select id="best3Dog" resultType="Participants">
+	    SELECT *
+	    FROM (
+	        SELECT *
+	        FROM Participants
+	        WHERE CONTEST_ID = #{generationNo}
+	        ORDER BY P_COUNT DESC
+	    )
+	    <![CDATA[
+	    WHERE ROWNUM <= 3
+	    ]]>
+	</select>
+	
+	<select id="selectAttmNList" resultType="ContestAttm">
+        SELECT *
+        FROM ATTACHMENT
+        WHERE ATTM_REF_TYPE = 'C'  AND ATTM_STATUS ='Y' AND ATTM_LEVEL = '1'
+	</select>
+	
+	<select id="selectParticipants" resultType="Participants">
+		select *
+		from Participants
+		WHERE P_NO = #{ pNo }	
+	</select>
+	
+	<!-- 조회수 -->
+	<update id="updateCount">
+		UPDATE Participants
+		SET P_COUNT = P_COUNT + 1
+		WHERE P_NO = #{ pNo }
+	</update>
+	
+	<select id="selectAttmPList" resultType="ContestAttm">
+		select *
+		from ATTACHMENT
+		WHERE ATTM_STATUS = 'Y' AND ATTM_REF_NO = #{pNum} AND ATTM_REF_TYPE = 'C'
+	</select>
+	
+	<select id="countList" resultType="_int">	
+		SELECT COUNT(*)
+		FROM Participants
+		WHERE P_STATUS ='Y' AND contest_Id = #{contestId} AND MB_ID = #{mbId}
+	</select>
+	
+	<!-- 포인트등록 -->
+	<update id="contestPoint">
+		UPDATE MEMBER
+		SET MB_POINT = MB_POINT + 1000
+		WHERE MB_ID = #{ mbId }
+	</update>
+	<!-- 포인트 기록 -->
+	<insert id="contestPointList">
+		insert into POINT_HISTORY
+		values ( POINT_HISTORY_SEQ.NEXTVAL, 'C', 1000, sysdate, #{mbId} )
+	</insert>
+	
+	<select id="bestParticipantstList" resultType="Participants">
+		SELECT *
+		FROM Participants
+		WHERE CONTEST_ID = #{cNo}
+		ORDER BY P_COUNT DESC
+	</select>
+
+	
+	
+	<select id="topFiveBest" resultType="Participants">
+        SELECT *
+        FROM Participants
+        WHERE CONTEST_ID = #{cNo}
+        ORDER BY P_COUNT DESC
+        FETCH FIRST 4 ROWS ONLY
+	</select>
+	
+	
+	<select id="searchParticipantstList" resultType="Participants">
+		SELECT *
+		FROM Participants
+		WHERE CONTEST_ID = #{cNo}  AND ( P_TITLE LIKE '%${search}%'  OR  P_PET LIKE '%${search}%' )
+		ORDER BY P_NO DESC
+	</select>
+	
+	<select id="searchBestParticipantstList" resultType="Participants">
+        SELECT *
+        FROM Participants
+        WHERE CONTEST_ID = #{cNo}  AND ( P_TITLE LIKE '%${search}%'  OR  P_PET LIKE '%${search}%' )
+        ORDER BY P_COUNT DESC
+	</select>
+	
+	<select id="cPetList" resultType="map">
+        SELECT PET_ID
+        FROM Participants
+        WHERE CONTEST_ID = #{cNo}  AND MB_ID = #{id}
+	</select>
+	
+	<insert id="bestDogVote">
+		insert into BOARD_LIKE
+		values ( BL_SEQ.NEXTVAL , 'C', #{pNo}, #{id} )
+	</insert>
+	
+	<update id="bestDogCountUpdate">
+		UPDATE Participants
+		SET P_COUNT = P_COUNT + 1
+		WHERE P_NO = #{pNo}
+	</update>
+	
+	<select id="voteCheck" resultType="Integer">
+		SELECT count(*)
+		FROM BOARD_LIKE
+		WHERE LIKE_REF_TYPE = 'C' AND LIKE_REF_BOARD = #{pNo} AND LIKE_USER = #{id}
+	</select>
+	
+	<select id="wOProductList" resultType="_int">
+	    SELECT PRODUCT_ID
+		FROM ORDER_DETAIL
+		WHERE ORDER_DETAIL_ID = #{aa}
+	</select>
+	
+	<select id="productAttm" resultType="ContestAttm">
+		SELECT *
+	    FROM (
+	        SELECT *
+	        FROM ATTACHMENT
+	        WHERE ATTM_STATUS = 'Y' AND ATTM_REF_TYPE = 'P' AND ATTM_REF_NO = #{outO} AND ATTM_LEVEL = 1
+	        ORDER BY ATTM_ID DESC
+	    )
+	    <![CDATA[
+	    WHERE ROWNUM <= 1
+	    ]]>
+	</select>
+	
+	<select id="selectDog" resultType="Pet">
+	    SELECT *
+		FROM PET
+		WHERE OWNER_ID = #{mbId}
+	</select>
+	
+</mapper>
+
+
+

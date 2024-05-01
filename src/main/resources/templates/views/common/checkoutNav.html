@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="checkoutNav">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" href="/image/woofly.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+<style>
+	.offcanvas a {
+		border-radius: 23px;
+		margin: 5px;
+	}
+	
+	@font-face{
+	font-family:'DNFBitBitv2';
+	font-style:normal;font-weight:400;src:url('//cdn.df.nexon.com/img/common/font/DNFBitBitv2.otf')format('opentype')}
+	
+	* {
+	font-family: 'DNFBitBitv2';
+	font-weight: lighter;
+	}
+</style>
+</head>
+<body>
+	<nav class="navbar sticky-top bg-white pb-0">
+		<div class="container-fluid justify-content-end mx-5">
+			<ul class="nav bg-white">
+				<li class="nav-item"><a class="nav-link text-black" href="/adminMain"><small>고객센터</small></a></li>
+				<li class="nav-item"><a class="nav-link text-black" href="/my"><small>마이페이지</small></a></li>
+				<li class="nav-item"><a class="nav-link text-black" href="/my/saved"><small>관심</small></a></li>
+				<li class="nav-item"><a class="nav-link text-black" href="#offcanvas" data-bs-toggle="offcanvas" role="button"><small>알림</small></a></li>
+				<th:block th:if="${session.loginUser == null}">
+					<li class="nav-item"><a class="nav-link text-black" href="/account/login"><small>로그인</small></a></li>
+				</th:block>
+				<th:block th:if="${session.loginUser != null}">
+					<li class="nav-item"><a class="nav-link text-black" type="submit" href="/account/logout"><small>로그아웃</small></a></li>
+				</th:block>
+			</ul>
+		</div>
+		<div class="container-fluid mx-5 justify-content-between">
+	   		<a class="navbar-brand" href="/"><img src="/image/woofly.png" alt="Woofly" width="100" height="60"></a>
+	   		<h1 style="line-height: 60px;">
+	   			배송/결제
+	   		</h1>
+	   		<a style="width:100px;">
+	   		</a>
+		</div>
+	</nav>
+	
+	<div class="offcanvas offcanvas-end w-20" data-bs-scroll="true" data-bs-backdrop="static" tabindex="-1" id="offcanvas">
+	  	<div class="offcanvas-header">
+		    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+		    <h5 class="offcanvas-title" id="offcanvasLabel">알림</h5>
+  		</div>
+  		<div class="offcanvas-body">
+  			<div class="mb-5 d-flex flex-wrap">
+	  			<button class="btn btn-outline-secondary btn-sm px-3 active" href="#">전체</button>
+	  			<button class="btn btn-outline-secondary btn-sm px-3" href="#">거래</button>
+	  			<button class="btn btn-outline-secondary btn-sm px-3" href="#">좋아요</button>
+	  			<button class="btn btn-outline-secondary btn-sm px-3" href="#">댓글</button>
+	  			<button class="btn btn-outline-secondary btn-sm px-3" href="#">관리자</button>
+	  			<button class="btn btn-outline-secondary btn-sm px-3" href="#">관심</button>
+	  			<button class="btn btn-outline-secondary btn-sm px-3" href="#">기타</button>
+  			</div>
+  			
+  		</div>
+	</div>
+</body>
+</html>

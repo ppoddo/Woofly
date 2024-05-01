@@ -1,0 +1,269 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WOOFLY</title>
+<link rel="icon" href="image/woofly.png">
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+</style>
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-between mx-5">
+			<div th:replace="~{common/myNav :: myNav}"></div>
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<div class="col-10 mb-5 pt-3 me-4">
+				<h3>구입 내역</h3>
+				<form action="/my/usedBuying" method="get">
+					<div class="border-top border-bottom bg-body-tertiary d-flex align-items-center justify-content-center" style="height: 70px;">
+						<div>
+							<button type="button" class="btn btn-outline-dark btn-sm" onclick="getMonths(2);">최근 2개월</button>
+							<button type="button" class="btn btn-outline-dark btn-sm" onclick="getMonths(4);">4개월</button>
+							<button type="button" class="btn btn-outline-dark btn-sm" onclick="getMonths(6);">6개월</button>
+						</div>
+						&nbsp;&nbsp;&nbsp;
+						<div class="d-flex">
+							<input type="date" class="form-control d-block" name="startDate" id="startDate" th:value="${ startDate }">
+							<span class="my-auto">~</span>
+							<input type="date" class="form-control d-block" name="endDate" id="endDate" th:value="${ endDate }">
+						</div>
+						&nbsp;&nbsp;&nbsp;
+						<div>
+							<button class="btn btn-dark btn-sm">조회</button>
+						</div>
+					</div>
+				</form>
+				<p class="text-secondary" style="font-size: 13px;">한 번에 조회 가능한 기간은 최대 6개월입니다.</p>
+				<div class="border-bottom d-flex justify-content-between pb-3">
+					<div class="col-6">
+						<button class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#modal">
+							중고
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down" viewBox="0 0 16 16">
+							  	<path d="M3.204 5h9.592L8 10.481 3.204 5zm-.753.659 4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659z"/>
+							</svg>
+						</button>
+					</div>
+					<div class="d-flex col-6 justify-content-end pe-5">
+						<div class="text-end col-3 pe-2">
+							<span role="button" id="price">구매 가격</span>
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sort-numeric-down" viewBox="0 0 16 16" th:if="${#strings.arraySplit(sort, ' ')[0] == 'orderDate' || sort == 'price desc'}">
+							  	<path d="M12.438 1.668V7H11.39V2.684h-.051l-1.211.859v-.969l1.262-.906h1.046z"/>
+							  	<path fill-rule="evenodd" d="M11.36 14.098c-1.137 0-1.708-.657-1.762-1.278h1.004c.058.223.343.45.773.45.824 0 1.164-.829 1.133-1.856h-.059c-.148.39-.57.742-1.261.742-.91 0-1.72-.613-1.72-1.758 0-1.148.848-1.835 1.973-1.835 1.09 0 2.063.636 2.063 2.687 0 1.867-.723 2.848-2.145 2.848zm.062-2.735c.504 0 .933-.336.933-.972 0-.633-.398-1.008-.94-1.008-.52 0-.927.375-.927 1 0 .64.418.98.934.98z"/>
+							  	<path d="M4.5 2.5a.5.5 0 0 0-1 0v9.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999.007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L4.5 12.293z"/>
+							</svg>
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sort-numeric-up-alt" viewBox="0 0 16 16" th:if="${sort == 'price asc'}">
+							  	<path fill-rule="evenodd" d="M11.36 7.098c-1.137 0-1.708-.657-1.762-1.278h1.004c.058.223.343.45.773.45.824 0 1.164-.829 1.133-1.856h-.059c-.148.39-.57.742-1.261.742-.91 0-1.72-.613-1.72-1.758 0-1.148.848-1.836 1.973-1.836 1.09 0 2.063.637 2.063 2.688 0 1.867-.723 2.848-2.145 2.848zm.062-2.735c.504 0 .933-.336.933-.972 0-.633-.398-1.008-.94-1.008-.52 0-.927.375-.927 1 0 .64.418.98.934.98"/>
+							  	<path d="M12.438 8.668V14H11.39V9.684h-.051l-1.211.859v-.969l1.262-.906h1.046zM4.5 13.5a.5.5 0 0 1-1 0V3.707L2.354 4.854a.5.5 0 1 1-.708-.708l2-1.999.007-.007a.498.498 0 0 1 .7.006l2 2a.5.5 0 1 1-.707.708L4.5 3.707z"/>
+							</svg>
+						</div>
+						<div class="text-end col-4">
+							<span role="button" id="orderDate">구입 날짜</span>
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sort-numeric-down" viewBox="0 0 16 16" th:if="${#strings.arraySplit(sort, ' ')[0] == 'price' || sort == 'orderDate desc'}">
+							  	<path d="M12.438 1.668V7H11.39V2.684h-.051l-1.211.859v-.969l1.262-.906h1.046z"/>
+							  	<path fill-rule="evenodd" d="M11.36 14.098c-1.137 0-1.708-.657-1.762-1.278h1.004c.058.223.343.45.773.45.824 0 1.164-.829 1.133-1.856h-.059c-.148.39-.57.742-1.261.742-.91 0-1.72-.613-1.72-1.758 0-1.148.848-1.835 1.973-1.835 1.09 0 2.063.636 2.063 2.687 0 1.867-.723 2.848-2.145 2.848zm.062-2.735c.504 0 .933-.336.933-.972 0-.633-.398-1.008-.94-1.008-.52 0-.927.375-.927 1 0 .64.418.98.934.98z"/>
+							  	<path d="M4.5 2.5a.5.5 0 0 0-1 0v9.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999.007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L4.5 12.293z"/>
+							</svg>
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sort-numeric-up-alt" viewBox="0 0 16 16" th:if="${sort == 'orderDate asc'}">
+							  	<path fill-rule="evenodd" d="M11.36 7.098c-1.137 0-1.708-.657-1.762-1.278h1.004c.058.223.343.45.773.45.824 0 1.164-.829 1.133-1.856h-.059c-.148.39-.57.742-1.261.742-.91 0-1.72-.613-1.72-1.758 0-1.148.848-1.836 1.973-1.836 1.09 0 2.063.637 2.063 2.688 0 1.867-.723 2.848-2.145 2.848zm.062-2.735c.504 0 .933-.336.933-.972 0-.633-.398-1.008-.94-1.008-.52 0-.927.375-.927 1 0 .64.418.98.934.98"/>
+							  	<path d="M12.438 8.668V14H11.39V9.684h-.051l-1.211.859v-.969l1.262-.906h1.046zM4.5 13.5a.5.5 0 0 1-1 0V3.707L2.354 4.854a.5.5 0 1 1-.708-.708l2-1.999.007-.007a.498.498 0 0 1 .7.006l2 2a.5.5 0 1 1-.707.708L4.5 3.707z"/>
+							</svg>
+						</div>
+					</div>
+				</div>
+				<div th:onclick="|location.href='/board/used/detail?uNo=${buying.uNo}'|" class="rounded d-flex justify-content-between mb-3 sold" role="button" style="border: 1px solid black; height: 100px" th:each="buying : ${list}">
+					<input type="hidden" th:value="${ buying.uNo }">
+					<div class="d-flex align-content-center ms-3 col-6">
+						<img class="rounded float-start my-auto" th:src="'/image/board/' + ${buying.renameName}" style="width: 80px; height: 80px; border: 1px solid black;">
+						<div class="ms-3 text-truncate" style="line-height: 100px;">[[${buying.uTitle}]]</div>
+					</div>
+					<div class='col-6 d-flex justify-content-end'>
+						<div class="me-5 col-4 text-center" style="width: 100px; line-height: 100px;">[[|${#numbers.formatInteger(buying.productPrice, 3, 'COMMA')} 원|]]</div>
+						<div class="d-flex col-4 text-center pe-4 justify-content-center" style="line-height: 100px;">
+							[[${#dates.format(buying.soldDate, 'yy/MM/dd')}]]
+						</div>
+					</div>
+				</div>
+				<nav th:if="${not #arrays.isEmpty(list)}">
+					<ul class="pagination pagination-sm justify-content-center mt-5">
+					 	<!-- 이전 -->
+						<li class="page-item" th:if="${ pi.currentPage > 1 }">
+							<a class="page-link" th:href="@{${loc}(page=${pi.currentPage-1})}" aria-label="Previous"> 
+								<span aria-hidden="true">&laquo;</span>
+							</a>
+						</li>
+					
+						<!-- 숫자 -->
+						<li class="page-item" th:each="page : ${ #numbers.sequence(pi.startPage, pi.endPage) }">
+							<a class="page-link" th:href="@{${loc}(page=${page})}" th:text="${ page }"></a>
+						</li>
+						
+						
+						<!-- 다음 -->
+						<li class="page-item" th:if="${ pi.currentPage < pi.maxPage }">
+							<a class="page-link" th:href="@{${loc}(page=${pi.currentPage+1})}" aria-label="Next"> 
+								<span aria-hidden="true">&raquo;</span>
+							</a>
+						</li>
+				  	</ul>
+				</nav>
+				
+				<div class="d-flex justify-content-center align-items-center" style="min-height: 500px" th:if="${ #arrays.isEmpty(list) }">
+					<div class="d-flex flex-column justify-content-center align-items-center">
+						<p>구매 입찰 내역이 없습니다.</p>
+						<div>
+							<button class="btn btn-outline-dark" onclick="location.href='/'">SHOP 바로가기</button>
+						</div>
+					</div>
+				</div>
+				<div class="modal fade" id="modal" tabindex="-1">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<div class="modal-header">
+				        		<h1 class="modal-title fs-5" id="modalToggleLabel">선택한 상태 보기</h1>
+    				        	<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+							</div>
+							<div class="modal-body text-center">
+								<button class="btn btn-outline-dark  btn-lg col-3" onclick="location.href='/my/buying'">상품</button>&nbsp;&nbsp;&nbsp;
+								<button class="btn btn-dark btn-lg col-3">중고</button>&nbsp;&nbsp;&nbsp;
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+		</div>
+	</main>
+	<script th:inline="javascript">
+		const myNav = document.getElementById("myNav1");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+		
+				
+		//생일 넘어가기
+		const now_date = Date.now();
+		const timeOff = new Date().getTimezoneOffset()*60000;
+		const today = new Date(now_date-timeOff).toISOString().split("T")[0];
+		startDate.setAttribute("max", today);
+		endDate.setAttribute("max", today);
+		
+		const getMonths = (months) => {
+			let startDate = new Date();
+			startDate.setMonth(startDate.getMonth() - months);
+			let endDate = new Date();
+
+			let year = (startDate.getFullYear() + "");
+			let month = ('0' + (startDate.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-based
+			let day = ('0' + startDate.getDate()).slice(-2);
+
+			startDate = year + '-' + month + '-' + day;
+			
+			year = (endDate.getFullYear() + "");
+			month = ('0' + (endDate.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-based
+			day = ('0' + (endDate.getDate()+1)).slice(-2);
+			
+			endDate = year + '-' + month + '-' + day;
+			window.location.href = '/my/usedBuying?startDate=' + startDate + '&endDate=' + endDate;		
+		}
+		
+		endDate.addEventListener('change', () => {
+			let sixMonthsBefore = new Date(endDate.value);
+			sixMonthsBefore.setMonth(sixMonthsBefore.getMonth() - 6);
+			var newDate = new Date(startDate.value);
+			
+			
+			if(startDate.value == '' || sixMonthsBefore > newDate) {
+				let year = (sixMonthsBefore.getFullYear() + "");
+				let month = ('0' + (sixMonthsBefore.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-based
+				let day = ('0' + sixMonthsBefore.getDate()+1).slice(-2);
+				startDate.value = year + '-' + month + '-' + day;
+			}
+				
+		})
+		
+		startDate.addEventListener('change', () => {
+			let sixMonthsAfter = new Date(startDate.value);
+			sixMonthsAfter.setMonth(sixMonthsAfter.getMonth() + 6);
+			var newDate = new Date(endDate.value);
+
+			if(sixMonthsAfter < newDate) {
+				if (sixMonthsAfter > new Date()) {
+					sixMonthsAfter = new Date();
+				}
+				
+				let year = (sixMonthsAfter.getFullYear() + "");
+				let month = ('0' + (sixMonthsAfter.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-based
+				let day = ('0' + sixMonthsAfter.getDate()).slice(-2);
+				endDate.value = year + '-' + month + '-' + day;
+			}
+		})
+		
+		
+		const price = document.getElementById('price');
+		const orderDate = document.getElementById('orderDate');
+		/*<![CDATA[*/
+		const sort = /*[[${sort}]]*/null;
+		price.addEventListener('click', () => {
+			let url = "/my/usedBuying?";
+			const startDate = /*[[${startDate}]]*/null;
+			const endDate = /*[[${endDate}]]*/null;
+			if (startDate != null) {
+				url += "startDate=" + startDate + "&";
+			}
+			if (endDate != null) {
+				url += "endDate=" + endDate + "&";
+			}
+			if(sort.split(" ")[0] == 'orderDate') {
+				url += "sort=price desc";
+			} else if(sort == 'price desc') {
+				url += "sort=price asc";
+			} else if(sort == 'price asc') {
+				url += "sort=price desc";
+			}
+			window.location.href= url;
+		});
+		
+		orderDate.addEventListener('click', () => {
+			let url = "/my/usedBuying?";
+			const startDate = /*[[${startDate}]]*/null;
+			const endDate = /*[[${endDate}]]*/null;
+			if (startDate != null) {
+				url += "startDate=" + startDate + "&";
+			}
+			if (endDate != null) {
+				url += "endDate=" + endDate + "&";
+			}
+			if(sort.split(" ")[0] == 'price') {
+				url += "sort=orderDate desc";
+			} else if(sort == 'orderDate desc') {
+				url += "sort=orderDate asc";
+			} else if(sort == 'orderDate asc') {
+				url += "sort=orderDate desc";
+			}
+			window.location.href= url;
+		})
+		/*]]>*/
+	
+	</script>
+</body>
+</html>

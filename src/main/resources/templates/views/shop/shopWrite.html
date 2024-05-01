@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+	crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- pooper -->
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    
+    <style>
+    	.standardSize{
+    		display:none;
+    	}
+    </style>
+</head>
+<body>
+    <!-- tap -->
+    <div th:replace="~{common/top :: top}"></div>
+    <main>
+        <div class="container">
+            <h1 class="fw-bold mb-4 border-2 border-bottom border-black pb-2">쇼핑몰 상품 등록</h1>
+            <form action="/shop/insertProduct" method="POST" id="shopForm" enctype="multipart/form-data">
+            	<input type="hidden" name="usedStandard" id="usedStandardInput" value="N">
+				<input type="hidden" name="colorCount" id="colorCountInput" value="0">
+                <div class="d-flex justify-content-between">
+                    <div class="col-6">
+                        <!-- 만약 미리보기 만들면 이 자리가 미리보기 자리고 파일 추가 버튼들은 오른쪽 div로 이동-->
+                        <div class="album bg-light m-4" id="thumbnail">
+                            <div class="card shadow-sm p-3">
+                                <svg class="bd-placeholder-img card-img-top" width="100%" height="225" name="thumbnailSvg">
+                                    <rect width="100%" height="100%" fill="#55595c"></rect>
+                                    <text x="50%" y="50%" fill="#eceeef" dy=".3em">1</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <table>
+                            <tr>
+                                <td>제목</td>
+                                <td><input type="text" class="form-control" name="productName" id="name" required="required"></td>
+                            </tr>
+                            <tr>
+                                <td>가격</td>
+                                <td><input type="text" class="form-control" name="price" id="price"  required="required"></td>
+                            </tr>
+                            <tr>
+                            	<td>대분류</td>
+                            	<td>
+                            		<select class="form-select" required="required" id="category" name="productCategory">
+                            			<option disabled selected="selected">...</option>
+                            			<th:block th:each="m : ${bList}">
+											<option th:value="${m.productCategoryNo}">[[${ m.productCategory}]]</option>                            		
+										</th:block>                          		
+                            		</select>
+                            	</td>
+                            </tr>
+                            <tr>
+                            	<td>상세분류</td>
+                            	<td>
+                            		<select class="form-select" required="required" id="detailCategory" name="productDetailCategory">
+                            			<option disabled selected="selected">...</option>
+                            		</select>
+                            		<input type="hidden" id="hiddenCate" name="productDetailNo">
+                            	</td>
+                            </tr>
+                            <tr>
+                            	<td>수량</td>
+                            	<td><input type="number" name="quantity" id="quantity" class="form-control" value="1" min="1" max="1000"></td>
+                            </tr>
+                        </table>
+                        <button type="button" class="btn btn-outline-info" id="addFile">이미지 추가</button>
+                        <div id="fileArea">
+                            <div class="mb-3 p-1 d-flex" id="thumbnailParent">
+                                <input type="file" class="form-control form-control-lg" name="thumbnailFile" accept="image/*">
+                                <button type="button" class="btn btn-large" name="deleteThumbButton">
+	                        		<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-file-x" viewBox="0 0 16 16">
+									  <path d="M6.146 6.146a.5.5 0 0 1 .708 0L8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 0 1 0-.708z"/>
+									  <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+									</svg>
+	                        	</button>
+                            </div>
+                        </div>
+                    </div>                   
+                </div>
+                <div class="product-detail pt-4">
+                	<div class="">
+                		<button type="button" class="btn btn-success btn-sm" id="standardBtn">표준 사이즈 정보 사용</button>
+                		<button type="button" class="btn btn-success btn-sm" id="addColor">색깔 선택 추가</button>
+                	</div>
+                    <table class="table bordertext-center standardSize" id="standardSize">
+                        <tr class=" col-12 ">
+                            <th class="col-3">사이즈 정보</th>
+                            <th class="col-2">S</th>
+                            <th class="col-2">M</th>
+                            <th class="col-2">L</th>
+                            <th class="col-2">XL</th>
+                        </tr>
+                        <tr>
+                            <th>몸무게</th>
+                            <td>1.5~2.5</td>
+                            <td>2.5~3.8</td>
+                            <td>3.8~5.9</td>
+                            <td>6~9</td>
+                        </tr>
+                        <tr>
+                            <th>가슴둘레</th>
+                            <td>30</td>
+                            <td>35</td>
+                            <td>42</td>
+                            <td>46</td>
+                        </tr>
+                        <tr>
+                            <th>목둘레</th>
+                            <td>20</td>
+                            <td>24</td>
+                            <td>28</td>
+                            <td>31</td>
+                        </tr>
+                        <tr>
+                            <th>등길이</th>
+                            <td>23</td>
+                            <td>27</td>
+                            <td>31</td>
+                            <td>34</td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- 색깔 추가(addColor) -->
+                <div class="mt-3 d-flex col-12" id="colorDiv">
+                
+				</div>
+                
+                <!-- 내용 사진 -->
+                <div class="product-description d-flex justify-content-center border-2 border-black border-bottom">
+                    <!-- 미리보기 -->
+                    <!-- addFileContent 버튼 추가 시 썸네일도 추가되도록 -->
+                    <div class="album bg-light m-4 col-6" id="contentImage">
+                        <div class="card shadow-sm p-3">
+                            <svg class="bd-placeholder-img card-img-top" width="100%" height="225">
+                                <rect width="100%" height="100%" fill="#55595c"></rect>
+                                <text x="50%" y="50%" fill="#eceeef" dy=".3em">1</text>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="m-4 col-4">
+                        <button type="button" class="btn btn-outline-info" id="addFileContent">내용 이미지 추가</button>
+	                    <div id="contentFileArea">
+	                        <div class="mb-3 p-1 d-flex">
+	                            <input type="file" class="form-control form-control-lg" name="contentFile" accept="image/*">
+	                            <button type="button" class="btn btn-large" name="deleteContentButton">
+	                        		<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-file-x" viewBox="0 0 16 16">
+									  <path d="M6.146 6.146a.5.5 0 0 1 .708 0L8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 0 1 0-.708z"/>
+									  <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+									</svg>
+	                        	</button>
+	                        </div>
+	                    </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-3 float-end mt-3">
+                    <button type="button" class="btn btn-outline-success" id="submitShop">등록</button>
+                    <button type="button" class="btn btn-outline-dark" onclick="javascrpt:history.back();">취소</button>
+                </div>
+            </form>
+        </div>            
+    </main>
+
+    <!-- 모달 -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="modalChoice">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content rounded-1 shadow">
+                <div class="modal-body p-4 text-center">
+                    <h4 class="mb-1">썸네일 이미지와 내용 이미지는 최소 한장이 있어야 합니다.</h4>
+                    <p class="mb-1">이미지를 반드시 삽입해주세요.</p>
+                </div>
+                <div class="modal-footer flex-nowrap p-1">
+                    <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 m-0 rounded-0 border-end" id="checkFile">
+                        <strong>네</strong>
+                     </button>
+                     <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 m-0 rounded-0" data-bs-dismiss="modal">아니오</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 구조 잘 파악해서 해야함 구조 잘못건들면 자스 안먹힘 -->
+    <!-- 미리보기 사진들 넓이랑 높이 고정될 수 있도록 CSS같은거 만져야 함. -->
+    <script th:inline="javascript">
+        let divChildren = document.getElementById('thumbnail').querySelectorAll('div');
+        let divContent = document.getElementById('contentImage').querySelectorAll('div');
+        window.onload = () =>{
+
+            var fileAreaCount = 2;
+            var contentFileAreaCount = 2;
+            var colorCount = 0;
+
+			const fileArea = document.querySelector('#fileArea');
+            const thumbDiv = document.getElementById('thumbnail');
+			document.getElementById('addFile').addEventListener('click', () =>{
+
+                if(fileAreaCount <= 5) {
+                    const newDiv = document.createElement('div');
+                    newDiv.classList.add('mb-3', 'p-1', 'd-flex');
+                    newDiv.innerHTML = `<input type="file" class="form-control form-control-lg" name="thumbnailFile" accept="image/*">
+                    					<button type="button" class="btn btn-large" name="deleteThumbButton">
+			                        		<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-file-x" viewBox="0 0 16 16">
+											  <path d="M6.146 6.146a.5.5 0 0 1 .708 0L8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 0 1 0-.708z"/>
+											  <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+											</svg>
+			                        	</button>
+			                        	`;
+                    fileArea.append(newDiv);
+
+                     // 역따옴표 쓰는거임(코드 블록 표현 시)
+                    const thumbSvgTemplate = `
+                        <svg class="bd-placeholder-img card-img-top" width="100%" height="225" name="thumbnailSvg">
+                            <rect width="100%" height="100%" fill="#55595c"></rect>
+                            <text x="50%" y="50%" fill="#eceeef" dy=".3em">${fileAreaCount}</text>
+                        </svg>
+                        `;
+
+                    const newSvg = document.createElement('div');
+                    newSvg.classList.add('card', 'shadow-sm', 'p-3');
+                    newSvg.innerHTML = thumbSvgTemplate;
+
+                    thumbDiv.append(newSvg);
+
+                    divChildren = thumbDiv.querySelectorAll('div');
+                    
+                    fileAreaCount += 1;
+
+                } else {
+                    alert("썸네일용 사진은 최대 5개까지 가능합니다.");
+                }
+				               
+			});
+
+            const contentFileArea = document.querySelector('#contentFileArea');
+            const contentDiv = document.getElementById('contentImage');
+            document.getElementById('addFileContent').addEventListener('click', () =>{
+
+                if(contentFileAreaCount <= 10) {
+                    const newDiv = document.createElement('div');
+                    newDiv.classList.add('mb-3', 'p-1', 'd-flex');
+                    newDiv.innerHTML = `<input type="file" class="form-control form-control-lg" name="contentFile" accept="image/*">
+				                    	<button type="button" class="btn btn-large" name="deleteContentButton">
+					                		<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-file-x" viewBox="0 0 16 16">
+											  <path d="M6.146 6.146a.5.5 0 0 1 .708 0L8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 0 1 0-.708z"/>
+											  <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+											</svg>
+				                		</button>
+                    				`;             
+
+                    contentFileArea.append(newDiv);
+
+                    const thumbSvgTemplate = `
+                        <svg class="bd-placeholder-img card-img-top" width="100%" height="225" name="contentSvg">
+                            <rect width="100%" height="100%" fill="#55595c"></rect>
+                            <text x="50%" y="50%" fill="#eceeef" dy=".3em">${contentFileAreaCount}</text>
+                        </svg>
+                        `;
+
+                    const newSvg = document.createElement('div');
+                    newSvg.classList.add('card', 'shadow-sm', 'p-3');
+                    newSvg.innerHTML = thumbSvgTemplate;
+
+                    contentDiv.append(newSvg);
+
+                    divContent = contentDiv.querySelectorAll('div');
+
+                    contentFileAreaCount += 1;
+                } else {
+                    alert("내용 사진은 최대 10개까지 가능합니다.");
+                }
+				
+			});
+		
+            let filesIsEmpty = true;
+            let contentIsEmpty = true;
+
+            // 제출 이벤트
+			const form = document.getElementById('shopForm');
+			document.getElementById('submitShop').addEventListener('click', () =>{
+				const files = document.getElementsByName('thumbnailFile');
+                const contentFiles = document.getElementsByName('contentFile');
+                
+                const selects =  document.querySelectorAll('select');
+                
+                for(select of selects){
+					if(select.value == '...'){
+						alert('카테고리를 반드시 선택해주세요.');
+						return;
+					}
+                }
+
+                <!-- 썸네일 이미지와 내용 이미지 둘 다 한장은 존재해야함.-->
+
+				for(const f of files) {
+					if(f.value != '') {
+						filesIsEmpty = false;
+					}
+				}
+
+                for(const f of contentFiles){
+                    if(f.value != '') {
+                        contentIsEmpty = false;
+                    }
+                }
+				
+				if(filesIsEmpty || contentIsEmpty) {
+					$('#modalChoice').modal('show');
+				} else {
+					form.submit();
+				}
+
+			});
+            
+            document.getElementById('checkFile').addEventListener('click', () =>{
+                $('#modalChoice').modal('hide');
+
+                if(filesIsEmpty) {
+                    document.getElementById('addFile').focus();
+                } 
+                if(contentIsEmpty) {
+                    document.getElementById('addFileContent').focus();
+                }
+    
+            });
+
+
+            // thumbDiv의 자식 요소 divChildren을 innerHTML = "" 하면 아래 요소는 삭제 된다. == 초기화
+            // thumbDiv 아래에 넣기(썸네일의 최대 부모div)
+            const thumbInput = document.getElementsByName('thumbnailFile');
+            const preImage = document.createElement('img');
+            //let divChildren = thumbDiv.querySelectorAll('div'); // 아래에는 <svg>가 있음..
+
+            fileArea.addEventListener('click', function(event){
+            	const target = event.target;
+            	if(target.name === 'deleteThumbButton' || target.tagName ==='svg') {
+					const parentDivs = fileArea.querySelectorAll('.mb-3.p-1.d-flex');
+					const parentDiv = target.closest('.mb-3.p-1.d-flex');
+
+					if(parentDiv) {
+						const index = Array.from(parentDivs).indexOf(parentDiv);
+						parentDiv.remove();
+						
+						let tDiv = thumbDiv.querySelectorAll('div');
+						tDiv[index].remove();
+						fileAreaCount -= 1;
+					}
+            	}
+            });
+            
+            
+            fileArea.addEventListener('change', function(event) {
+                // 이벤트 발생된 자식 요소
+                const target = event.target;
+
+                if(target.name === 'thumbnailFile'){
+                    const index = Array.from(fileArea.querySelectorAll('input[name="thumbnailFile"]')).indexOf(target);
+                    console.log("index : ", index);
+                    if(target.files.length > 0) {
+                        if(divChildren != null) {
+                            divChildren[index].innerHTML = '';
+
+                            const preImage = document.createElement('img');
+                            const selectedFile = target.files[0];
+                            const objectURL = URL.createObjectURL(selectedFile);
+                            preImage.src = objectURL;
+
+                            divChildren[index].append(preImage);
+
+                        }
+                    } else {
+                        divChildren[index].innerHTML = `
+                            <svg class="bd-placeholder-img card-img-top" width="100%" height="225" name="thumbnailSvg">
+                                <rect width="100%" height="100%" fill="#55595c"></rect>
+                                <text x="50%" y="50%" fill="#eceeef" dy=".3em">인덱스밸류+1</text>
+                            </svg>
+                         `;
+                    }
+
+                } 
+            });
+
+            contentFileArea.addEventListener('click', function(event){
+            	const target = event.target;
+            	if(target.name === 'deleteContentButton' || target.tagName ==='svg') {
+					const parentDivs = contentFileArea.querySelectorAll('.mb-3.p-1.d-flex');
+					const parentDiv = target.closest('.mb-3.p-1.d-flex');
+
+					if(parentDiv) {
+						const index = Array.from(parentDivs).indexOf(parentDiv);
+						parentDiv.remove();
+						
+						let cDiv = contentDiv.querySelectorAll('div');
+						cDiv[index].remove();
+						contentFileAreaCount -= 1;
+					}
+            	}
+            });
+            
+            
+            
+            contentFileArea.addEventListener('change', function(event){
+                const target = event.target;
+
+                if(target.name === 'contentFile'){
+                    const index = Array.from(contentFileArea.querySelectorAll('input[name="contentFile"]')).indexOf(target);
+                    console.log("index : ", index);
+                    if(target.files.length > 0){
+                        if(divContent != null){
+                            divContent[index].innerHTML = '';
+
+                            const preImage = document.createElement('img');
+                            const selectedFile = target.files[0];
+                            const objectURL = URL.createObjectURL(selectedFile);
+                            preImage.src = objectURL;
+
+                            divContent[index].append(preImage);  
+                        }
+                    } else {
+                        divContent[index].innerHTML = `
+                            <svg class="bd-placeholder-img card-img-top" width="100%" height="225" name="contentSvg">
+                                <rect width="100%" height="100%" fill="#55595c"></rect>
+                                <text x="50%" y="50%" fill="#eceeef" dy=".3em">${contentFileAreaCount}</text>
+                            </svg>
+                        `;
+                    }
+                }
+            });
+
+			
+            
+            // 사이즈 정보
+            const standardSize = document.getElementById('standardSize');
+            const standardBtn = document.getElementById('standardBtn');
+            
+            const usedStandard = document.getElementById('usedStandardInput');
+            standardBtn.addEventListener('click', () =>{
+            	
+            	if(standardSize.style.display == 'none'){
+            		standardSize.style.display = 'table';
+            		usedStandard.value = 'Y';
+            	} else {
+            		standardSize.style.display = 'none';
+            		usedStandard.value = 'N';
+            	}
+            });
+            
+            // 색상 정보
+	        const colorDiv = document.getElementById('colorDiv');
+    		const colorPickers = document.getElementsByClassName('colorPicker');
+    		const colorFeedbacks = document.getElementsByClassName('colorFeedback');
+    		const addColor = document.getElementById('addColor');
+    		
+    		var colorNum = document.getElementById('colorCountInput').value;
+    		
+    		addColor.addEventListener('click', () =>{
+    			if(colorCount < 5) {
+    				const newDiv = document.createElement('div');
+    				newDiv.classList.add('colorOne');
+    				
+    				const newSpan = document.createElement('span');
+    				newSpan.classList.add('colorFeedback', 'fs-5')
+    				newSpan.textContent = '#000000';
+    				
+    				const newPicker = document.createElement('input');
+    				newPicker.classList.add('colorPicker');
+    				newPicker.setAttribute('name', 'color');
+    				newPicker.setAttribute('type', 'color');
+    				
+    				const deleteColorBtn = document.createElement('button');
+    				deleteColorBtn.classList.add('btn', 'btn-sm');
+    				deleteColorBtn.setAttribute('name', 'deleteColorButton');
+    				deleteColorBtn.setAttribute('type', 'button');
+    				deleteColorBtn.innerHTML = `
+							                	<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-file-x" viewBox="0 0 16 16">
+												  <path d="M6.146 6.146a.5.5 0 0 1 .708 0L8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 0 1 0-.708z"/>
+												  <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+												</svg>
+							          		`;
+    				
+    				newPicker.addEventListener('change', function() {
+                		const color = this.value;
+                        
+                		newSpan.textContent = color;
+    				});
+    				
+    				newDiv.append(newPicker);
+    				newDiv.append(newSpan);
+    				newDiv.append(deleteColorBtn);
+    				
+    				colorDiv.append(newDiv);
+    				
+    				colorCount += 1;
+    				colorNum = colorCount;
+    			} else {
+    				alert('색상은 5개까지 지정가능합니다.');
+    			}
+    			
+    		});
+    		
+    		colorDiv.addEventListener('click', function(event){
+            	const target = event.target;
+            	if(target.name === 'deleteColorButton' || target.tagName ==='svg') {
+					const parentDiv = target.closest('.colorOne');
+					console.log(parentDiv);
+
+					if(parentDiv) {
+						parentDiv.remove();
+						
+						colorCount -= 1;
+						colorNum = colorCount;
+					}
+            	}
+            });
+    		
+    		
+
+    		
+    		// 카테고리 자바스크립트
+    		const big = /*[[${bList}]]*/'';
+    		const all = /*[[${cList}]]*/'';
+    		
+    		const category = document.getElementById('category');
+    		
+    		const detail = document.getElementById('detailCategory');
+    		category.addEventListener('change', () =>{
+    			const ct = category.value;
+       			detail.innerHTML = '';
+       			const optionVoid = document.createElement('option');
+       			optionVoid.innerText='...';
+       			detail.appendChild(optionVoid);
+       			for(const c of all) {
+   	    			if(ct == c.productCategoryNo){
+   	    				const option = document.createElement('option');
+   	    				option.innerText = c.productDetailCategory;
+   	    				option.value = c.productDetailNo;
+   	    				
+   	    				detail.appendChild(option);
+   	    			}
+       			}
+    		});
+
+   			// input type="hidden" 값 변경
+    		detail.addEventListener('change', function() {
+    			if(this.value != '...') {
+    				const selectedValue = this.value;
+    				document.getElementById('hiddenCate').value = selectedValue;
+    			}
+				
+			});
+   			
+   			
+   			// 수량 변경
+   			document.getElementById('quantity').addEventListener('change',  function() {
+   				const check = this.value;
+   				const max = 1000;
+   				
+   				if(check > 1000) {
+   					this.value = max;
+   					alert('수량은 1000개를 초과할 수 없습니다.');
+   				}
+   			});
+   			
+		}	
+    </script>
+</body>
+</html>

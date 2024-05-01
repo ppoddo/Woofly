@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" href="image/woofly.png">
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+</style>
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-between mx-5">
+			<div th:replace="~{common/myNav :: myNav}"></div>
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<div class="col-10 pt-3 mb-5 me-4">
+				<div class="d-flex mb-3">
+					<h3 class="mb-0">포인트</h3> &nbsp;&nbsp;&nbsp; 
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle my-auto" role="button" viewBox="0 0 16 16">
+					  	<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+					  	<path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94"/>
+					</svg>
+				</div>
+				<div class="border rounded d-flex align-items-center" style="height: 120px;">
+					<div class="h-70 col-3 border-end ms-5">
+						<p class='mb-0'>사용 가능한 포인트</p>
+						<h3>[[${#numbers.formatInteger(session.loginUser.mbPoint, 3, 'COMMA')}]]P</h3>
+					</div>
+					<div class="h-70 col-3 ms-5">
+						<p class='mb-0'>소멸 예정 포인트</p>
+						<h3>[[${pointsExpiring}]]P</h3>
+					</div>
+				</div>
+				<br>
+				<p class="text-secondary pb-4 border-bottom border-2 border-black" style="font-size: 12px;">포인트 유효기간은 적립일로부터 최대 1년까지이며, 유형에 따라 달라질 수 있습니다.</p>
+				<table class="col-12">
+					<thead class="border-bottom">
+						<tr style="height: 40px;">
+							<th>상세 내역</th>
+							<th class="text-end">사용일시</th>
+							<th class="text-end">적립 사용</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:if="${#arrays.isEmpty(list)}">
+							<td colspan="2" class="text-center" style="width: 500px; line-height: 500px;">적립 또는 사용한 내역이 없습니다.</td>
+						</tr>
+						<tr th:each="point : ${list}" style="height: 50px; line-height: 50px;" class="border-bottom">
+							<td th:if="${point.transactionType == 'A'}">&nbsp;&nbsp;상품 구매 <b>[[${#numbers.formatInteger(point.pointChange, 3, 'COMMA')}]]</b>P</td>
+							<td th:if="${point.transactionType == 'S'}">&nbsp;&nbsp;포인트 사용 <b>[[${#numbers.formatInteger(point.pointChange, 3, 'COMMA')}]]</b>P</td>
+							<td class="text-end"><b>[[${#dates.format(point.transactionDatetime, 'yy/MM/dd HH:mm:ss')}]]</b>P</td>
+							<td class="text-end" th:if="${point.transactionType=='A'}"><b>적립</b></td>
+							<td class="text-end" th:if="${point.transactionType=='S'}"><b>사용</b></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+		</div>
+	</main>
+	<script>
+		const myNav = document.getElementById("myNav8");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+	</script>
+</body>
+</html>

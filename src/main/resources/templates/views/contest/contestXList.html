@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html  xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+
+<link rel="icon" href="image/woofly.png">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+	crossorigin="anonymous">
+	
+<link rel="stylesheet" type="text/css" th:href="@{/css/yh/contestList.css}" /> 
+</head>
+<body>
+	<div th:replace="~{common/top :: top}"></div>
+	<main>
+		<div class="container-fluid d-flex mx-5">
+			
+			<!-- 관리자만 보이게!!!!!!!!!!!!!!!!!!! -->
+			<th:block th:if="${ session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+				<div th:replace="~{common/adminNav :: adminNav}"></div>
+			</th:block>
+			<th:block th:if="${ session.loginUser == null || session.loginUser.isAdmin != 'Y'}">
+				<div th:replace="~{common/contestNav :: contestNav}"></div>
+			</th:block>
+			
+			<!-- 마이페이지 아래만 수정해주세요 -->
+			<div class="col-10 mb-5">
+				<div class="container mx-5 mt-5">
+					<div class="container d-flex px-0 border-bottom border-black border-3 justify-content-between align-items-center">
+						<h1>콘테스트</h1>
+						<!-- 로그인 유저만 보이도록 -->
+						
+					</div>
+					
+					
+					
+					<div class="row g-0 text-center" style="margin-top: 10px;">
+						<div class="col-6 col-md-2" style="margin-top: 5px; ">
+							<input type="radio" class="btn-check" name="options-outlined 2" id="danger-outlined" autocomplete="off" >
+						</div>
+						<div class="col-6 col-md-7"></div>
+						
+					</div>
+							
+					
+					
+					<h1 style="text-align: center; margin-top: 10%">현재 콘테스트 진행중이 아닙니다.</h1>
+					<ul class="dimage">						
+						
+						<li class="dogimage" >
+							<div class="album-item">
+								<label class="pNo" style="display: none;"></label>
+								
+								<div class="album-info" style="display: inline-block; ">
+									<p class="album-title"></p>
+									
+								</div>
+								
+							</div>
+						</li>
+						
+					</ul>
+					
+				</div>	
+			</div>
+		</div>
+	</main>
+	
+	<script th:inline="javascript">
+		window.onload = () => {
+			const anav = document.getElementById('myNav5')
+			if(anav != null){
+				anav.style.fontWeight = 'bold';
+			}
+			const canav = document.getElementById('cmyNav1')
+			if(canav != null){
+				canav.style.fontWeight = 'bold';
+			}
+		}
+	</script>
+	
+</body>
+</html>

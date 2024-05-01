@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kh.woofly.order.model.dao.OrderDAO">
+	
+	
+	<select id="selectMySavedHome" resultType="Saved">
+		select * from (
+			select *
+	 		from saved
+	 			 join attachment on (attm_ref_no = product_id)
+  			 	 join product using (product_id)
+		 	where attm_ref_type = 'P' and saved.mb_id = #{id} and attm_level = 1
+		<![CDATA[
+		) where rownum <= 5
+		]]>
+		
+	</select>
+	
+	<select id="selectMySelling" resultType="UsedBoard">
+		select * from (
+			select * from used_board
+				join attachment on (u_no = attm_ref_no)
+			where buyer_id = #{id} and attm_ref_type = 'U' and attm_level = 1 and u_type = '일반'
+			order by sold_date desc)
+		<![CDATA[
+		 where rownum <= 5
+		]]>
+	</select>
+
+	<select id="selectMyBuying" resultType="Order">
+		
+	    select *
+	    from orders
+	    where customer_id = #{id}
+		    <if test="startDate != null">
+		    	and order_date >= #{startDate}
+		    </if>
+		    <if test="endDate != null">
+		    	and order_date <![CDATA[<]]> #{endDate}
+		    </if>
+		<if test="orderDate != null">
+		    order by order_date ${orderDate}
+		</if>
+		<if test="price != null">
+		    order by total ${price}
+		</if>
+    	
+	</select>
+	
+	<select id="getBuyingCount" resultType="_int">
+		select count(*)
+		from orders
+		where customer_id = #{id}
+			<if test="startDate != null">
+		    	and order_date >= #{startDate}
+		    </if>
+		    <if test="endDate != null">
+		    	and order_date <![CDATA[<]]> #{endDate}
+		    </if>
+		<if test="orderDate != null">
+		    order by order_date ${orderDate}
+		</if>
+		<if test="price != null">
+		    order by total ${price}
+		</if>
+	</select>
+	
+	<select id="selectOrder" resultType="Order">
+		select *
+		from orders
+		where order_id = #{orderNo}
+	</select>
+	
+	<select id="selectOrderDetails" resultType="OrderDetail">
+		select *
+		from order_detail
+			 join product using(product_id)
+		where order_id = #{orderNo}
+	</select>
+	
+	<select id="selectOrderProductsAttm" resultType="ProductAttm">
+		select * from (
+			select *
+			from attachment
+			where attm_ref_type = 'P' and attm_ref_no = #{productId}  and attm_level = 1
+		) where rownum = 1
+	</select>
+	
+	<select id="selectOrderAttm" resultType="ProductAttm">
+		select * from (
+			select * 
+			from order_detail
+                 join product using(product_id)
+			     join attachment on (product_id = attm_ref_no)
+			where order_id = #{orderId}
+                  and attm_ref_type = 'P' 
+                  and attm_level = 1 
+                  and price = (select max(price)
+                               from order_detail 
+                                    join product 
+                                         using(product_id)
+                                    where order_id = #{orderId})
+			order by attm_modify_date desc)
+		where rownum = 1
+        
+	</select>
+	
+	<select id="selectMostExpensive" resultType="Product">
+		select * from(
+			select * from order_detail
+				 		  join product using(product_id)
+			where order_id = #{orderId}
+			order by price desc)
+		where rownum = 1
+		
+	</select>
+	
+	<delete id="deletePoints">
+ 		delete from point_history 
+ 		<![CDATA[
+ 		where transaction_datetime < (select to_date(to_char(sysdate, 'yy') - 1 || to_char(sysdate, 'MMdd'), 'yy/MM/dd') from dual)
+ 		and mb_id = #{id}
+ 		]]>
+ 	</delete>
+ 	
+ 	<select id="selectMyPoints" resultType="Point">
+ 		select * from point_history
+ 		where mb_id = #{id}
+ 	</select>
+ 	
+ 	<select id="selectMySaved" resultType="Saved">
+ 		select *
+ 		from saved
+ 			 join attachment on (attm_ref_no = product_id)
+ 			 <if test='savedType == "P"'>
+ 			 	join product using (product_id)
+ 			 </if>
+ 			 <if test='savedType == "U"'>
+ 			 	join used_board on (product_id = u_no)
+	 			join member on (used_board.mb_id = member.mb_id)
+ 			 </if>
+	 	where attm_ref_type = #{savedType} and saved.mb_id = #{id} and attm_level = 1
+ 			 
+ 	</select>
+</mapper>

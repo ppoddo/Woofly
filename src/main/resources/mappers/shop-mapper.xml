@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kh.woofly.shop.model.dao.ShopDAO">
+	<insert id="insertProduct" useGeneratedKeys="true">
+		<selectKey order="BEFORE" resultType="_int" keyProperty="productId">
+				SELECT PRODUCT_SEQ.NEXTVAL
+				FROM DUAL
+		</selectKey>
+		INSERT ALL
+			INTO PRODUCT					<!-- 1 = productCategoryNo -->
+			VALUES (#{productId}, #{productName}, #{price}, DEFAULT, DEFAULT, #{productDetailNo}, DEFAULT)
+			INTO PRODUCT_STOCK
+			VALUES (PRO_STOCK_SEQ.NEXTVAL, #{productId}, #{usedStandard}, #{quantity}, #{color})
+		SELECT *
+		FROM DUAL
+	</insert>
+	
+	<insert id="insertAttm">
+		INSERT ALL
+		<foreach collection="list" item="a">
+			INTO ATTACHMENT
+			VALUES (NEW_AID, #{a.originalName}, #{a.renameName}, SYSDATE, SYSDATE, #{a.attmPath}, DEFAULT, 'P', #{a.attmRefNo}, #{a.attmLevel})
+		</foreach>
+		SELECT *
+		FROM DUAL
+	</insert>
+	
+	<select id="selectCategory" resultType="ProductCategory">
+		SELECT *
+		FROM PRODUCT_CATEGORY
+			<if test="i != null">
+			   	JOIN PRODUCT_DETAIL_CATEGORY USING(PRODUCT_CATEGORY_NO)
+		    </if>
+	</select>
+	
+	<!-- selectProducts => choose -->
+	<sql id="dynamicOrderBy">
+	    <choose>
+	        <when test="sort == 'popularity'">
+	            ORDER BY COALESCE((SELECT COUNT(*) FROM SAVED WHERE SAVED_TYPE = 'P' AND PRODUCT_ID = PRODUCT.PRODUCT_ID), 1)
+	        </when>
+	        <when test="sort == 'sales'">
+	            ORDER BY COALESCE((SELECT COUNT(*) FROM ORDER_DETAIL WHERE PRODUCT_ID = PRODUCT.PRODUCT_ID), 1)
+	        </when>
+	        <when test="sort == 'price'">
+	            ORDER BY PRICE
+	        </when>
+	        <otherwise>
+	        </otherwise>
+	    </choose>
+	</sql>
+	
+	<select id="selectProducts" resultType="Product">
+	    SELECT *
+	    FROM PRODUCT
+	        LEFT JOIN PRODUCT_STOCK ON(PRODUCT.PRODUCT_ID = PRODUCT_STOCK.PRODUCT_ID)
+	    WHERE PRODUCT_STATUS = 'Y'
+	    <if test="cNo != null">
+	        AND PRODUCT_DETAIL_NO = #{cNo}
+	    </if>    
+	    <if test="sort != null and direction != null">
+	        <include refid="dynamicOrderBy"/>
+	        <if test="direction == 'ASC'">
+	            ASC
+	        </if>
+	        <if test="direction == 'DESC'">
+	            DESC
+	        </if>
+	    </if>
+	</select>
+
+	
+	<!-- 상품사진 전용 -->
+	<select id="selectProductAttm" resultType="ProductAttm">
+		SELECT *
+		FROM ATTACHMENT
+		WHERE ATTM_REF_TYPE = 'P' 
+		<if test="productId == null">
+			AND ATTM_LEVEL = '1'
+		    AND (ATTM_REF_NO, ATTM_ID) IN (
+		        SELECT ATTM_REF_NO, MIN(ATTM_ID)
+		        FROM ATTACHMENT
+		        WHERE ATTM_REF_TYPE = 'P' AND ATTM_LEVEL = '1'
+		        GROUP BY ATTM_REF_NO
+		    )
+		</if>
+		<if test="productId != null">
+			AND	ATTM_REF_NO = #{productId}
+		</if>
+	</select>
+	
+	<!-- String(보드타입)으로 카운트 가져오기 -->
+	<select id="getProductCount" resultType="_int">
+		SELECT COUNT(*)
+		<if test="string == null">
+			FROM DUAL
+		</if> <!-- .equlse('P') -->
+		<if test="string != null">
+			FROM PRODUCT
+			WHERE PRODUCT_STATUS = 'Y'
+		</if>
+	</select>
+	
+	<select id="getDetailCount" resultType="_int">
+		SELECT COUNT(*)
+		FROM PRODUCT
+		WHERE PRODUCT_DETAIL_NO = #{cNo} AND PRODUCT_STATUS = 'Y'
+	</select>
+	
+	<select id="selectedCategory" resultType="ProductCategory">
+		SELECT *
+		FROM PRODUCT
+		    JOIN PRODUCT_DETAIL_CATEGORY USING(PRODUCT_DETAIL_NO)
+		WHERE (PRODUCT_DETAIL_NO, PRODUCT_ID)IN (
+		        SELECT PRODUCT_DETAIL_NO, MIN(PRODUCT_ID)
+		        FROM PRODUCT
+				<if test="cNo != null">
+					WHERE PRODUCT_DETAIL_NO = #{cNo}
+				</if>
+		        GROUP BY PRODUCT_DETAIL_NO
+		    )
+	</select>
+	
+	<select id="selectDetailProduct" resultType="Product">
+		SELECT *
+		FROM PRODUCT
+			LEFT JOIN PRODUCT_STOCK USING(PRODUCT_ID)
+		WHERE PRODUCT_ID = #{productId}
+	</select>
+	
+	<select id="selectDetailCategory" resultType="ProductCategory">
+		SELECT *
+		FROM PRODUCT_DETAIL_CATEGORY
+			JOIN PRODUCT_CATEGORY USING(PRODUCT_CATEGORY_NO)
+		WHERE PRODUCT_DETAIL_NO = #{productDetailNo}
+	</select>
+	
+	
+	<!-- 상품 댓글 부분 -->
+	<insert id="insertReply">
+		INSERT INTO REPLY
+		VALUES (REPLY_SEQ.NEXTVAL, #{bType}, #{bNo}, #{reContent}, DEFAULT, DEFAULT, DEFAULT, #{mbId})
+	</insert>
+	
+	<select id="selectReply" resultType="Reply">
+		SELECT R_NO, B_TYPE, B_NO, RE_CONTENT, RE_DATE, RE_LIKE, RE_D_STATUS, MB_ID, MB_NICKNAME
+		FROM REPLY
+			LEFT JOIN MEMBER USING(MB_ID)
+		WHERE RE_D_STATUS = 'Y' AND B_TYPE = #{bType} AND B_NO = #{bNo}
+		ORDER BY R_NO DESC
+	</select>
+	
+	
+	<!-- 장바구니 부분 -->
+	
+	<insert id="insertCart">
+		<selectKey order="BEFORE" resultType="_int" keyProperty="cartId">
+				SELECT CART_SEQ.NEXTVAL
+				FROM DUAL
+		</selectKey>
+		INSERT INTO CART
+		VALUES (#{cartId}, #{mbId}, #{quantity}, #{productId}, DEFAULT, #{pSize}, #{color})
+	</insert>
+	
+	<select id="selectUserCart" resultType="Cart">
+		SELECT *
+		FROM CART
+		WHERE MB_ID = #{mbId}
+	</select>
+	
+	<update id="updateCartQuantity">
+		UPDATE CART
+		SET QUANTITY = #{quantity}
+		WHERE CART_ID = #{cartId} 
+	</update>
+	
+	<delete id="deleteAttm">
+		DELETE
+		FROM ATTACHMENT
+		WHERE RENAME_NAME IN
+		<foreach collection="list" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="updateProduct">
+		UPDATE PRODUCT
+		SET PRODUCT_NAME = #{productName}, PRICE = #{price}, PRODUCT_MODIFY_DATE = SYSDATE, PRODUCT_DETAIL_NO = #{productDetailNo}
+		WHERE PRODUCT_ID = #{productId}
+	</update>
+	
+	<update id="updateStock">
+		UPDATE PRODUCT_STOCK
+		SET USED_STANDARD = #{usedStandard}, COLOR = #{color}, QUANTITY = #{quantity}
+		WHERE STOCK_ID = #{stockId}
+	</update>
+		
+	<update id="deleteProduct">
+		UPDATE PRODUCT
+		SET PRODUCT_STATUS = 'N'
+		WHERE PRODUCT_ID = #{pId}
+	</update>
+	
+	<update id="attmStatusYN">
+		UPDATE ATTACHMENT
+		SET ATTM_STATUS = 'N'
+		WHERE ATTM_REF_TYPE = 'P' AND ATTM_REF_NO = #{pId}
+	</update>
+	
+	
+	<insert id="insertReplyCount">
+		<selectKey order="AFTER" resultType="String" keyProperty="r.mbId">
+				SELECT MB_ID
+				FROM Reply
+				WHERE R_NO = #{r.rNo}
+		</selectKey>
+		INSERT INTO REPLY_LIKE
+		VALUES (RL_SEQ.NEXTVAL, #{r.rNo}, #{mId})
+	</insert>
+	
+	<update id="updateReplyCount">
+		UPDATE REPLY
+		SET RE_LIKE = (SELECT RE_LIKE
+                FROM REPLY
+                WHERE R_NO = #{rNo}) + 1
+		WHERE R_NO = #{rNo}
+	</update>
+	
+	<delete id="downReplyCount">
+		DELETE FROM REPLY_LIKE
+		WHERE LIKE_REF_BOARD = #{rNo} AND LIKE_USER = #{mId} 
+	</delete>
+		
+	<update id="downCountReplyCount">
+		UPDATE REPLY
+		SET RE_LIKE = (SELECT RE_LIKE
+                FROM REPLY
+                WHERE R_NO = #{rNo}) - 1
+		WHERE R_NO = #{rNo}
+	</update>	
+		
+	<select id="selectReplyLike" resultType="ReplyLike">
+		SELECT *
+	    FROM REPLY_LIKE
+	    WHERE LIKE_REF_BOARD IN
+	    <foreach item="item" collection="list" open="(" separator="," close=")">
+	        #{item}
+	    </foreach>
+	</select>
+	
+	<update id="updateReply">
+		UPDATE REPLY
+		SET RE_CONTENT = #{reContent}, RE_DATE = SYSDATE
+		WHERE R_NO = #{rNo}
+	</update>	
+	
+	<update id="deleteReply">
+		UPDATE REPLY
+		SET RE_D_STATUS = 'N'
+		WHERE R_NO = #{rNo}
+	</update>
+	
+	<insert id="insertStampProduct">
+		INSERT INTO SAVED
+		VALUES (SAVED_SEQ.NEXTVAL, #{pId}, #{mbId}, #{type})
+	</insert>
+	
+	
+	<select id="selectMyStampProduct" resultType="_int">
+		SELECT COUNT(*)
+		FROM SAVED
+		WHERE SAVED_TYPE = 'P' AND PRODUCT_ID = #{productId} AND MB_ID = #{memberId}
+	</select>
+	
+	<select id="selectSavedProduct" resultType="_int">
+		SELECT COUNT(*)
+		FROM SAVED
+		WHERE SAVED_TYPE = 'P' AND PRODUCT_ID = #{productId}
+	</select>
+	
+	<delete id="deleteStampProduct">
+		DELETE FROM SAVED
+		WHERE PRODUCT_ID = #{pId} AND MB_ID = #{mbId} AND SAVED_TYPE = #{type}
+	</delete>
+	
+	<insert id="insertNotify">
+		INSERT INTO NOTIFICATION
+		VALUES(NOTI_SEQ.NEXTVAL, #{mbId}, #{notiType}, #{notiContent}, 'N', #{fromUser}, #{refNo}, SYSDATE)
+	</insert>
+	
+	<select id="recentlyProductFive" resultType="Product">
+		SELECT *
+		FROM PRODUCT
+		WHERE PRODUCT_STATUS = 'Y'
+		ORDER BY PRODUCT_CREATE_DATE DESC
+		FETCH FIRST 5 ROWS ONLY
+	</select>
+	
+	<select id="popularityProductFive" resultType="Product">
+		SELECT *
+		FROM PRODUCT
+			LEFT JOIN PRODUCT_STOCK ON(PRODUCT.PRODUCT_ID = PRODUCT_STOCK.PRODUCT_ID)
+		WHERE PRODUCT_STATUS = 'Y'
+		ORDER BY COALESCE((SELECT COUNT(*) FROM ORDER_DETAIL WHERE PRODUCT_ID = PRODUCT.PRODUCT_ID), 1)
+		FETCH FIRST 5 ROWS ONLY
+	</select>
+	
+	<select id="selectMyOrder" resultType="_int">
+		SELECT count(*)
+		FROM ORDERS
+    		LEFT JOIN ORDER_DETAIL USING(ORDER_ID)
+		WHERE CUSTOMER_ID = #{mbId} AND PRODUCT_ID = #{pId}
+	</select>
+	
+	
+</mapper>

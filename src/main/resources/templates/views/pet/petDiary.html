@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>petDiary</title>
+<link rel="icon" href="/image/woofly.png">
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+</style>
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-between mx-5">
+			<div th:replace="~{common/myNav :: myNav}"></div>
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<div class="col-10">
+				<div class="border-bottom border-3 border-black">
+					<h3>마이펫 다이어리</h3>
+				</div>
+				<form action="/pet/petDiary" method="get">
+					<div class="border-top border-bottom bg-body-tertiary d-flex align-items-center justify-content-center" style="height: 70px;">
+						<div>
+							<button type="button" class="btn btn-outline-dark btn-sm" onclick="getOneWeek(1);">일주일</button>
+							<button type="button" class="btn btn-outline-dark btn-sm" onclick="getMonths(1);">한달</button>
+							<button type="button" class="btn btn-outline-dark btn-sm" onclick="getMonths(3);">3개월</button>
+						</div>
+						&nbsp;&nbsp;&nbsp;
+						<div class="d-flex">
+							<input type="date" class="form-control d-block" name="startDate" id="startDate" th:value="${ startDate }">
+							<span class="my-auto">~</span>
+							<input type="date" class="form-control d-block" name="endDate" id="endDate" th:value="${ endDate }">
+						</div>
+						&nbsp;&nbsp;&nbsp;
+						<div>
+							<button class="btn btn-dark btn-sm">조회</button>
+						</div>
+					</div>
+				    <span class="text-secondary" style="font-size: 13px;">한 번에 조회 가능한 기간은 최대 3개월입니다.</span>
+					<div class="d-flex bd-highlight mb-2">
+					  	<div class="p-2 bd-highlight">
+						  	<select class="form-select" name="petName" style="width: 160px;">
+							  	<option value="" selected>마이펫 선택</option>
+						  	  	<option th:each="p : ${pet}" th:selected="${petId == p.petId}"th:value="${p.petId}" th:text="${p.petName}"></option>
+						  	</select>
+					  	</div>
+					  	<div class="p-2 bd-highlight">
+						  	<select class="form-select" name="petHealth" style="width:160px">
+								<option value="" selected>오늘의 상태</option>
+								<option value="A" th:selected="${petHealth == 'A'}">😻 신나요</option>
+								<option value="B" th:selected="${petHealth == 'B'}">😸 그냥 그래요</option>
+								<option value="C" th:selected="${petHealth == 'C'}">😺 무기력해요</option>
+								<option value="D" th:selected="${petHealth == 'D'}">😿 아파요</option>
+						  	</select>
+					  	</div>
+					  	<div class="p-2 bd-highlight">
+					  		<button class="btn btn-dark btn-sm">조회</button>
+					  	</div>
+					  	<div class="ms-auto p-2 bd-highlight">
+					  	 	<a href="/pet/petDiaryWrite" class="btn btn-dark btn-sm justify-content-end">다이어리 쓰기</a>
+					  	</div>
+					</div>
+				</form>	
+				
+				<div th:each="d : ${list}" class="rounded d-flex justify-content-between mb-3" style="border: 1px solid black; height: 100px;" role="button" th:onclick="|location.href='/pet/petDiaryDetail/${d.drNo}'|">
+				    <div class="d-flex align-content-center ms-3 col-9">
+				        <div class="ms-3 d-flex" style="line-height: 100px;">
+				            <strong style="width: 100px;">[[${d.petName}]]</strong>
+				            <div><img th:src="'/image/' + ${d.petProfile}" class="me-3" style="width: 50px; height: 50px; border-radius: 100px; border: 1px grey;"></div>&nbsp;&nbsp;
+				        	<!-- 제목이 따로 없기 때문에 subString으로 끊어주기 -->
+				        	<div class="d-block text-truncate" th:text="${d.drContent}"></div>
+				        	<!-- <div th:if="${#strings.length(d.drContent) le 20}" th:text="${d.drContent}"></div>
+							<div th:if="${#strings.length(d.drContent) gt 20}" th:text="${#strings.substring(d.drContent, 0, 20)} + '...'"></div> -->
+				        </div>
+				    </div>
+				    <div class="d-flex col-3">
+				        <th:block th:switch="${d.petHealth}" class="text-truncate">
+					        <div class="text-truncate col-6" th:case="A" style="line-height: 100px;">😻 신나요</div>
+					        <div class="text-truncate col-6" th:case="B" style="line-height: 100px;">😸 그냥 그래요</div>
+					        <div class="text-truncate col-6" th:case="C" style="line-height: 100px;">😺 무기력해요</div>
+					        <div class="text-truncate col-6" th:case="D" style="line-height: 100px;">😿 아파요</div>
+					    </th:block>
+					    &nbsp;&nbsp;
+				        <div class="me-3 col-6 text-truncate" style="line-height: 100px;" th:text="${#dates.format(d.drDate, 'yyyy-MM-dd')}"></div>&nbsp;
+				    </div>
+				</div>
+				
+				<nav th:if=${!#arrays.isEmpty(list)}>
+					<ul class="pagination pagination-sm justify-content-center mt-5">
+					 	<!-- 이전 -->
+						<li class="page-item" th:if="${ pi.currentPage > 1 }">
+							<a class="page-link" th:href="@{${loc}(page=${pi.currentPage-1})}" aria-label="Previous"> 
+								<span aria-hidden="true">&laquo;</span>
+							</a>
+						</li>
+					
+						<!-- 숫자 -->
+						<li class="page-item" th:each="page : ${ #numbers.sequence(pi.startPage, pi.endPage) }">
+							<a class="page-link" th:href="@{${loc}(page=${page})}" th:text="${ page }"></a>
+						</li>
+						
+						
+						<!-- 다음 -->
+						<li class="page-item" th:if="${ pi.currentPage < pi.maxPage }">
+							<a class="page-link" th:href="@{${loc}(page=${pi.currentPage+1})}" aria-label="Next"> 
+								<span aria-hidden="true">&raquo;</span>
+							</a>
+						</li>
+				  	</ul>
+				</nav>
+				
+				<div class="d-flex justify-content-center align-items-center" style="min-height: 500px" th:if="${ #arrays.isEmpty(list) }">
+					<div class="d-flex flex-column justify-content-center align-items-center">
+						<img src="/images/cryingdog.png" style="width:200px;">
+						<p>다이어리가 없습니다.😢</p>
+					</div>
+				</div>
+				
+				</div>
+			</div>
+	</main>
+	<script th:inline="javascript">
+		const myNav = document.getElementById("myPet3");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+		
+		
+		//생일 넘어가기
+		const now_date = Date.now();
+		const timeOff = new Date().getTimezoneOffset()*60000;
+		const today = new Date(now_date-timeOff).toISOString().split("T")[0];
+		startDate.setAttribute("max", today);
+		endDate.setAttribute("max", today);
+		/*<![CDATA[*/
+		const petId = /*[[${petId}]]*/null;
+		const petHealth = /*[[${petHealth}]]*/null;
+		/*]]>*/
+		const getMonths = (months) => {
+			let startDate = new Date();
+			startDate.setMonth(startDate.getMonth() - months);
+			let endDate = new Date();
+
+			let year = (startDate.getFullYear() + "");
+			let month = ('0' + (startDate.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-based
+			let day = ('0' + startDate.getDate()).slice(-2);
+
+			startDate = year + '-' + month + '-' + day;
+			
+			year = (endDate.getFullYear() + "");
+			month = ('0' + (endDate.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-based
+			day = ('0' + endDate.getDate()).slice(-2);
+			
+			endDate = year + '-' + month + '-' + day;
+			
+
+			
+			window.location.href = '/pet/petDiary?startDate=' + startDate + '&endDate=' + endDate + '&petId=' + petId + '&petHealth' + petHealth;		
+		}
+		
+		const getOneWeek = (week) => {
+			let startDate = new Date(); // 새 날짜를 가져오는거
+			startDate.setDate(startDate.getDate() - 7); // 그 날짜에서 7일을 빼주고
+			let endDate = new Date(); // 
+
+			let year = (startDate.getFullYear() + "");
+			let month = ('0' + (startDate.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-based
+			let day = ('0' + startDate.getDate()).slice(-2);
+
+			startDate = year + '-' + month + '-' + day;
+			
+			year = (endDate.getFullYear() + "");
+			month = ('0' + (endDate.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-based
+			day = ('0' + endDate.getDate()).slice(-2);
+			
+			endDate = year + '-' + month + '-' + day;
+			window.location.href = '/pet/petDiary?startDate=' + startDate + '&endDate=' + endDate + '&petId=' + petId + '&petHealth' + petHealth;		
+		}
+		
+		endDate.addEventListener('change', () => {
+			let sixMonthsBefore = new Date(endDate.value);
+			sixMonthsBefore.setMonth(sixMonthsBefore.getMonth() - 3);
+			var newDate = new Date(startDate.value);
+			
+			
+			if(startDate.value == '' || sixMonthsBefore > newDate) {
+				let year = (sixMonthsBefore.getFullYear() + "");
+				let month = ('0' + (sixMonthsBefore.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-based
+				let day = ('0' + sixMonthsBefore.getDate()).slice(-2);
+				startDate.value = year + '-' + month + '-' + day;
+			}
+				
+		})
+		
+		startDate.addEventListener('change', () => {
+			let sixMonthsAfter = new Date(startDate.value);
+			sixMonthsAfter.setMonth(sixMonthsAfter.getMonth() + 3);
+			var newDate = new Date(endDate.value);
+
+			if(sixMonthsAfter < newDate) {
+				if (sixMonthsAfter > new Date()) {
+					sixMonthsAfter = new Date();
+				}
+				
+				let year = (sixMonthsAfter.getFullYear() + "");
+				let month = ('0' + (sixMonthsAfter.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-based
+				let day = ('0' + sixMonthsAfter.getDate()).slice(-2);
+				endDate.value = year + '-' + month + '-' + day;
+			}
+		})
+	</script>
+</body>
+</html>

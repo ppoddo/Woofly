@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="myNav">
+<head>
+<meta charset="UTF-8">
+<style>
+	@font-face{
+	font-family:'DNFBitBitv2';
+	font-style:normal;font-weight:400;src:url('//cdn.df.nexon.com/img/common/font/DNFBitBitv2.otf')format('opentype')}
+	
+	* {
+	font-family: 'DNFBitBitv2';
+	font-weight: lighter;
+	}
+</style>
+<title>WOOFLY</title>
+</head>
+<body>
+	<div class="navbar mb-5">
+		<div class="container-fluid flex-column align-items-start mb-auto">
+			<a class="navbar-brand" href="/my"><h2>마이 페이지</h2></a>
+			<h4 class="mt-3">쇼핑 정보</h4>
+			
+			<ul class="nav flex-column">
+			 	<li class="nav-item">
+			    	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" id="myNav1" href="/my/buying">구매 내역</a>
+			  	</li>
+			  	<li class="nav-item">
+			    	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" id="myNav2" href="/my/selling">판매 내역</a>
+			  	</li>
+			  	<li class="nav-item">
+			    	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" id="myNav3" href="/my/saved">찜하기</a>
+			  	</li>
+			  	<li class="nav-item">
+			    	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" id="myNav9" href="/my/cart">장바구니</a>
+			  	</li>
+			</ul>
+			<h4 class="mt-5">내 정보</h4>
+			<ul class="nav flex-column">
+			 	<li class="nav-item">
+			    	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" id="myNav4" href="/my/login-edit">로그인 정보</a>
+			  	</li>
+			  	<li class="nav-item">
+			    	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" id="myNav5" href="/my/profile-edit">프로필 관리</a>
+			  	</li>
+			  	<li class="nav-item">
+			    	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" id="myNav6" href="/my/address">주소록</a>
+			  	</li>
+			  	<li class="nav-item">
+			    	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" id="myNav7" href="/my/payment">결제 정보</a>
+			  	</li>
+			  	<li class="nav-item">
+			    	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" id="myNav8" href="/my/point">포인트</a>
+			  	</li>
+			</ul>
+			<h4 class="mt-5">내 펫 정보</h4>
+			<ul class="nav flex-column">
+				<li class="nav-item">
+                	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" id="myPet1" href='/pet/petInfo'>강아지 정보</a>
+              	</li>
+              	<li class="nav-item">
+                	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" id="myPet2" href="/pet/petPhoto">강아지 사진첩</a>
+              	</li>
+              	<li class="nav-item">
+                	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" id="myPet3" href="/pet/petDiary">강아지 다이어리</a>
+              	</li>
+              	<li class="nav-item">
+                	<a class="nav-link text-secondary" style="padding-left: 0px; padding-bottom: 0px;" id="myPet4" href="/pet/petContest">강아지 컨테스트</a>
+              	</li>
+			</ul>
+			
+		</div>
+	</div>
+</body>
+</html>

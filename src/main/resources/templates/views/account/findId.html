@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WOOFLY</title>
+<link rel="icon" href="/image/woofly.png">
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+	
+	.border-bottom input:focus {
+        outline: none;
+    }
+</style>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-center mx-5">
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			
+			<div class="col-10 pt-3 mb-5 d-flex justify-content-center">
+				<div style="width:400px">
+					<div class="text-center border-bottom border-3 border-black">
+						<h2 style="font-weight:800">아이디 찾기</h2>
+					</div>	
+					<br>
+					<h6>가입시 등록하신 성함과 이메일을 입력하시면, 이메일로 아이디를 전송해드립니다.</h6>
+					<form action="/sendId.dw" method="POST">
+						<div class="mt-3">
+							<p>이름</p>
+							<div class="border-bottom d-flex justify-content-between">
+								<input type="text" id="mbName" name="mbName" style="border: none; background: transparent; width:100%">
+							</div>
+							<div class="mt-1 form-text" id="idMailCheck" style="font-weight: bolder;"></div>
+						</div>
+						<br>
+						<div class="mb-3">
+							<p>이메일</p>
+							<div class="border-bottom d-flex justify-content-between">
+								<input type="email" id="mbEmail" name="mbEmail" placeholder="가입하신 이메일 주소" style="border: none; background: transparent; width:80%">
+								<button type="button" id="injuengBtn" class="btn btn-outline-dark mb-3 btn-sm">전송</button>
+							</div>
+							<div class="mt-1 form-text" id="injuengSendCheck" style="font-weight: bolder;"></div>
+						</div>
+							<br>
+						<div class="mb-5">
+							<p>인증번호 입력</p>
+							<div class="border-bottom d-flex justify-content-between">
+								<input type="hidden" value="" id="injeungbunho"> <!-- 실제로 보낸 랜덤 인증번호 , 비교용으로 hidden -->
+								<input type="text" value="" id="injeung" name="injeung" style="border: none; background: transparent; width:80%">
+								<button type="button" id="codeBtn" class="btn btn-outline-dark mb-3 btn-sm">확인</button>
+							</div> 
+							<div class="mt-1 form-text" id="injuengCheck" style="font-weight: bolder;"></div>
+						</div>
+						<div>
+							<button type="button" class="btn btn-dark mb-3" id="findIdBtn" style="width:100%">아이디 찾기</button>
+						</div>
+					</form>
+				</div>
+			</div>
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+		</div>
+	</main>
+	<script>
+		const myNav = document.getElementById("myNav4");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+		
+		$('#testBtn').click(function(e){
+			e.preventDefault();
+			$('#testModal').modal("show");
+		});
+		
+		const injuengBtn = document.getElementById('injuengBtn'); //인증번호 보내기 버튼
+		const codeBtn = document.getElementById('codeBtn'); //인증번호 일치 확인 버튼
+		const findIdBtn = document.getElementById('findIdBtn'); //최종 제출 버튼
+	
+		//유효성 검사
+        let check_email = false;
+	      
+		findIdBtn.addEventListener("click", function(){
+            if(!check_email) {
+               alert("이메일 인증을 완료해주세요!");
+            } else {
+               //아이디 정보를 메일로 전송
+               document.querySelector('form').submit();
+               alert("아이디를 이메일로 전송하였습니다");
+               
+            }
+         })
+		
+			injuengBtn.addEventListener("click", function(){
+				const mbEmail = document.getElementsByName('mbEmail')[0].value; //window.onload에 쓰면 안됨
+				const mbName = document.getElementsByName('mbName')[0].value; //window.onload에 쓰면 안됨
+				const injeungbunho = document.getElementById('injeungbunho')
+				const injuengSendCheck = document.getElementById('injuengSendCheck');
+				//이름과 이메일 검사
+				$.ajax({
+					url: "/checkNameEmail.dw",
+					data: {"mbName": mbName, "mbEmail" : mbEmail},
+					success: (data) => {
+						if(data === "true") {
+							//이름과 이메일이 맞을 시,
+							$.ajax({
+								url: "/mailInjeung.dw",
+								data: {"mbEmail": mbEmail},
+								success: (data) => {
+									console.log(data);
+									injuengSendCheck.innerText = '인증번호가 발송되었습니다.';
+									injuengSendCheck.style.color = "black";
+									document.getElementById('injeungbunho').value = data; //form 안의 injuengbunho의 value에 값 집어넣기
+								},
+								error : function(error) {
+									injuengSendCheck.innerText = '인증번호 발송에 실패하였습니다.';
+									injuengSendCheck.style.color = "red";
+								}
+							})
+							
+						} else {
+							idMailCheck.innerText = "이름과 이메일주소를 다시 확인해주세요.";
+							idMailCheck.style.color = "red";
+						}
+					},
+					error : error => console.log(error)
+				});
+			})
+			
+			 codeBtn.addEventListener("click", function(){
+		         const injeung = document.getElementById('injeung').value; //내가 쓴 번호
+		         const injeungbunho = document.getElementById('injeungbunho').value; //랜덤번호
+		         
+		         console.log(injeung);
+		         console.log(injeungbunho);
+		         
+		         if (injeungbunho == "") {
+		        	 injuengCheck.innerText = "인증을 진행해주세요.";
+		        	 injuengCheck.style.color = "red";
+		        	 check_email = false;
+			         } else {
+			            if (injeung == "") {
+			            	injuengCheck.innerText = "인증번호를 입력해주세요.";
+			            	injuengCheck.style.color = "red";
+			            	check_email = false;
+			         } else {
+			            if (injeung == injeungbunho) {
+			               // 인증 번호가 맞을때 실행할거
+			               injuengCheck.innerText = "인증번호가 일치합니다.";
+			               injuengCheck.style.color = "black";
+			               check_email = true;
+			         } else {
+			            // 인증 번호가 맞지 않을때 실행할거
+			            injuengCheck.innerText = "인증번호가 일치하지 않습니다.";
+			            injuengCheck.style.color = "red";
+			            check_email = false;
+			         }
+		           }
+		         }
+		      });
+		
+	</script>
+</body>
+</html>

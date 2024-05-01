@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" th:href="@{/image/woofly.png}">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <!--  
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous" /> 
+-->
+<link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+      integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer" />
+<link rel="stylesheet" type="text/css" th:href="@{/css/yh/QNAList.css}" /> 
+<link rel="stylesheet" type="text/css" th:href="@{/css/yh/modal.css}" />
+
+</head>
+<body>
+    <div th:replace="~{common/top :: top}"></div>
+	<main>
+		<div class="container-fluid d-flex mx-5">
+			
+			<!-- 관리자만 보이게!!!!!!!!!!!!!!!!!!! -->
+
+			<th:block th:if="${session.loginUser == null or session.loginUser.isAdmin == 'N'}">
+				<div th:replace="~{common/infoNav :: infoNav}"></div>
+			</th:block>
+			<th:block th:if="${session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+				<div th:replace="~{common/adminNav :: adminNav}"></div>
+			</th:block>
+			
+			<div class="col-10 mb-5">
+				<div class="container mx-5 mt-5">
+				
+				
+					<div class="container d-flex px-0 border-bottom border-black border-3 justify-content-between align-items-center">
+						<h1>FAQ</h1>
+						<h3>자주 묻는 질문과 답변을 미리 확인해 보세요!</h3>
+						<!-- 관리자만 보이게!!!!!!!!!!!!!!!!!!! -->
+						<div>
+							<a role="button" href="/info/QNAWrite" class="btn btn-dark btn-sm h-50" th:if="${ session.loginUser != null && session.loginUser.isAdmin == 'Y'}">글 작성</a>
+						</div>
+					</div>
+					
+					<!-- 카테고리 버튼들 -->
+					<div class="container text-center mt-3 row-cols-6 catagoryBar">
+						<button type="button" class="btn btn-outline-dark" name="categoryBtn" value="쇼핑몰">쇼핑몰</button>
+						<button type="button" class="btn btn-outline-dark" name="categoryBtn" value="콘테스트">콘테스트</button>
+						<button type="button" class="btn btn-outline-dark" name="categoryBtn" value="중고거래">중고거래</button>
+						<button type="button" class="btn btn-outline-dark" name="categoryBtn" value="도그워커">도그워커</button>
+						<button type="button" class="btn btn-outline-dark" name="categoryBtn" value="산책메이트">산책메이트</button>
+					</div>
+	      			<input type="hidden" th:value="${ value }" th:name="${ value }" id="aaaa">
+					<form action="/info/searchQNA">
+						<input type="hidden" th:value="${ value }" name="value" id="aaaa" >
+						<div class="row g-0 text-center mt-3">
+							<div class="col-6 col-md-1">
+							</div>
+							<div class="col-sm-6 col-md-1 input-group-lg" style="margin-left: 40px;">
+								<select  class="form-select-lg" name="Category" style="display: inline-block;">
+									<option value="q_Title" th:selected="${ Category == 'q_Title'}">제목</option>
+									<option value="q_Content" th:selected="${ Category == 'q_Content'}">내용</option>
+									<option value="all" th:selected="${ Category == 'all'}">제목+내용</option>
+								</select>
+							</div>
+							<div class="col-sm-6 col-md-7 input-group-lg" style="margin-left: 50px;">
+								<input type="text" id="search-box" class="form-control" placeholder="검색" name="search" th:value="${ search }" >
+							</div>
+							<div class="col-6 col-md-1  ">
+								<button class="btn btn-outline-dark btn-lg">검색</button>
+							</div>
+						</div>
+					</form>
+					<div class="wrapper">
+						<div class="faq" th:each="l : ${list}" >
+						    <button class="accordion" >
+						    	<div class="category">[[${ l.qCategory }]]</div>[[${ l.qTitle }]]
+						    	<i class="fa-solid fa-chevron-down"></i>
+						    </button>
+						    <div class="pannel">	
+						  		<!-- 관리자만 보이게!!!!!!!!!!!!!!!!!!! -->
+						    	<form  action="/info/QNAEdit" method="POST" style="display: inline-block;">
+									<input type="hidden" th:value="${ l.qId }" name="qId">
+									<label class="qId" style="display: none;">[[${ l.qId }]]</label>
+									<input type="hidden" th:value="${ pi.currentPage }" name="page">
+									
+									<th:block th:if="${ session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+										<button class="btn btn rounded-2 btn-outline-dark" >수정</button>
+										<button type="button" name="modalOpen" class="btn btn rounded-2 btn-outline-danger" >삭제</button>
+									</th:block>
+									
+									<th:block th:if="${ session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+										<p style="display: inline-block; margin-left: 50px;">
+											[[${ l.qContent }]]
+										</p>
+									</th:block>
+									<th:block th:if="${ session.loginUser == null || session.loginUser.isAdmin != 'Y'}">
+										<p style="display: inline-block; margin-left: 160px;">
+											[[${ l.qContent }]]
+										</p>
+									</th:block>
+									
+									<input type="hidden" th:value="page" name="page">
+								</form>
+								
+						    </div>
+						</div>
+					</div>
+					<div th:replace="~{info/pageNav :: pageNav}"></div>
+				</div>	
+			</div>
+		</div>
+		
+		<div id="modalContainer" class="hidden">
+			<div id="modalContent" class="modalContentCss">
+		    	<br>
+		    	<h1 style="text-align: center;">정말 삭제하시겠습니까?</h1>
+		    	<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+			    <button id="delete" type="button" class="btn btn-lg rounded-2 btn-outline-danger">삭제</button>
+				&emsp;&emsp;&emsp;&emsp;
+			    <button id="modalClose" type="button" class="btn btn-lg rounded-2 btn-outline-dark">닫기</button>	
+			</div>
+		</div>
+    </main>
+    
+	<script th:inline="javascript">
+		var acc = document.getElementsByClassName("accordion");
+		var i;
+		
+		for (i = 0; i < acc.length; i++) {
+			acc[i].addEventListener("click", function () {
+				this.classList.toggle("active");
+				this.parentElement.classList.toggle("active");
+				
+				var pannel = this.nextElementSibling;
+				
+				if (pannel.style.display === "block") {
+					pannel.style.display = "none";
+				} else {
+					pannel.style.display = "block";
+				}
+			});
+		}
+		
+		window.onload = () => {
+			const mbts = document.getElementsByName('modalOpen');
+			const modalCloseButton = document.getElementById('modalClose');
+			const modal = document.getElementById('modalContainer');
+			const del = document.getElementById('delete');
+			const category = document.getElementById('aaaa').value;
+			
+			for(const mbt of mbts) {
+				mbt.addEventListener('click', (event) => {
+				    modal.classList.remove('hidden');
+				    const qId = event.target.closest('.faq').querySelector('.qId').innerText;
+				   
+				    del.addEventListener('click', () => {
+				    	 /*<![CDATA[*/
+				        location.href = '/info/deleteQNA?qId=' + qId + "&page=" + /*[[${pi.currentPage}]]*/123;
+				        /*]]>*/
+				    });
+				});
+			}					
+			modalCloseButton.addEventListener('click', () => {
+				modal.classList.add('hidden');
+			});
+			
+			const cbts = document.getElementsByName('categoryBtn');
+			
+			for(const cbt of cbts) {
+				const value = cbt.value;
+				
+				if(category == value){
+					cbt.className = "btn btn-dark"
+					
+					cbt.addEventListener('click', (event) => {
+					     location.href = '/info/QNA' ;
+					});
+					
+				} else{
+					cbt.addEventListener('click', (event) => {
+					     location.href = '/info/selectCategoryQNA?value=' + value ;
+					});
+				}
+			}
+			
+			const pbts = document.getElementsByName('pagebtn');
+			
+			for(const pbt of pbts) {
+				const cp1 = "[[${pi.currentPage}]]"
+				const cp2 = pbt.innerText
+				if(cp1 == cp2) {
+					pbt.style.background = 'lightgrey';
+				}
+			}
+			const anav = document.getElementById('myNav2')
+			anav.style.fontWeight = 'bold';
+		
+		}
+	</script>
+</body>
+</html>

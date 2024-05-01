@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kh.woofly.admin.model.dao.AdminDAO">
+	<select id="getReportCount" resultType="_int">
+		SELECT COUNT(*)
+		FROM REPORT
+		<if test="searchId != null and searchId != ''">
+			WHERE R_ACCUSED LIKE '%' || #{searchId} || '%'
+		</if>
+	</select>
+
+	<select id="selectReportList" resultType="Report">
+		SELECT *
+		FROM REPORT
+		<if test="searchId != null">
+			WHERE R_ACCUSED LIKE '%' || #{searchId} || '%'
+		</if>
+		ORDER BY R_NO DESC
+	</select>
+	
+	<select id="selectReportRank" resultType="map">
+		SELECT
+		    A.R_ACCUSED,
+		    A.R_SITUATION_W_COUNT,
+		    A.LAST_REPORT_DATE,
+		    A.TOTAL_REPORT_COUNT,
+		    B.MB_NAME
+		FROM (
+		    SELECT
+		        R_ACCUSED,
+		        COUNT(CASE WHEN R_SITUATION = 'W' THEN 1 END) AS R_SITUATION_W_COUNT,
+		        MAX(R_DATE) AS LAST_REPORT_DATE,
+		        COUNT(*) AS TOTAL_REPORT_COUNT
+		    FROM REPORT
+		    WHERE R_DATE BETWEEN SYSDATE - 7 AND SYSDATE
+		    GROUP BY R_ACCUSED
+		    ORDER BY TOTAL_REPORT_COUNT DESC
+		    FETCH FIRST 5 ROWS ONLY
+		) A
+		JOIN MEMBER B ON A.R_ACCUSED = B.MB_ID
+	</select>
+	
+	<select id="selectReportDetail" resultType="Report">
+		SELECT 
+		    REPORT.*,
+		    MEMBER.mb_Name AS mbName,           
+		    ACCUSED_MEMBER.mb_Name AS mbSubName,
+		    ACCUSED_MEMBER.mb_Date AS mbDate
+		FROM REPORT
+			JOIN MEMBER ON REPORT.R_ACCUSER = MEMBER.MB_ID
+			LEFT JOIN MEMBER ACCUSED_MEMBER ON REPORT.R_ACCUSED = ACCUSED_MEMBER.MB_ID
+		WHERE REPORT.R_NO = #{rNo}
+	</select>
+	
+	<select id="selectTargetList" resultType="Report">
+		SELECT *
+		FROM REPORT
+			JOIN MEMBER ON(R_ACCUSER = MB_ID)
+		WHERE R_ACCUSED = #{rAccused}
+		ORDER BY R_NO DESC
+	</select>
+	
+	<update id="updateStopDate">
+		UPDATE MEMBER
+		SET IS_BANNED = 'Y'
+		WHERE MB_ID = #{rAccused}
+	</update>
+	
+	<update id="updateReportSit">
+		UPDATE REPORT
+		SET R_SITUATION = #{rSituation}
+		WHERE R_NO = #{rNo}
+	</update>
+	
+	<select id="selectWarningCount" resultType="_int">
+		SELECT COUNT(*)
+		FROM REPORT
+		WHERE R_ACCUSED = #{rAccused} AND R_SITUATION = 'W'
+	</select>
+	
+	<select id="selectAllMembers" resultType="Member">
+		SELECT *
+		FROM MEMBER
+		<if test="mbId != null">
+			WHERE MB_ID LIKE '%' || #{mbId} || '%'
+		</if>
+		ORDER BY mb_Id ASC
+	</select>
+	
+	<select id="selectAllAddress" resultType="MemberAddress">
+		SELECT *
+		FROM (
+		    SELECT 
+		        MA.*,
+		        ROW_NUMBER() OVER (PARTITION BY MB_ID ORDER BY CASE WHEN ADDR_TYPE = 'Y' THEN 0 ELSE 1 END, ROWNUM) AS rnk
+		    FROM MEMBER_ADDRESS MA
+			)
+		WHERE rnk = 1
+	</select>
+	
+	<select id="getMembersCount" resultType="_int">
+		SELECT COUNT(*)
+		FROM MEMBER
+		<if test="mbId != null">
+			WHERE MB_ID LIKE '%' || #{mbId} || '%'
+		</if>
+	</select>
+	
+	<update id="updateKickOutMembers">
+		UPDATE MEMBER
+		SET MB_STATUS = 'N'
+		WHERE MB_ID = #{mbId}
+	</update>
+	
+	<update id="updateInfo">
+		UPDATE MEMBER
+		SET ${column} = #{datas}
+		WHERE MB_ID = #{mbId}
+	</update>
+	
+	<select id="selectMonthlyEarnings" resultType="_int">
+		SELECT SUM(TOTAL)
+		FROM ORDERS
+		WHERE TRUNC(ORDER_DATE, 'MONTH') = TRUNC(SYSDATE, 'MONTH')
+	</select>
+	
+	<select id="selectAnnualEarnings" resultType="_int">
+		SELECT SUM(TOTAL)
+		FROM ORDERS
+		WHERE TRUNC(ORDER_DATE, 'YEAR') = TRUNC(SYSDATE, 'YEAR')
+	</select>
+	
+	<select id="selectContestRatio" resultType="map">
+		SELECT
+	        (SELECT COUNT(P_NO) FROM PARTICIPANTS) AS TOTAL_PARTICIPANTS,
+	        (SELECT COUNT(P_NO) FROM PARTICIPANTS WHERE INSTR(UPPER(P_PRODUCT), 'O') > 0) AS PARTICIPANTS_WITH_O_PRODUCT
+	    FROM DUAL
+	</select>
+	
+	<select id="selectCompanyCount" resultType="_int">
+		SELECT COUNT(*)
+		FROM COMPANY
+		WHERE COM_STATUS = 'Y'
+	</select>
+	
+	<select id="selectMonthlyList" resultType="map">
+		 SELECT
+		    TO_CHAR(ORDER_DATE, 'YYYY-MM') AS MONTH,
+		    NVL(SUM(TOTAL), 0) AS TOTAL_SUM
+		FROM ORDERS
+		WHERE ORDER_DATE >= ADD_MONTHS(TRUNC(SYSDATE, 'MONTH'), -5)
+		GROUP BY TO_CHAR(ORDER_DATE, 'YYYY-MM')
+		HAVING TO_DATE(MAX(TO_CHAR(ORDER_DATE, 'YYYY-MM')), 'YYYY-MM')<![CDATA[ < ]]>ADD_MONTHS(TRUNC(SYSDATE, 'MONTH'), 1)
+		ORDER BY TO_CHAR(ORDER_DATE, 'YYYY-MM')
+	</select>
+	
+	<select id="selectBoardsCount" resultType="map">
+	    SELECT
+		    (SELECT SUM(M_COUNT) FROM MISSING_BOARD WHERE EXTRACT(YEAR FROM M_CREATE_DATE) = EXTRACT(YEAR FROM SYSDATE)) AS M_COUNT,
+		    (SELECT SUM(DW_COUNT) FROM DW_BOARD WHERE EXTRACT(YEAR FROM DW_CREATE_DATE) = EXTRACT(YEAR FROM SYSDATE)) AS DW_COUNT,
+		    (SELECT SUM(B_COUNT) FROM BOARD WHERE EXTRACT(YEAR FROM B_CREATE_DATE) = EXTRACT(YEAR FROM SYSDATE)) AS B_COUNT,
+		    (SELECT SUM(U_COUNT) FROM USED_BOARD WHERE EXTRACT(YEAR FROM U_CREATE_DATE) = EXTRACT(YEAR FROM SYSDATE)) AS U_COUNT,
+		    (SELECT SUM(WM_COUNT) FROM WM_BOARD WHERE EXTRACT(YEAR FROM WM_CREATE_DATE) = EXTRACT(YEAR FROM SYSDATE)) AS WM_COUNT
+		FROM DUAL
+	</select>
+	
+	<select id="selectReportBoardCount" resultType="map">
+		SELECT R_CATEGORY, COUNT(*) AS TOTAL_COUNT
+		FROM REPORT
+		WHERE EXTRACT(YEAR FROM R_DATE) = EXTRACT(YEAR FROM SYSDATE)
+		GROUP BY R_CATEGORY
+	</select>
+	
+	<insert id="insertNotify">
+		INSERT INTO NOTIFICATION
+		VALUES(NOTI_SEQ.NEXTVAL, #{mbId}, #{notiType}, #{notiContent}, 'N', #{fromUser}, #{refNo}, SYSDATE)
+	</insert>
+	
+	<select id="selectAfterContest" resultType="Contest">
+		SELECT *
+		FROM CONTEST
+		WHERE CON_END_DATE >= SYSDATE
+		ORDER BY CON_NO
+	</select>
+	
+</mapper>
+
+

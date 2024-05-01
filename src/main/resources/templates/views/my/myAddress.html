@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" href="image/woofly.png">
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+</style>
+<script src="http://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-between mx-5">
+			<div th:replace="~{common/myNav :: myNav}"></div>
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<div class="col-10 pt-3 mb-5 me-4">
+				<div class="d-flex justify-content-between mb-5">
+					<h3>주소록</h3>
+					<div class="my-auto">
+						<button class="btn btn-outline-dark btn-sm" data-bs-toggle="modal" data-bs-target="#newAddr">+새 배송지 추가</button>
+					</div>
+				</div>
+				<div th:if="${#arrays.isEmpty(list)}" class="d-flex justify-content-center align-items-center" style="height: 500px; line-height: 500px;">배송지 정보를 등록해주세요</div>
+				<div class="d-flex justify-content-between border-bottom border-black border-3 mb-3" th:each="address: ${list}">
+					<div>
+						<div class="d-flex mb-1" style="height: 20px;">
+							<p>[[|${#strings.substring(address.mbName, 0, 1)}**|]]</p> &nbsp;&nbsp;
+							<div th:if="${ address.addrType == 'Y'}">
+								<span class="badge rounded-pill text-bg-light">기본 배송지</span>
+							</div>
+						</div>
+						<p class="mb-0">[[|010-${address.mbTel[3]}***-*${#strings.substring(address.mbTel, 8, 11)}|]]</p>
+						<p>[[|(${address.postcode})${address.addr} ${address.addrDetail != null ? address.addrDetail : ""}]]</p>
+					</div>
+					<div class="my-auto">
+						<input type="hidden" th:value="${ address.addrId }">
+						<input type="hidden" th:value="${ address.addr }">
+						<input type="hidden" th:value="${ address.addrDetail }">
+						<input type="hidden" th:value="${ address.postcode }">
+						<input type="hidden" th:value="${ address.addrType }">
+						<button class="btn btn-sm btn-outline-dark updateBtn" data-bs-toggle="modal" data-bs-target="#updateAddr">수정</button>
+						<button class="btn btn-sm btn-outline-dark deleteBtn">삭제</button>
+					</div>
+				</div>
+				
+				<!-- 새 주소 등록 모달 -->
+				<form action="/addAddress.yj" method="post" id="addAddressForm">
+					<div class="modal fade" id="newAddr" tabindex="-1">
+						<div class="modal-dialog modal-dialog-centered">
+							<div class="modal-content">
+								<div class="modal-header text-center">
+					        		<h1 class="modal-title fs-5" id="">새 주소 추가</h1>
+		 				        	<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+								</div>
+								<div class="modal-body text-left">
+									<div class="mb-3">
+									    <label for="name" class="form-label">이름</label>
+										<input type="text" class="form-control" id="addNewName" name="mbName" placeholder="수령인의 이름">
+										<div class="form-text" id="addNameCheck"></div>
+									</div>
+									<div class="mb-3">
+									    <label for="phone" class="form-label">휴대폰 번호</label>
+										<input type="text" class="form-control" id="addNewPhone" name="mbTel" placeholder="- 없이 입력">
+										<div class="form-text" id="addPhoneCheck"></div>
+									</div>
+									<div class="mb-3 d-flex align-items-end gap-4">
+										<div class="col-9">
+										    <label for="postcode" class="form-label">우편번호</label>
+											<input type="text" class="form-control" id="addNewPostcode" name="postcode" readonly placeholder="우편 번호를 검색하세요">
+										</div>
+										<div class="col-3">
+											<button type="button" id="addSearchBtn" onclick="addAddr();" class="btn btn-outline-dark btn">주소 검색</button>
+										</div>
+									</div>
+									<div class="mb-3">
+									    <label for="addr" class="form-label">주소</label>
+										<input type="text" class="form-control" id="addNewAddr" name="address" readonly placeholder="우편 번호 검색후 자동 입력됩니다">
+									</div>
+									<div class="mb-3">
+									    <label for="detail-addr" class="form-label">상세주소</label>
+										<input type="text" class="form-control" id="addNewDetailAddr" name="addressDetail" placeholder="건물, 아파트, 동/호수 입력">
+									</div>
+									<div class="form-check mb-3">
+									  	<input class="form-check-input" type="checkbox" value="Y" name="addrType" id="newCheckBox">
+									  	<label class="form-check-label text-secondary" for="checkBox">
+									    	기본 배송지로 설정
+									  	</label>
+									</div>
+									<div class="text-center">
+										<button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">취소</button>
+										<button type="button" id="addAddressSubmitBtn" class="btn btn-dark disabled">저장하기</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				
+				<!-- 주소 수정 모달창 -->
+				<form action="/updateAddr.yj" method="post" id="updateAddrForm">
+					<input type="hidden" name="addrId" id="addrId">
+					<div class="modal fade" id="updateAddr" tabindex="-1">
+						<div class="modal-dialog modal-dialog-centered">
+							<div class="modal-content">
+								<div class="modal-header text-center">
+					        		<h1 class="modal-title fs-5" id="">배송지 추가</h1>
+		 				        	<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+								</div>
+								<div class="modal-body text-left">
+									<div class="mb-3">
+									    <label for="name" class="form-label">이름</label>
+										<input type="text" class="form-control" id="name" placeholder="수령인의 이름" name="mbName">
+										<div class="form-text" id="nameCheck"></div>
+										
+									</div>
+									<div class="mb-3">
+									    <label for="phone" class="form-label">휴대폰 번호</label>
+										<input type="text" class="form-control" id="phone" placeholder="- 없이 입력" name="mbTel">
+										<div class="form-text" id="phoneCheck"></div>
+										
+									</div>
+									<div class="mb-3 d-flex align-items-end gap-4">
+										<div class="col-9">
+										    <label for="postcode" class="form-label">우편번호</label>
+											<input type="text" class="form-control" id="postcode" name="postcode" readonly placeholder="우편 번호를 검색하세요">
+										</div>
+										<div class="col-3">
+											<button class="btn btn-outline-dark btn" onclick="updateSearchAddr();" type="button">주소 검색</button>
+										</div>
+									</div>
+									<div class="mb-3">
+									    <label for="addr" class="form-label">주소</label>
+										<input type="text" class="form-control" id="addr" name="address" readonly placeholder="우편 번호 검색후 자동 입력됩니다">
+									</div>
+									<div class="mb-3">
+									    <label for="detail-addr" class="form-label">상세주소</label>
+										<input type="text" class="form-control" id="addrDetail" name="addressDetail" placeholder="건물, 아파트, 동/호수 입력">
+									</div>
+									<div class="form-check mb-3">
+									  	<input class="form-check-input" type="checkbox" value="Y" name="addrType" id="checkBox">
+									  	<label class="form-check-label text-secondary" for="checkBox">
+									    	기본 배송지로 설정
+									  	</label>
+									</div>
+									<div class="text-center">
+										<button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">취소</button>
+										<button type="button" id="updateAddrBtn" class="btn btn-dark disabled">저장하기</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				
+			</div>
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+		</div>
+	</main>
+	
+	<script>
+		const myNav = document.getElementById("myNav6");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+		
+		
+		// 수정 버튼 눌렀을때 수정 모달 창안에 값 대입
+		const updateBtns = document.getElementsByClassName('updateBtn');
+		let currentAddr = null;
+		for (const updateBtn of updateBtns) {
+			updateBtn.addEventListener('click', function () {
+				currentAddr = this;
+				
+				// 주소 식별 번호
+				const addrId = this.parentElement.children[0].value;
+				document.getElementById('addrId').value = addrId;
+				
+				// 주소 수정 모달 창에 채우기
+				const addr = this.parentElement.children[1].value;
+				const addrDetail = this.parentElement.children[2].value;
+				const postcode = this.parentElement.children[3].value;
+				const addrType = this.parentElement.children[4].value;
+
+				document.getElementById('addr').value = addr;
+				document.getElementById('addrDetail').value = addrDetail;
+				document.getElementById('postcode').value = postcode;
+				if(addrType == 'Y') {
+					document.getElementById("checkBox").checked = true;
+				}
+			})
+		}
+		
+		// 수정 버튼 눌렀을때
+		const updateAddrBtn = document.getElementById('updateAddrBtn');
+		updateAddrBtn.addEventListener("click", () => {
+			const phone_regex = /010+[0-9]{8}/;
+			const addr = document.getElementById("addr").value;
+			const addrDetail = document.getElementById("addrDetail").value;
+			const postcode = document.getElementById("postcode").value;
+			// 기본 배송지 선택했을때
+			if (document.getElementById('checkBox').checked == true && currentAddr.parentElement.children[4].value != 'Y') {
+				// 기본배송지가 있는지 확인
+				$.ajax({
+					url: '/checkAddrType.yj',
+					data: {},
+					success: (data) =>{
+						console.log(data);
+						if (data == 'bad') {
+							alert("기본 배송지가 이미 있습니다.");
+							
+						// 
+						} else if (addr != currentAddr.parentElement.children[1].value && 
+								   addrDetail != currentAddr.parentElement.children[2].value && 
+								   postcode != currentAddr.parentElement.children[3].value) {
+							// 이미 있는 주소지 인지 확인
+							$.ajax({
+								url: '/checkAddr.yj',
+								data: {'postcode' : postcode, 
+									   'address' : addr,
+									   'addressDetail' : addrDetail},
+								success: data => {
+									console.log(123);
+									if (data == 'bad') {
+										alert("이미 있는 배송지 입니다, 등록하신 주소 수정으로 이동하세요.");
+									} else {
+										document.getElementById("updateAddrForm").submit();
+									}
+								},
+								error: data => console.log(data)
+								
+							})
+						} else {
+							document.getElementById("updateAddrForm").submit();
+						}
+					},
+					error: data => console.log(data)
+				})
+			} else if (addr != currentAddr.parentElement.children[1].value && 
+					   addrDetail != currentAddr.parentElement.children[2].value && 
+					   postcode != currentAddr.parentElement.children[3].value) {
+				$.ajax({
+					url: '/checkAddr.yj',
+					data: {'postcode' : postcode, 
+						   'address' : addr,
+						   'addressDetail' : addrDetail},
+					success: data => {
+						console.log(data);
+						if (data == 'bad') {
+							alert("이미 있는 배송지 입니다");
+						} else {
+							document.getElementById("updateAddrForm").submit();
+						}
+					},
+					error: data => console.log(data)
+					
+				})
+			} else {
+				document.getElementById("updateAddrForm").submit();
+			}
+
+		});
+	
+		
+		// 주소 수정 주소 검색
+		const updateSearchAddr = () => {
+		    new daum.Postcode({
+		        oncomplete: function(data) {
+		        	// 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+	                // 도로명 주소의 노출 규칙에 따라 주소를 표시한다.
+	                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+	                var roadAddr = data.roadAddress; // 도로명 주소 변수
+	                var extraRoadAddr = ''; // 참고 항목 변수
+
+	                // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+	                // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+	                if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+	                    extraRoadAddr += data.bname;
+	                }
+	                // 건물명이 있고, 공동주택일 경우 추가한다.
+	                if(data.buildingName !== ''){
+	                   extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+	                }
+	                // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+	                if(extraRoadAddr !== ''){
+	                    extraRoadAddr = ' (' + extraRoadAddr + ')';
+	                }
+
+	                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+	                document.getElementById('postcode').value = data.zonecode;
+	                document.getElementById("addr").value = roadAddr + extraRoadAddr;
+	                
+	                const addr = document.getElementById("addr").value;
+	    			const addrDetail = document.getElementById("addrDetail").value;
+	    			const postcode = document.getElementById("postcode").value;
+	    			const name = document.getElementById("name").value;
+	    			const phone = document.getElementById("phone").value;
+	    			if (addr != "" && addrDetail != "" && postcode != "" && name != "" && phone != "") {
+	    				$("#updateAddrBtn").removeClass('disabled');
+	    			} else {
+	    				document.getElementById("updateAddrBtn").className = "btn btn-dark disabled";
+	    			}
+            	}
+		    }).open();
+		}
+		
+		
+		// 새 주소 등록 주소 검색
+		const addAddr = () => {
+		    new daum.Postcode({
+		        oncomplete: function(data) {
+		        	// 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+	                // 도로명 주소의 노출 규칙에 따라 주소를 표시한다.
+	                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+	                var roadAddr = data.roadAddress; // 도로명 주소 변수
+	                var extraRoadAddr = ''; // 참고 항목 변수
+
+	                // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+	                // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+	                if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+	                    extraRoadAddr += data.bname;
+	                }
+	                // 건물명이 있고, 공동주택일 경우 추가한다.
+	                if(data.buildingName !== ''){
+	                   extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+	                }
+	                // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+	                if(extraRoadAddr !== ''){
+	                    extraRoadAddr = ' (' + extraRoadAddr + ')';
+	                }
+
+	                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+	                document.getElementById('addNewPostcode').value = data.zonecode;
+	                document.getElementById("addNewAddr").value = roadAddr + extraRoadAddr;
+	                
+	                const postcode = document.getElementById("addNewPostcode").value;
+	    			const address = document.getElementById("addNewAddr").value;
+	    			const addressDetail = document.getElementById("addNewDetailAddr").value;
+	    			const name = document.getElementById("addNewName").value;
+	    			const phone = document.getElementById("addNewPhone").value;
+	    			if (address != "" && postcode != "" && name != "" && phone != "") {
+	    				$("#addAddressSubmitBtn").removeClass('disabled');
+	    			} else {
+	    				document.getElementById("addAddressSubmitBtn").className = "btn btn-dark disabled";
+	    			}
+	                
+            	}
+		    }).open();
+		}
+		
+		
+		// 새 주소 등록
+		const phone_regex = /010+[0-9]{8}/;
+		document.getElementById("addAddressSubmitBtn").addEventListener('click', () => {
+			const postcode = document.getElementById("addNewPostcode").value;
+			const address = document.getElementById("addNewAddr").value;
+			const addressDetail = document.getElementById("addNewDetailAddr").value;
+			
+			// 기본 배송지 선택했을때
+			if (document.getElementById('newCheckBox').checked == true) {
+				// 기본배송지가 있는지 확인
+				$.ajax({
+					url: '/checkAddrType.yj',
+					data: {},
+					success: (data) =>{
+						console.log(data);
+						if (data == 'bad') {
+							alert("기본 배송지가 이미 있습니다.");
+						} else {
+							// 이미 있는 주소지 인지 확인
+							$.ajax({
+								url: '/checkAddr.yj',
+								data: {'postcode' : postcode, 
+									   'address' : address,
+									   'addressDetail' : addressDetail},
+								success: data => {
+									console.log(data);
+									if (data == 'bad') {
+										alert("이미 있는 배송지 입니다, 등록하신 주소 수정으로 이동하세요.");
+									} else {
+										document.getElementById("addAddressForm").submit();
+									}
+								},
+								error: data => console.log(data)
+								
+							})
+						}
+					},
+					error: data => console.log(data)
+				})
+			} else {
+				console.log('else');
+				$.ajax({
+					url: '/checkAddr.yj',
+					data: {'postcode' : postcode, 
+						   'address' : address,
+						   'addressDetail' : addressDetail},
+					success: data => {
+						console.log(data);
+						if (data == 'bad') {
+							alert("이미 있는 배송지 입니다");
+						} else {
+							document.getElementById("addAddressForm").submit();
+						}
+					},
+					error: data => console.log(data)
+					
+				})
+			}
+		}) 
+			
+		// 모든 값이 있을때 저장하기 풀기
+		// 수정 버튼
+		const updateAddrForm = document.getElementById('updateAddrForm');
+		updateAddrForm.addEventListener('change', () => {
+			const addr = document.getElementById("addr").value;
+			const postcode = document.getElementById("postcode").value;
+			const name = document.getElementById("name").value;
+			const phone = document.getElementById("phone").value;
+			if (addr != "" && postcode != "" && name != "" && phone != "") {
+				$("#updateAddrBtn").removeClass('disabled');
+			} else {
+				document.getElementById("updateAddrBtn").className = "btn btn-dark disabled";
+			}
+		})
+		
+		// 추가 버튼
+		const addAddressForm = document.getElementById('addAddressForm');
+		addAddressForm.addEventListener('change', () => {
+			const postcode = document.getElementById("addNewPostcode").value;
+			const address = document.getElementById("addNewAddr").value;
+			const name = document.getElementById("addNewName").value;
+			const phone = document.getElementById("addNewPhone").value;
+			if (address != "" && postcode != "" && name != "" && phone != "") {
+				$("#addAddressSubmitBtn").removeClass('disabled');
+			} else {
+				document.getElementById("addAddressSubmitBtn").className = "btn btn-dark disabled";
+			}
+		})
+		
+		const name = document.getElementById('name');
+		name.addEventListener('keyup', () => {
+			if (name.value.length < 2 || name.value.length > 7) {
+				document.getElementById('nameCheck').innerText = "올바른 이름을 입력해주세요. (2 - 7자)";
+				document.getElementById('nameCheck').style.color = "red";
+			} else {
+				document.getElementById('nameCheck').innerText = "";
+				
+			}
+		})
+		
+		const phone = document.getElementById('phone');
+		phone.addEventListener('keyup', () => {
+			if (!phone_regex.test(phone.value)) {
+				document.getElementById('phoneCheck').innerText = "정확한 휴대폰 번호를 입력해주세요.";
+				document.getElementById('phoneCheck').style.color = "red";
+			} else {
+				document.getElementById('phoneCheck').innerText = "";
+				
+			}
+		})
+		
+		const addNewName = document.getElementById('addNewName');
+		addNewName.addEventListener('keyup', () => {
+			if (addNewName.value.length < 2 || addNewName.value.length > 7) {
+				document.getElementById('addNameCheck').innerText = "올바른 이름을 입력해주세요. (2 - 7자)";
+				document.getElementById('addNameCheck').style.color = "red";
+			} else {
+				document.getElementById('addNameCheck').innerText = "";
+				
+			}
+		})
+		
+		const addNewPhone = document.getElementById('addNewPhone');
+		addNewPhone.addEventListener('keyup', () => {
+			if (!phone_regex.test(addNewPhone.value)) {
+				document.getElementById('addPhoneCheck').innerText = "정확한 휴대폰 번호를 입력해주세요.";
+				document.getElementById('addPhoneCheck').style.color = "red";
+			} else {
+				document.getElementById('addPhoneCheck').innerText = "";
+				
+			}
+		})
+		
+		const deleteBtns = document.getElementsByClassName('deleteBtn');
+		for(const deleteBtn of deleteBtns) {
+			deleteBtn.addEventListener('click', () => {
+				if (confirm("주소지를 삭제 하시겠습니까?")) {
+					const addrId = deleteBtn.parentElement.children[0].value;
+					window.location.href = "/deleteAddr.yj?addrId=" + addrId;
+				}
+			})
+		}
+
+		
+
+	</script>
+</body>
+</html>

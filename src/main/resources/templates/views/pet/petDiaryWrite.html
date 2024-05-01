@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+<link rel="icon" href="${ contextPath }/resources/image/woofly.png">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+	
+	input{
+		border: none; 
+		background: transparent;
+		width:100%
+	}
+</style>
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-between mx-5">
+			<div th:replace="~{common/myNav :: myNav}"></div>
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<div class="col-10 pt-3 mb-5 me-4">
+				<div class="border-bottom border-3 border-black mb-3">
+					<h3>마이펫 다이어리</h3>
+				</div>
+				<form action="/petDiaryWrite.dw" method="POST">
+					<h4>마이펫 다이어리 쓰기</h4>
+					<br>
+					<div class="col-7">
+						<div class="d-flex justify-content-between">
+							<div class="d-flex">
+								<input type="date" name="date" id="drDate" class="form-control d-block" style="width: 180px;" required>
+							</div>
+							<div class = "d-flex">
+							  <select class="form-select" name="petName" style="width: 160px;" required>
+								  <option selected disabled>강아지 선택</option>
+							  	  <option th:each="p : ${list}" th:value="${p.petId}" th:text="${p.petName}"></option>
+							  </select>
+						 	 </div>
+							  <div>
+								<select class="form-select" name="petHealth" style="width:160px" required>
+									<option selected disabled>오늘의 상태</option>
+									<option value="A">😻 신나요</option>
+									<option value="B">😸 그냥 그래요</option>
+									<option value="C">😺 무기력해요</option>
+									<option value="D">😿 아파요</option>
+								</select>
+							</div>
+						</div>
+					</div>
+					<br>
+					<div class="col-7">
+						<p class="text-secondary">내용<p>
+						  <label for="exampleFormControlTextarea1" class="form-label"></label>
+						  <textarea style="resize:none;" class="form-control" name="drContent" id="exampleFormControlTextarea1" rows="10" placeholder="내용을 입력해주세요..."></textarea>
+					</div>
+					<div class="d-flex justify-content-start mt-5">
+					    <button type="submit" class="btn btn-dark btn-sm">확인</button>
+					</div>
+				</form>
+			</div>
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+		</div>
+	</main>
+	<script>
+		const myNav = document.getElementById("myPet3");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+		
+		//생일 넘어가기
+   	    const now_date = Date.now();
+        const timeOff = new Date().getTimezoneOffset()*60000;
+        const today = new Date(now_date-timeOff).toISOString().split("T")[0];
+        document.getElementById("drDate").setAttribute("max", today);
+        
+        console.log(petId);
+	  	console.log(petName);
+	</script>
+</body>
+</html>

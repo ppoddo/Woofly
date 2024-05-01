@@ -1,0 +1,87 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WOOFLY</title>
+<link rel="icon" href="/image/woofly.png">
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+	.btn-sm {
+		border-radius: 23px !important; 
+	}
+</style>
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-between mx-5">
+			<div th:replace="~{common/myNav :: myNav}"></div>
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<div class="col-10 mb-5 pt-3 me-4">
+				<h3 class="pb-3 mb-3 border-bottom border-black border-2">찜하기 내역</h3>
+				<div class="d-flex mb-4 justify-content-between">
+					<div class="d-flex">
+						<div>
+							<button class="btn btn-outline-dark btn-sm" onclick="location.href='/my/saved'">SHOPPING</button>
+						</div>
+						&nbsp;&nbsp;&nbsp;
+						<div>
+							<button class="btn btn-dark btn-sm" onclick="location.href='/my/saved/used'">중고</button>
+						</div>
+					</div>
+					<div>
+					</div>
+				</div>
+				<div th:onclick="|location.href='/board/used/detail?uNo=${b.uNo}'|" role="button" class="rounded d-flex justify-content-between mb-3" style="border: 1px solid black; height: 100px" th:each="b : ${list}">
+					<div class="d-flex align-content-center ms-3 col-9">
+						<img th:src="'/image/board/' + ${b.renameName}"class="rounded float-start my-auto" style="width: 80px; height: 80px; border: 1px solid black;">
+						<div class="ms-3" style="line-height: 50px; text-overflow: ellipsis;">
+							[[${b.uTitle}]] <br>
+							<div class="text-truncate" style="width: 600px;">[[${b.uContent}]]</div>
+						</div>		
+					</div>
+					<div class="d-flex col-3">
+						<div class="me-3 text-truncate" style="width: 100px; line-height: 100px;">[[${b.mbNickName}]]</div>
+						<div class="me-3" style="width: 100px; line-height: 100px;">[[${#dates.format(b.uCreateDate, 'yy/MM/dd')}]]</div>
+					</div>
+				</div>
+					<th:block th:if="${#arrays.isEmpty(list)}">
+					<div class="d-flex justify-content-center align-items-center" style="min-height: 500px">
+						<div class="d-flex flex-column justify-content-center align-items-center">
+							<p>구매 입찰 내역이 없습니다.</p>
+							<div>
+								<button class="btn btn-outline-dark" onclick="location.href='/'">SHOP 바로가기</button>
+							</div>
+						</div>
+					</div>
+				</th:block>
+			</div>
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+		</div>
+	</main>
+	<script>
+		const myNav = document.getElementById("myNav3");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+	</script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>petDiaryDetail</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+<link rel="icon" href="/image/woofly.png">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+	
+	p {
+		margin-bottom: 0 !important;
+	}
+	
+	hr.hr-3 {
+		  border: 0;
+		  height: 0;
+		  border-top: 1px solid #8c8c8c;
+	}
+
+</style>
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-between mx-5">
+			<div th:replace="~{common/myNav :: myNav}"></div>
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			
+			<!-- 무한 스크롤 예정 -->
+			
+		<div class="col-10">
+			<div class="border-bottom border-3 border-black">
+				<h3>마이펫 다이어리</h3>
+				<br>
+			</div>
+			<div class="d-flex justify-content-end">
+			    <a href="/pet/petDiaryWrite" class="btn btn-dark btn-sm mt-3 mb-2">다이어리 쓰기</a>
+			</div>
+				<div class="container">
+				    <div class="row justify-content-center">
+				        <div class="col-7">
+				            <div class="ms-auto d-block">
+								<div class="d-flex align-items-center mb-1" >
+								  <div class="p-2">
+								  	  <img th:src="'/image/' + ${d.petProfile}" style="width: 50px; height: 50px; border-radius: 100px; border: 1px grey;">
+								  </div>
+								  <div class="p-2">
+								  	<strong>[[${d.petName}]]</strong> 
+								  </div>
+								  <div class="p-2 ms-auto">
+									  <div class="dropdown">
+											<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-three-dots-vertical dropdown-toggle" data-bs-toggle="dropdown" role="button" viewBox="0 0 16 16">
+					                          	<path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
+					                   		</svg>
+											<ul class="dropdown-menu">
+												<li><a class="dropdown-item" th:href="'/pet/petDiaryEdit/' + ${d.drNo}" role="button">수정</a></li>
+												<li><a class="dropdown-item" role="button" id="deleteDiaryBtn">삭제</a></li>
+											</ul>
+										</div>
+									   <!-- <a th:href="'/pet/petDiaryEdit/' + ${d.drNo}" class="btn btn-outline-dark btn-sm">수정</a>
+								       <a role="button" class="btn btn-dark btn-sm" id="deleteDiaryBtn">삭제</a> -->
+									       <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+											<div class="modal-dialog modal-dialog-centered" role="document">
+												<div class="modal-content">
+													<div class="modal-header">
+														<h5 class="modal-title" id="exampleModalLabel">마이펫 다이어리 삭제</h5>
+													</div>
+													<div class="modal-body">
+														<strong>마이펫 다이어리를 정말로 삭제하시겠습니까?</strong>
+										        		<p>(삭제된 다이어리는 복구되지 않습니다.)</p>
+													</div>
+													<div class="modal-footer justify-content-between">
+												        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">아니오</button>
+												        <a th:href="'/pet/petDiaryDelete/' + ${d.drNo}" class="btn btn-dark">네</a>
+											      	</div>
+												</div>
+											</div>
+										</div>
+								  </div>
+								  <!-- 드랍다운 안먹어서 나중에 넣어야징~! -->
+								  <!-- <div class="p-2 ms-auto">
+									<div class="btn-group">
+								  		<svg role="button" data-bs-toggle="dropdown" aria-expanded="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-three-dots dropdown-toggle" viewBox="0 0 16 16">
+										  <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
+										</svg>
+										  <ul class="dropdown-menu">
+										  	<li><a class="dropdown-item" href="">수정</a></li>
+										  	<li><a class="dropdown-item" href="">삭제</a></li>
+										  </ul>
+									</div>
+								  </div> -->
+								</div>
+							</div>
+				
+							<!-- 메인 -->
+							<div style = "border: 1px solid black;" class="px-2 py-2 rounded">
+								<div class="d-flex justify-content-end mb-1">
+									  <div class="p-2 mt-2 d-flex">
+									   <th:block th:switch="${d.petHealth}">
+									        <p th:case="A">😻 신나요</p>
+									        <p th:case="B">😸 그냥 그래요</p>
+									        <p th:case="C">😺 무기력해요</p>
+									        <p th:case="D">😿 아파요</p>
+									    </th:block> &nbsp;
+									  	<p>|</p>&nbsp;
+									  	<p th:text="${#dates.format(d.drDate, 'yyyy-MM-dd')}"></p>
+									  </div>
+								  </div>
+								  <hr class="hr-3">
+								<div class="mb-2">
+									<p class=" mb-1" th:text="${d.drContent}" id="drContent">
+										<hr class="hr-3">
+										<!-- 우리 해피가 세상에서 제일 귀여워♥
+										<hr class="hr-3">
+										요즘 해피는 다른 강아지하고 잘논다 
+										<hr class="hr-3">
+										대견해 죽겠다 진짜~
+										<hr class="hr-3"> -->
+									</p> 
+								</div>
+							</div>
+				        </div>
+				    </div>
+				</div>
+			</div>
+		</div>
+	</main>
+	<script>
+		const myNav = document.getElementById("myPet3");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+		
+		//마이펫 다이어리 삭제 모달	
+		  $('#deleteDiaryBtn').click(function(e){
+		      e.preventDefault();
+			  $('#deleteModal').modal("show");
+		  });
+	</script>
+</body>
+</html>

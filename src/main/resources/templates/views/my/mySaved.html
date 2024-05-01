@@ -1,0 +1,84 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WOOFLY</title>
+<link rel="icon" href="image/woofly.png">
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+	.btn-sm {
+		border-radius: 23px !important; 
+	}
+</style>
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-between mx-5">
+			<div th:replace="~{common/myNav :: myNav}"></div>
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<div class="col-10 mb-5 pt-3 me-4">
+				<h3 class="pb-3 mb-3 border-bottom border-black border-2">찜하기 내역</h3>
+				<div class="d-flex mb-4 justify-content-between">
+					<div class="d-flex">
+						<div>
+							<button class="btn btn-dark btn-sm" onclick="location.href='/my/saved'">SHOPPING</button>
+						</div>
+						&nbsp;&nbsp;&nbsp;
+						<div>
+							<button class="btn btn-outline-dark btn-sm" onclick="location.href='/my/saved/used'">중고</button>
+						</div>
+					</div>
+					<div>
+					</div>
+				</div>
+				<div class="d-flex justify-content-between mb-3 gap-5 flex-wrap">
+					<div class="card" style="width: 20%;" th:each="s: ${list}" th:onclick="|location.href='/shop/productDetail?pId=${s.productId}&page=1'|" role="button">
+				  		<img th:src="'/image/shopFiles/' + ${s.renameName}" class="card-img-top mx-auto mt-3" alt="..." style="width: 90%; height: auto;">
+				  		<div class="card-body">
+				    		<p class="card-text">[[${s.productName}]]</p>
+				    		<p class="card-text">[[${#numbers.formatInteger(s.price, 3, 'COMMA')}]]원</p>
+				  		</div>
+					</div>
+				</div>
+				<th:block th:if="${#arrays.isEmpty(list)}">
+					<div class="d-flex justify-content-center align-items-center" style="min-height: 500px">
+						<div class="d-flex flex-column justify-content-center align-items-center">
+							<p>구매 입찰 내역이 없습니다.</p>
+							<div>
+								<button class="btn btn-outline-dark" onclick="location.href='/shopMain'">SHOP 바로가기</button>
+							</div>
+						</div>
+					</div>
+				</th:block>
+			</div>
+			
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+		</div>
+	</main>
+	<script>
+		const myNav = document.getElementById("myNav3");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+	</script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" href="/image/woofly.png">
+</head>
+<body>
+	<div th:replace="~{common/topAdd :: topAdd}"></div>
+	 <div class="container mt-5 mb-3">
+      	<div class="container d-flex px-0 mb-3 border-bottom border-black border-3 justify-content-between align-items-center">
+			<h1>도그워커</h1>
+			<h3>게시글 작성하기</h3>
+		</div>
+		<div class="container">
+			<!-- 사진 작성자 작성일자 드롭다운 -->
+			<!-- <div class="header-container d-flex mt-3 justify-content-between">
+				<div class="d-flex">
+					<img class="float-start me-4" th:src="'/image/' + ${dw.mbPhoto}" alt="" style="height: 50px; width: 50px; border-radius: 50px;">
+					<div class="header-text-container">
+						<h6></h6>
+						
+					</div>
+				</div>
+			</div> -->
+			
+			<br>
+			
+			<form  action="/board/dw/insertDwBoard" method="POST" enctype="multipart/form-data" id="attmForm">
+				<div class="mb-3" style="width: 24%;">
+					<label for="title" class="form-label">게시판 선택</label>
+					    <select class="form-select mb-1"  name="dwType" required>
+					    	<option value="" disabled selected></option>
+							<option th:value="0" value="0">도그워커게시판</option>
+							<option th:value="1" value="1">도그워커후기</option>
+						</select>
+				</div>
+				
+				<div class="mb-2"  style="display: none;">
+                     <label for="postcode">우편번호</label>
+                     <div class="border-bottom d-flex pb-2 justify-content-between">
+                        <div class="col-10 ps-0">
+                        	<input type="text" class="form-control" id="postcode" name="mbAddress1" style="border: none; background: transparent;" readonly placeholder="우편 번호를 검색하세요">
+                        </div>
+                        <div>
+                        	<button type="button" onclick="execDaumPostcode()" class="btn btn-outline-dark btn-sm">검색</button>
+                     	</div>
+                     </div>
+                  </div>
+                  <div class="mb-2">
+                     <label for="postcode">주소</label>
+                     <div class="border-bottom d-flex pb-2 justify-content-between">
+                     	<div class="col-10 ps-0">
+                        	<input type="text" id="address" class="form-control" name="dwLocation" style="border: none; background: transparent;" readonly placeholder="우편 번호 검색후 자동 입력됩니다" required>
+                     	</div>
+                     	<div>
+	                       	<button type="button" onclick="execDaumPostcode()" class="btn btn-outline-dark btn-sm">검색</button>
+	                     </div>
+	                     <div>
+	                       	<button type="button" onclick="clearAddress()" class="btn btn-outline-dark btn-sm">비우기</button>
+	                     </div>
+                     </div>
+                     
+                  </div>
+                  <div class="mb-2" style="display: none;">
+                     <label for="postcode">상세주소</label>
+                     <div class="border-bottom d-flex justify-content-between">
+                        <input type="text" id="detailAddress" class="form-control" name="mbAddress3" style="border: none; background: transparent;" placeholder="건물, 아파트, 동/호수 입력">
+                     </div>
+                  </div>
+                  <div class="mb-2" style="display: none;">
+                     <label for="postcode">참고항목</label>
+                     <div class="border-bottom d-flex justify-content-between">
+                        <input type="text" id="extraAddress" class="form-control" name="mbAddress4" style="border: none; background: transparent;" readonly>
+                     </div>
+                  </div>
+                  <br>
+                  
+                  
+				<div class="mb-3">
+					<label for="title" class="form-label" >제목</label>
+				  	<input type="text" class="form-control" id="title" name="dwTitle" placeholder="제목을 입력하세요" required>
+				</div>
+				<div class="mb-3">
+				  	<label for="content" class="form-label">내용</label>
+				  	<textarea class="form-control" id="content" name="dwContent" rows="20" style="resize: none;" required></textarea>
+				</div>
+				<div class="mb-3">
+	               <label for="title" class="form-label">지급할 금액</label>
+	                 <input style="width: 20%" type="text" class="form-control" name="dwPrice" id="productPrice" onkeyup="inputNumberFormat(this)" placeholder="금액 입력" required>
+	            </div>	              
+
+				
+				<label for="file" class="form-label">첨부파일</label><br>
+				<button type="button" class="btn btn-dark btn-sm h-50" id="addFile">파일추가</button> <br><br>
+					<div id="fileArea">
+					   
+					</div>
+				
+				<div class="row border-top border-black pt-3">
+					<button class="btn btn-dark">등록</button>
+				</div>
+			</form>
+		</div>
+		
+		
+	</div>
+	
+	<script>
+		// 해당 페이지 nav bar 강조 넣기
+		// 페이지 별로 id만 수정 하면 됨 eg.) topAdd1, topAdd2, ...
+		const boardNav = document.getElementById("topAdd4");
+		$(boardNav).addClass('active');
+		
+		function inputNumberFormat(obj) {
+		     obj.value = comma(uncomma(obj.value));
+		 }
+
+		 function comma(str) {
+		     str = String(str);
+		     return str.replace(/(\d)(?=(?:\d{3})+(?!\d))/g, '$1,');
+		 }
+
+		 function uncomma(str) {
+		     str = String(str);
+		     return str.replace(/[^\d]+/g, '');
+		 }
+		 
+		 
+		//주소
+	      function execDaumPostcode() {
+	        new daum.Postcode({
+	            oncomplete: function(data) {
+	                // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+	                // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+	                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+	                var addr = ''; // 주소 변수
+	                var extraAddr = ''; // 참고항목 변수
+
+	                //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+	                if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+	                    addr = data.roadAddress;
+	                } else { // 사용자가 지번 주소를 선택했을 경우(J)
+	                    addr = data.jibunAddress;
+	                }
+
+	                // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+	                if(data.userSelectedType === 'R'){
+	                    // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+	                    // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+	                    if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+	                        extraAddr += data.bname;
+	                    }
+	                    // 건물명이 있고, 공동주택일 경우 추가한다.
+	                    if(data.buildingName !== '' && data.apartment === 'Y'){
+	                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+	                    }
+	                    // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+	                    if(extraAddr !== ''){
+	                        extraAddr = ' (' + extraAddr + ')';
+	                    }
+	                    // 조합된 참고항목을 해당 필드에 넣는다.
+	                    document.getElementById("extraAddress").value = extraAddr;
+	                
+	                } else {
+	                    document.getElementById("extraAddress").value = '';
+	                }
+
+	                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+	                document.getElementById('postcode').value = data.zonecode;
+	                document.getElementById("address").value = addr;
+	                // 커서를 상세주소 필드로 이동한다.
+	                document.getElementById("detailAddress").focus();
+	            }
+	        }).open();
+	    }  
+		
+	      function clearAddress() {
+	          // 주소 입력 필드를 비웁니다.
+	          document.getElementById('address').value = '';
+	      }
+		 
+	      function validateForm() {
+	    	    // 필수 필드 검증
+	    	    var form = document.getElementById("attmForm");
+	    	    var isValid = form.checkValidity();
+
+	    	    if (!isValid) {
+	    	        // 필수 필드 중 하나라도 비어 있다면
+	    	        var requiredFields = form.querySelectorAll(':invalid');
+	    	        
+	    	        // 첫 번째 필수 필드로 포커스 이동
+	    	        requiredFields[0].focus();
+	    	    } else {
+	    	        // 유효성 검사 통과 시 다음 동작 수행
+	    	        form.submit(); // 또는 원하는 동작 수행
+	    	    }
+	    	}
+		
+		window.onload = () =>{
+			const fileArea = document.querySelector('#fileArea');
+			document.getElementById('addFile').addEventListener('click', () =>{
+				const newDiv = document.createElement('div');
+				newDiv.classList.add('mb-3');
+				newDiv.innerHTML = '<input type = "file" class = "form-control form-control-sm" name ="file">';
+				
+				fileArea.append(newDiv);
+			});
+		}
+	</script>
+	 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+</body>
+</html>

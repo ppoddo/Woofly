@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" href="${ contextPath }/resources/image/woofly.png">
+	<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+    <script type="text/javascript" src="https://chir.ag/projects/ntc/ntc.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+	.board-list {
+		cursor: pointer;
+	}
+
+  .checkbox {
+      width: 25px;
+      height: 25px;
+      margin-top: 25px;
+  }
+  
+  .vibration{animation: vibration 0.1s infinite;}
+  @keyframes vibration{
+  	from {
+  		transform: rotate(1deg);
+  	}
+  	to{
+  		transform: rotate(-1deg);
+  	}
+  }
+</style>
+</head>
+<body>
+    <div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="container-fluid d-flex mx-5">
+			<div th:replace="~{common/adminNav :: adminNav}"></div>
+			<div class="col-10 pt-3 mb-5">
+                <div class="offcanvas offcanvas-end w-20" data-bs-backdrop="static" data-bs-scroll="true" tabindex="-1" id="offcanvas">
+                    <div class="offcanvas-header">
+                      <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                      <h5 class="offcanvas-title" id="offcanvasLabel">알림</h5>
+                    </div>
+                    <div class="offcanvas-body">
+                        <div class="mb-5 d-flex flex-wrap">
+                            <a class="btn btn-outline-secondary btn-sm px-3 active" href="#">전체</a>
+                            <a class="btn btn-outline-secondary btn-sm px-3" href="#">거래</a>
+                            <a class="btn btn-outline-secondary btn-sm px-3" href="#">좋아요</a>
+                            <a class="btn btn-outline-secondary btn-sm px-3" href="#">댓글</a>
+                            <a class="btn btn-outline-secondary btn-sm px-3" href="#">관리자</a>
+                            <a class="btn btn-outline-secondary btn-sm px-3" href="#">관심</a>
+                            <a class="btn btn-outline-secondary btn-sm px-3" href="#">기타</a>
+                        </div>
+                        
+                      <p>Try scrolling the rest of the page to see this option in action.</p>
+                    </div>
+              </div>
+          
+          
+          
+              <div class="container mx-5 mt-5">
+                  <div class="container d-flex px-0 border-bottom border-black border-3 justify-content-between align-items-center">
+                      <h1>회원 관리</h1>
+                      <!-- 관리자만 보이도록 어차피 관리자만 들어옴-->
+                  </div>
+          
+                  <form action="/admin/memberManagement.ad">
+                      <div class="row col-auto mt-3">
+                            <label for="search-box" class="form-label">회원 아이디 검색</label>
+                      </div>
+                      <div class="row g-0 text-center">
+                          <div class="col-sm-6 col-md-10 input-group-lg">
+                            <input type="text" id="searchBox" class="form-control" placeholder="검색" name="mbId">
+                          </div>
+                          <div class="col-6 col-md-2">
+                              <button type="submit" class="btn btn-outline-dark btn-lg" id="searchBtn">검색</button>
+                          </div>
+                        </div>
+                  </form>
+                  
+                  <!-- CSS 좀 만져야 할 듯? -->
+                  <div class="container board-list" id="board-list">
+                      <div class="row mt-3 border-top border-secondary text-center boardLists" style="height: 80px;" th:each="m : ${mList}">
+                          <div class="col-2" style="line-height: 100px;" th:text="${m.mbId}">회원아이디</div>
+                          <div class="col-2" style="line-height: 100px;" th:text="${m.mbName}">회원이름</div>
+                          <div class="col-2" style="line-height: 100px;" th:text="${m.mbNickName}">닉네임</div>
+                          <div class="col-4" style="line-height: 100px;">
+						     <span th:if="${#lists.contains(addrList.![mbId], m.mbId)}">
+						        <span th:each="ad : ${addrList}" th:if="${m.mbId == ad.mbId}" th:text="${ad.addr}">-</span>
+						     </span>
+						     <span th:unless="${#lists.contains(addrList.![mbId], m.mbId)}">-</span>
+						  </div> 
+                          
+                          <div class="col-2" style="line-height: 100px;" th:text="${m.mbTel}">전화번호</div>
+                      </div>
+                  </div>
+                  
+                  <nav class="nav justify-content-center" aria-label="Standard pagination example" th:if="${mList.size != 0}" th:with="loc=${loc}">
+		        	<ul class="pagination">
+		        		<th:block th:if="${ pi.currentPage <= 1}">
+		        			<li class="page-item">
+		        				<a class="page-link disable" aria-label="Previous">
+		        					<span aria-hidden="true">&laquo;</span>
+		        				</a>
+		        			</li>
+		        		</th:block>
+		        		<th:block th:unless="${ pi.currentPage <= 1}">
+			        		<li class="page-item">
+					            <a class="page-link" th:href="@{${loc}(page=${pi.currentPage - 1})}" aria-label="Previous">
+					            	<span aria-hidden="true">&laquo;</span>
+					            </a>
+					        </li>
+					    </th:block>
+				        
+		                  <li class="page-item" th:each="p : ${#numbers.sequence(pi.startPage, pi.endPage)}">
+		                      <a class="page-link" th:href="@{${loc}(page=${p})}" th:text="${p}"></a>
+		                  </li>
+				           	
+			           	<li class="page-item" th:if="${ pi.currentPage >= pi.maxPage }">
+			            	<a class="page-link" aria-label="Next">
+			            		<span aria-hidden="true">&raquo;</span>
+			            	</a>
+		         		 </li>
+			           	<th:block th:unless="${ pi.currentPage >= pi.maxPage }")>
+			          	 	<li class="page-item">
+			            		<a class="page-link" th:href="@{${loc}(page=${pi.currentPage + 1})}" aria-label="Next">
+			            			<span aria-hidden="true">&raquo;</span>
+			            		</a>
+			            	</li>
+		            	</th:block>
+			    	</ul>
+		        </nav>
+              </div>	
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="memberModal">
+		<div class="modal-dialog">
+    		<div class="modal-content rounded-3 shadow">
+      			<div class="modal-body p-4 text-center">
+               <div class="row">
+                 <table class="memberDetail table">
+                    <tr class="table-primary">
+                       <th>목차</th>
+                       <th>내용</th>
+                   </tr>
+                    <tr>
+                       <td>이름</td>
+                       <td></td>
+                    </tr>
+                    <tr>
+                       <td>아이디</td>
+                       <td></td>
+                   </tr>
+                   <tr>
+                       <td>닉네임</td>
+                       <td class="nickName"></td>
+                   </tr>
+                   <tr>
+                       <td>이메일</td>
+                       <td class="email"></td>
+                   </tr>
+                   <tr>
+                       <td>생년월일</td>
+                       <td>20220720</td>
+                   </tr>
+                   <tr>
+                       <td>핸드폰번호</td>
+                       <td>010-1111-2222</td>
+                   </tr>
+                   <tr>
+                       <td>보유 포인트</td>
+                       <td>4352P</td>
+                   </tr>
+                   <tr>
+                       <td>관리자 여부</td>
+                       <td class="isAdmin">N</td>
+                   </tr>
+                   <tr>
+                       <td>활동 상태</td>
+                       <td>Y</td>
+                   </tr>
+                   <tr>
+                       <td>정지 상태</td>
+                       <td>N</td>
+                   </tr>
+
+                 </table>
+               </div>
+               <div>
+                 <textarea class="form-control" style="height: 150px; resize: none;" placeholder="정지/탈퇴 사유를 반드시 적어주세요"></textarea>
+               </div>
+      			</div>
+      			<div class="modal-footer flex-nowrap p-0" id="btns">		<!-- data-bs-dismiss="modal" -->
+        			<button type="button" class="btn btn-lg fs-10  btn-link text-decoration-none col-4 m-0 rounded-0 btn-outline-warning"  id="delete">정지</button>
+              			<button type="button" class="btn btn-lg fs-10  btn-link text-decoration-none col-4 m-0 rounded-0 btn-outline-danger" >탈퇴</button>
+        			<button type="button" class="btn btn-lg fs-10  btn-link text-decoration-none col-4 m-0 rounded-0 btn-outline-dark">취소</button>
+      			</div>
+    		</div>
+  		</div>
+	</div>
+	
+	<div class="modal fade" tabindex="-1" role="dialog" id="confirm">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content rounded-1 shadow">
+                <div class="modal-body p-4 text-center fs-4 fw-bold">
+                	
+                </div>
+                <div class="modal-body p-2 fw-bold fs-6">
+                
+                </div>
+                <div class="modal-footer flex-nowrap p-1">
+                    <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 m-0 rounded-0 border-end" id="submitForm">
+                        <strong>네</strong>
+                     </button>
+                     <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 m-0 rounded-0" data-bs-dismiss="modal">아니오</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script th:inline="javascript">
+		
+		// 각 게시물 별로 클릭 이벤트 넣는 부분
+		// ** 모달 창에 클릭 시 해당 객체의 정보 innerText 해버리기
+    window.onload = () =>{
+    	
+    	const mList = /*[[${mList}]]*/null;
+    	const modal = document.getElementById('memberModal');
+		const modalTrs = modal.querySelector('tbody');
+		
+		const confirmModal = document.getElementById('confirm');
+    	
+		let mem;
+		let tr;
+		$('#board-list').on('click', '.boardLists', function(event) {
+        	const target = event.target;
+        	tr = target.closest('.boardLists');
+        	const trMbId = tr.children[0].innerText;
+        	
+        	for(const m of mList) {
+        		if(m.mbId == trMbId){
+        			mem = m;
+        		}
+        	}
+        	
+    		modalTrs.children[1].children[1].innerText = mem.mbName;
+    		modalTrs.children[2].children[1].innerText = mem.mbId;
+    		modalTrs.children[3].children[1].innerText = mem.mbNickName;
+    		modalTrs.children[4].children[1].innerText = mem.mbEmail;
+    		modalTrs.children[5].children[1].innerText = mem.mbBirth.split('T')[0];
+    		modalTrs.children[6].children[1].innerText = mem.mbTel.slice(0,3) + '-' + mem.mbTel.slice(3, 7) + '-' + mem.mbTel.slice(7);
+    		modalTrs.children[7].children[1].innerText = mem.mbPoint + "P";
+    		modalTrs.children[8].children[1].innerText = mem.isAdmin;
+    		modalTrs.children[9].children[1].innerText = mem.mbStatus;
+    		modalTrs.children[10].children[1].innerText = mem.isBanned;
+    	  
+        	$('#memberModal').modal('show');
+		})
+      
+		
+		let beforeData;
+		modalTrs.addEventListener('dblclick', function(event) {
+			const target = event.target;
+			const nickName = target.classList.contains('nickName');
+			const email = target.classList.contains('email');
+			const isAdmin = target.classList.contains('isAdmin');
+			
+			// 수정 하려다가 다른 곳 누르면 되돌리기 로직
+			let tds = modalTrs.querySelectorAll('td');
+			for(let i = 0; i < tds.length; i++){
+				if(tds[i].children[0] != undefined && tds[i].children[0].value != undefined) {
+					if(tds[i].classList.contains('email')){
+						tds[i].innerHTML = tds[i].children[0].value + '@' + tds[i].children[1].value;
+					} else {
+						tds[i].innerHTML = tds[i].children[0].value;
+					}
+				}
+			}
+			
+			
+			// 변경 이벤트
+			if(nickName) {
+				beforData = target.innerText;
+				target.innerHTML = '<input type="text" value="' + target.innerText +'" size="12" class="updateData"><span id="nickNameChecked">❓</span>';
+			}
+			
+			if(email) {
+				beforData = target.innerText;
+				const domain = target.innerText.split('@')[1];
+				let selected = '<select class="updateData">\
+								<option>naver.com</option>\
+								<option>gmail.com</option>\
+								<option>nate.com</option>\
+								<option>hanmail.net</option>\
+							</select>';
+				if(domain == 'gmail.com'){
+					selected = '<select class="updateData">\
+						<option>naver.com</option>\
+						<option selected>gmail.com</option>\
+						<option>nate.com</option>\
+						<option>hanmail.net</option>\
+					</select>';
+				} else if(domain == 'nate.com'){
+					selected = '<select class="updateData">\
+						<option>naver.com</option>\
+						<option>gmail.com</option>\
+						<option selected>nate.com</option>\
+						<option>hanmail.net</option>\
+					</select>';
+				} else if(domain == 'hanmail.net'){
+					selected = '<select class="updateData">\
+						<option>naver.com</option>\
+						<option>gmail.com</option>\
+						<option>nate.com</option>\
+						<option selected>hanmail.net</option>\
+					</select>';
+				} else if(domain == 'naver.com'){
+					selected = '<select class="updateData">\
+						<option selected>naver.com</option>\
+						<option>gmail.com</option>\
+						<option>nate.com</option>\
+						<option>hanmail.net</option>\
+					</select>'
+				}
+				target.innerHTML = '<input type="text" class="updateData" value="' + target.innerText.split('@')[0] + '" size="5">@' + selected;
+			}
+			
+			if(isAdmin) {
+				beforData = target.innerText;
+				let checked = null;
+				if(beforeData == 'Y'){
+					checked = '<input type="radio" name="isAdmin" value="Y" class="updateData" checked> Y\
+								<input type="radio" name="isAdmin" value="N" class="updateData"> N';
+				} else {
+					checked = '<input type="radio" name="isAdmin" value="Y" class="updateData"> Y\
+								<input type="radio" name="isAdmin" value="N" class="updateData" checked> N';
+				}
+				target.innerHTML = checked;
+			}
+			
+			const updateDatas = document.getElementsByClassName('updateData');
+			for(const upData of updateDatas){
+				upData.addEventListener('keyup', function(event){
+					if(event.key =='Enter'){
+						let targetId = modalTrs.children[2].children[1].innerText;
+						let datas = '';
+						if(nickName) {
+							let imot = document.getElementById('nickNameChecked');
+							datas = event.target.value;
+							$.ajax({
+								url: '/nicknameCheck.yj',
+								data: {nickname:datas},
+								success: data => {
+									if(data == 'good') {
+										imot.innerText = '✔';
+										$.ajax({
+											url:'/admin/updateInfo.ad',
+											data: {column: 'nickName', datas:datas, mbId:targetId},
+											success: data =>{
+												if(data == 'success'){
+													mem.mbNickName = datas;
+													tr.children[2].innerText = datas;
+													event.target.parentElement.innerText = datas; 
+												} else {
+													alert('수정에 실패하여 페이지가 새로고침 됩니다.');
+													location.reload();
+												}
+											},
+											error: data => {
+												console.log(data);
+											}
+										})
+									} else if(data == 'bad'){
+										imot.innerText ='❌';
+										event.target.classList.add('vibration');
+										setTimeout(() => {
+											event.target.classList.remove('vibration');
+										}, 400);
+									} else {
+										imot.innerText = '❗';
+										alert("관리자의 닉네임과 같을 수 없습니다.");
+									}
+										
+								},
+								error: data => {
+									console.log(data);
+								}
+							})
+						}
+						if(isAdmin) {
+							for(let i = 0; i < updateDatas.length; i++) {
+								if(updateDatas[i].checked){
+									datas = updateDatas[i].value;
+									break;
+								}
+							}
+							
+							$.ajax({
+								url:'/admin/updateInfo.ad',
+								data: {column: 'isAdmin', datas:datas, mbId:targetId},
+								success: data =>{
+									if(data == 'success'){
+										mem.isAdmin = datas;
+										event.target.parentElement.innerText = datas; 
+									} else {
+										alert('수정에 실패하여 페이지가 새로고침 됩니다.');
+										location.reload();
+									}
+								},
+								error: data => {
+									console.log(data);
+								}
+							})
+							
+						}
+						if(email) {
+							for(let i = 0; i < updateDatas.length; i++){
+								if(i == 0){
+									datas = updateDatas[i].value;
+								} else {
+									datas += '@' + updateDatas[i].value;
+								}
+							}
+							
+							$.ajax({
+								url:'/admin/updateInfo.ad',
+								data: {column: 'email', datas:datas, mbId:targetId},
+								success: data =>{
+									if(data == 'success'){
+										mem.mbEmail = datas;
+										event.target.parentElement.innerText = datas; 
+									} else {
+										alert('수정에 실패하여 페이지가 새로고침 됩니다.');
+										location.reload();
+									}
+								},
+								error: data => {
+									console.log(data);
+								}
+							})
+						}
+						const upTarget = event.target;
+					}
+				});
+			}
+			
+			if(!isAdmin && !nickName && !email) {
+				alert('수정할 수 없는 항목입니다.');
+			}
+			
+		});
+
+		
+		
+		const btns = document.getElementById('btns').querySelectorAll('button');
+		for(const btn of btns) {
+			btn.addEventListener('click', (event) => {
+				//btn-outline-warning btn-outline-danger btn-outline-dark
+				const target = event.target;
+				const warningBtn = target.classList.contains('btn-outline-warning');
+				const kickOutBtn = target.classList.contains('btn-outline-danger');
+				const cancelBtn = target.classList.contains('btn-outline-dark');
+				
+				const reason = modal.querySelector('textarea').value;
+				
+				if(warningBtn) {
+					if(reason.trim() == '') {
+						alert('사유를 반드시 작성해주세요.');
+						return;
+					}
+					
+					const modalBody = confirmModal.querySelectorAll('.modal-body');
+					
+					modalBody[0].innerHTML = "<span>정말로 " + mem.mbName + "님을 <" + reason + "> 사유로 정지하시겠습니까? </span>";
+					modalBody[1].innerHTML = "<div class='stopBtn'><input type='hidden' value='" + mem.mbId + "'> </div>";
+					
+					
+					$('#confirm').modal('show');
+				}
+				
+				if(kickOutBtn) {
+					if(reason.trim() == '') {
+						alert('사유를 반드시 작성해주세요.');
+						return;
+					}
+					
+					const modalBody = confirmModal.querySelectorAll('.modal-body');
+					
+					modalBody[0].innerHTML = "<span>정말로 " + mem.mbName + "님을 <" + reason + "> 사유로 탈퇴시키겠습니까? </span>";
+					modalBody[1].innerHTML = "<div class='kickOutBtn'><input type='hidden' value='" + mem.mbId + "'> </div>";
+					
+					$('#confirm').modal('show');
+				}
+				
+				if(cancelBtn) {
+					$('#memberModal').modal('hide');
+				}
+				//
+			});
+		}
+		
+		document.getElementById('submitForm').addEventListener('click', function(){
+			const modalBody = confirmModal.querySelectorAll('.modal-body');
+			const target = modalBody[1].querySelector('div');
+			// 타겟 아이디
+			const mbId = target.children[0].value;
+			
+			const inputField = modal.querySelector('textarea');
+			
+			// 사유
+			const reason = inputField.value;
+			
+			const stopBtn = target.classList.contains('stopBtn');
+			const kickOutBtn = target.classList.contains('kickOutBtn');
+			
+			if(reason.trim() == '') {
+				alert('사유를 반드시 작성해주세요.');
+				return;
+			}
+			// 사유 저장할 곳 생기거나 로직 생기면 사유도 보내도록 해야함
+			
+			if(stopBtn){
+				$('confirm').modal('hide');
+				$('#memberModal').modal('hide');
+				location.href="/admin/membersStop.ad?mbId=" + mbId + "&reason=" + reason;
+			}
+			
+			if(kickOutBtn) {
+				$('confirm').modal('hide');
+				$('#memberModal').modal('hide');
+				location.href="/admin/kickOutMembers.ad?mbId=" + mbId + "&reason=" + reason;
+			}
+		});
+    }
+		
+		
+	</script>
+</body>
+</html>

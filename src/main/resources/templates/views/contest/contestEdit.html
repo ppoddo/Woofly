@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" href="image/woofly.png">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+	crossorigin="anonymous">
+
+<style>
+	.board-list {
+		cursor: pointer;
+	}
+</style>
+
+</head>
+<body>
+    <div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="container-fluid d-flex mx-5">
+			
+			<!-- 관리자만 보이게!!!!!!!!!!!!!!!!!!! -->
+			<th:block th:if="${ session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+				<div th:replace="~{common/adminNav :: adminNav}"></div>
+			</th:block>
+			<th:block th:if="${ session.loginUser == null || session.loginUser.isAdmin != 'Y'}">
+				<div th:replace="~{common/contestNav :: contestNav}"></div>
+			</th:block>
+			
+			<div class="container mt-4 col-10 mb-5">
+				<div class="col-md-12 mt=1 mb-4">
+					<div class="card">
+	<div class="card-header">
+		<h4>콘테스트 수정</h4>
+	</div>
+	<div class="card-body">
+		<form action="/contest/contestUpdate">
+			<table class="table">
+				<tbody>
+					<tr>
+						<th style="width: 25% ">기수 선택</th>
+						<td>
+							<select class="tableInput" name="conNo"  id="conNo" onchange="changeLangSelect()" style="height: 30px">
+								<th:block th:each="l : ${contestList}">
+									<option th:if="${l.conStatus == 'Y'}" th:value="${ l.conNo }" > 기수 : [[${ l.conGen }]] // 테마 : [[${ l.conName }]] : [[${l.conStatus}]]</option>
+								</th:block>
+							</select> 
+						</td>
+					</tr>
+					<tr>
+						<th>콘테스트 기수</th>
+						<td>
+							<input class="form-control" type="number" aria-label="default input example" name="conGen" id="conGen">
+						</td>
+					</tr>                                                   
+					<tr>
+						<th>콘테스트 테마</th>
+						<td>
+							<input class="form-control" type="text" aria-label="default input example" name="conName" id="conName">
+						</td>
+					</tr>
+					<tr>
+						<th>콘테스트 시작일</th>
+						<td>
+							<input type="date" name="conStartDate" id="conStartDate" style="width: 15%">
+						</td>
+					</tr>
+					<tr>
+						<th>콘테스트 종료일</th>
+						<td>
+							<input type="date" name="conEndDate" id="conEndDate" style="width: 15%">
+							<input type="hidden" name="conStatus" id="conStatus">
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<div class="container text-center">
+				<button class="btn btn-lg fs-10 col-2 m-0 rounded-2 btn-outline-primary">수정</button>
+				<button type="button" class="btn btn-lg fs-10 col-2 m-0 rounded-2 btn-outline-dark" onclick="javascript:history.back();">이전</button>
+			</div>
+		</form>
+	</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+	
+	<script th:inline="javascript">
+		const lists = /*[[${contestList}]]*/1;
+		
+	    var conGen = document.getElementById("conGen");
+	    var conName = document.getElementById("conName");
+	    var conStartDate = document.getElementById("conStartDate");
+		var conEndDate = document.getElementById("conEndDate");
+		var conStatus = document.getElementById("conStatus");
+		
+		// 기수 선택 
+		function changeLangSelect(){
+			var langSelect = document.getElementById("conNo");
+			// option의 value
+		    var selectValue = langSelect.options[langSelect.selectedIndex].value;
+		    // option의 text
+		    var selectText = langSelect.options[langSelect.selectedIndex].text;
+		    
+			for(const list of lists){
+				if( list.conNo ==  selectValue ){
+					conGen.value = list.conGen;
+					conName.value = list.conName;
+					conStartDate.value = list.conStartDate;
+					conEndDate.value = list.conEndDate;
+					conStatus.value = list.conStatus;
+					
+					for(const l of lists){
+						const lGen = list.conGen - 1;
+						const nGen = list.conGen + 1;
+						
+						if( (lists.length + 1) == nGen ){
+							const conEndDate = document.getElementById('conEndDate');
+							const conStartDate = document.getElementById('conStartDate');
+							// max 속성 제거
+							conEndDate.removeAttribute('max');
+							conStartDate.removeAttribute('max');
+							
+							conStartDate.min = lists[1].conEndDate;
+							conEndDate.min = lists[1].conEndDate;
+							break;
+						} else{
+							if(l.conGen == lGen){
+								conStartDate.min = l.conEndDate;
+								conEndDate.min = l.conEndDate;
+							}
+							
+							if(nGen == lists[0].conGen+1){
+								const conEndDate = document.getElementById('conEndDate');
+								// max 속성 제거
+								conEndDate.removeAttribute('max');
+							}
+							
+							if(l.conGen == nGen){
+								conEndDate.max = l.conStartDate;
+								conStartDate.max = l.conStartDate;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		window.onload = () => {
+			const anav = document.getElementById('myNav7')
+			if(anav != null){
+				anav.style.fontWeight = 'bold';
+			}
+			const canav = document.getElementById('cmyNav1')
+			if(canav != null){
+				canav.style.fontWeight = 'bold';
+			}
+			
+			var conNoSelect = document.getElementById("conNo");
+			const aDate = lists[1].conEndDate;
+			
+			for(const list of lists){
+				
+				if(list.conGen == /*[[${c.conGen}]]*/1){
+					conGen.value = list.conGen;
+					conName.value = list.conName;
+					conStartDate.value = list.conStartDate;
+					conEndDate.value = list.conEndDate;
+					
+					
+					const len = conNoSelect.options.length;
+					
+					for (let i=0; i<len; i++){  
+					  	//select box의 option value가 입력 받은 value의 값과 일치할 경우 selected
+					    if(conNoSelect.options[i].value == /*[[${c.conNo}]]*/1){
+					    	conNoSelect.options[i].selected = true;
+					    }
+					}
+					break;
+				}
+			}
+		}
+		
+		
+		
+	</script>
+
+</body>
+</html>

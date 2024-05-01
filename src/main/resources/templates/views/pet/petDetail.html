@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>petInfo</title>
+<link rel="icon" href="/image/woofly.png">
+<style>
+.active {
+	color: black !important;
+	font-weight: 700 !important;
+}
+input {
+  border: none;
+  background: transparent;
+  width: 100%;
+}
+
+select{
+	border: none;
+    background: transparent;
+}
+</style>
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-between mx-5">
+			<th:block th:if="${session.loginUser.mbId == p.ownerId}">
+				<div th:replace="~{common/myNav :: myNav}"></div>
+			</th:block>
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<div class="col-10 mx-auto">
+				<div class="border-bottom border-3 border-black">
+					<h3>마이펫 프로필 관리</h3>
+				</div>
+				<div class="d-flex align-items-center mt-5 mb-2 justify-content-center" style="height: 150px;">
+					<img th:src="@{ ${'/image/' + p.petProfile } }" class="mx-3" alt="편집" style="width: 150px; height: 150px; border-radius: 100px; border: 1px solid black; font-size: 1rem">
+				</div>
+				<div class="d-flex justify-content-center" th:if="${session.loginUser.mbId == p.ownerId}">
+					<form action="/editPetPhoto.dw" method="POST" enctype="multipart/form-data" id="petPhotoForm">
+						<input type="hidden" name="petId" th:value="${p.petId}">
+						<button type="button" class="btn btn-sm btn-outline-dark" onclick="profileChange()">프로필 변경</button>&nbsp;&nbsp; 
+						<input type="file" id="profile" name="file" style="display: none;" accept="image/*" value="123">
+					</form>
+					<form action="/deletePetPhoto.dw" method="get" id="deletePhotoForm">
+						<input type="hidden" name="petId" th:value="${p.petId}">
+						<button type="button" class="btn btn-dark btn-sm" id="deletePetPhoto">삭제</button>
+					</form>
+				</div>
+				<form action="/petEditName.dw" method="post">
+					<input type="hidden" name="petId" th:value="${p.petId}">
+					<div class="d-flex align-items-center justify-content-center mt-4">
+						<div class="col-5">
+							<p class="text-secondary">마이펫 이름</p>
+							<div class="border-bottom d-flex justify-content-between">
+								<input th:class="${session.loginUser.mbId != p.ownerId} ? form-control-plaintext" th:readonly="${session.loginUser.mbId != p.ownerId}" type="text" name="petName" th:value="${p.petName}"  style="width:80%;" required>
+								<div >
+									<button class="btn btn-outline-dark btn-sm mb-2" th:if="${session.loginUser.mbId == p.ownerId}">변경</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<form action="/petEditIntro.dw" method="post">
+					<input type="hidden" name="petId" th:value="${p.petId}">
+					<div class="d-flex align-items-center justify-content-center">
+						<div class="col-5 mt-4">
+							<p class="text-secondary">마이펫 소개</p>
+							<div class="border-bottom d-flex justify-content-between">
+								<input th:class="${session.loginUser.mbId != p.ownerId} ? form-control-plaintext" th:readonly="${session.loginUser.mbId != p.ownerId}"  type="text" min="29" name="petIntro" th:value="${p.petIntro}" style="width:80%;">
+								<div>
+									<button class="btn btn-outline-dark btn-sm mb-2" th:if="${session.loginUser.mbId == p.ownerId}">변경</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<form action="/petEditBirth.dw" method="post" id="birthForm">
+					<input type="hidden" name="petId" th:value="${p.petId}">
+					<div class="d-flex align-items-center justify-content-center">
+						<div class="col-5 mt-4">
+							<p class="text-secondary">생년월일</p>
+							<div class="border-bottom d-flex justify-content-between">
+								<input th:class="${session.loginUser.mbId != p.ownerId} ? form-control-plaintext" th:readonly="${session.loginUser.mbId != p.ownerId}" type="date" id="petBirth" name="petBirth" th:value="${p.petBirth}" style="width:25%">
+								<div>
+									<button th:if="${session.loginUser.mbId == p.ownerId}" type="button" id="birthBtn" class="btn btn-outline-dark btn-sm mb-2">변경</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<form action="/petEditBreed.dw" method="post">
+					<input type="hidden" name="petId" th:value="${p.petId}">
+					<div class="d-flex align-items-center justify-content-center">
+						<div class="col-5 mt-4">
+							<p class="text-secondary">견종</p>
+							<div class="border-bottom d-flex justify-content-between">
+								<select name="petBreed" th:disabled="${session.loginUser.mbId != p.ownerId}">
+								  <option selected disabled>[[${p.petBreed}]]</option>
+								  <option>골든리트리버</option>
+								  <option>그레이하운드</option>
+								  <option>노리치테리어</option>
+								  <option>닥스훈트</option>
+								  <option>도사</option>
+								  <option>동경견</option>
+								  <option>라브라도리트리버</option>
+								  <option>라이카</option>
+								  <option>리트리버</option>
+								  <option>말티즈</option>
+								  <option>말티푸</option>
+								  <option>미니어쳐푸들</option>
+								  <option>미니어쳐핀셔</option>
+								  <option>믹스견</option>
+								  <option>보더콜리</option>
+								  <option>보스턴테리어</option>
+								  <option>불독</option>
+								  <option>불테리어</option>
+								  <option>브리타니스파니엘</option>
+								  <option>비글</option>
+								  <option>비숑프리제</option>
+								  <option>사모예드</option>
+								  <option>삽살개</option>
+								  <option>샤페이</option>
+								  <option>셰퍼드</option>
+								  <option>슈나우져</option>
+								  <option>스코티쉬테리어</option>
+								  <option>스태퍼드셔불테리어</option>
+								  <option>스탠다드푸들</option>
+								  <option>스피츠</option>
+								  <option>시바</option>
+								  <option>시베리안허스키</option>
+								  <option>시츄</option>
+								  <option>아메리칸불리</option>
+								  <option>아메리칸코카스파니엘</option>
+								  <option>요크셔테리어</option>
+								  <option>울프독</option>
+								  <option>웰시코기</option>
+								  <option>웰시코기카디건</option>
+								  <option>웰시코기펨브로크</option>
+								  <option>재패니즈스피츠</option>
+								  <option>재패니즈칭</option>
+								  <option>진도견</option>
+								  <option>차우차우</option>
+								  <option>치와와</option>
+								  <option>카네코르소</option>
+								  <option>코카스파니엘</option>
+								  <option>토이푸들</option>
+								  <option>페키니즈</option>
+								  <option>포메라니안</option>
+								  <option>포인터</option>
+								  <option>푸들</option>
+								  <option>푸숑</option>
+								  <option>풍산견</option>
+								  <option>프렌치불독</option>
+								  <option>핏불테리어</option>
+								  <option>화이트리트리버</option>
+								  <option>휘펫</option>
+								</select>
+								<div>
+									<button th:if="${session.loginUser.mbId == p.ownerId}" class="btn btn-outline-dark btn-sm mb-2">변경</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<form action="/petEditWeight.dw" method="post">
+					<input type="hidden" name="petId" th:value="${p.petId}">
+					<div class="d-flex align-items-center justify-content-center">
+						<div class="col-5 mt-4">
+							<p class="text-secondary">몸무게 (kg)</p>
+							<div class="border-bottom d-flex justify-content-between">
+								<input th:class="${session.loginUser.mbId != p.ownerId} ? form-control-plaintext" th:readonly="${session.loginUser.mbId != p.ownerId}" type="number" min="0" name="petWeight" th:value="${p.petWeight}" style="width: 25%">
+								<div>
+									<button th:if="${session.loginUser.mbId == p.ownerId}" class="btn btn-outline-dark btn-sm mb-2">변경</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<form action="/petEditGender.dw" method="post">
+					<input type="hidden" name="petId" th:value="${p.petId}">
+					<div class="d-flex align-items-center justify-content-center">
+						<div class="col-5 mt-4">
+							<p class="text-secondary">성별</p>
+							<div class="border-bottom d-flex justify-content-between">
+								<select name="petGender" th:disabled="${session.loginUser.mbId != p.ownerId}">
+								  <option selected disabled>--</option>
+								  <option value="M" th:selected="${p.petGender == 'M'}">남아</option>
+								  <option value="F" th:selected="${p.petGender == 'F'}">여아</option>
+								</select>
+								<div>
+									<button th:if="${session.loginUser.mbId == p.ownerId}" class="btn btn-outline-dark btn-sm mb-2">변경</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<form action="/petEditMemo.dw" method="post">
+					<input type="hidden" name="petId" th:value="${p.petId}">
+					<div class="d-flex align-items-center justify-content-center mb-5">
+						<div class="col-5 mt-4">
+							<p class="text-secondary">특이사항</p>
+							<div class="border-bottom d-flex justify-content-between">
+								<input th:class="${session.loginUser.mbId != p.ownerId} ? form-control-plaintext" th:readonly="${session.loginUser.mbId != p.ownerId}" type="text" min="80" name="petMemo" th:value="${p.petMemo}" style="width:80%">
+								<div>
+									<button th:if="${session.loginUser.mbId == p.ownerId}" class="btn btn-outline-dark btn-sm mb-2">변경</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<!-- <a th:href="'/pet/petDelete/' + ${p.petId}" class="link-underline-secondary text-secondary d-flex justify-content-end me-5 mb-5">마이펫프로필 삭제</a> -->
+				<a role="button" class="link-underline-secondary text-secondary d-flex justify-content-end me-5 mb-5" id="deletePetBtn" th:if="${session.loginUser.mbId == p.ownerId}">마이펫 프로필 삭제</a>
+				<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLabel">마이펫 프로필 삭제</h5>
+							</div>
+							<div class="modal-body">
+								<strong>마이펫 프로필을 정말로 삭제하시겠습니까?</strong>
+				        		<p>(마이펫 프로필을 삭제하셔도 다이어리와 사진첩은 삭제되지 않습니다.)</p>
+							</div>
+							<div class="modal-footer justify-content-between">
+						        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">아니오</button>
+						        <a th:href="'/pet/petDelete/' + ${p.petId}" class="btn btn-dark">네</a>
+					      	</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<script>
+      const myNav = document.getElementById("myPet1");
+      $(myNav).removeClass('text-secondary');
+      $(myNav).addClass('active');
+      
+	 //마이펫 삭제 모달	
+	  $('#deletePetBtn').click(function(e){
+	      e.preventDefault();
+		  $('#deleteModal').modal("show");
+	  });
+	 
+	  //생일 넘어가기
+ 	  const now_date = Date.now();
+      const timeOff = new Date().getTimezoneOffset()*60000;
+      const today = new Date(now_date-timeOff).toISOString().split("T")[0];
+      document.getElementById("petBirth").setAttribute("max", today);
+		
+	  //마이펫 프로필 변경
+	  const profileChange = () => {
+	         const profile = document.getElementById("profile");
+	         profile.click();
+	      }
+	      
+	      const profile = document.getElementById('profile');
+	      profile.addEventListener('change', () => {
+	         if (profile.files.length > 0) {
+	             document.getElementById("petPhotoForm").submit();
+	         }
+	      })
+	 
+	 //마이펫 프로필 삭제
+	  const deletePetPhoto = document.getElementById("deletePetPhoto");
+	  deletePetPhoto.addEventListener('click', ()=>{
+		  document.getElementById("deletePhotoForm").submit();
+	  })
+	 
+      
+      
+      //태어난 날짜 미래 시간 선택 막기
+      document.getElementById('birthBtn').addEventListener('click', function(){
+    	 const today = new Date();
+    	 const petBirth = document.getElementById('petBirth').value;
+    	 const petBirth2 = new Date(petBirth);
+    	 const birthForm = document.getElementById('birthForm');
+    	 
+    	 if(petBirth2 > today) {
+    		 alert("날짜를 다시 선택해주세요.");
+    	 } else {
+    		birthForm.submit();
+    	 }
+      });
+      
+      //실시간 변경
+   	  const thirdForm = document.getElementsByTagName('form')[2];
+      const pTags = thirdForm.querySelectorAll('p:not(.text-secondary)');
+      
+         pTags.forEach(pTag => {
+          pTag.addEventListener('click', function editContent() {
+              var text = this.innerText; // 현재 p 태그의 텍스트 내용을 가져옵니다.
+      
+              // input 태그를 생성하고 텍스트 내용을 설정합니다.
+              var inputTag = document.createElement('input');
+              inputTag.setAttribute('type', 'text');
+              inputTag.setAttribute('value', text);
+      
+              // p 태그를 input 태그로 대체합니다.
+              this.parentNode.replaceChild(inputTag, this);
+      
+              // input 태그에 포커스를 주어 사용자가 바로 수정할 수 있도록 합니다.
+              inputTag.focus();
+            
+              // input 태그가 포커스를 잃으면(수정이 끝나면) 다시 p 태그로 변경합니다.
+              inputTag.addEventListener('blur', function revertContent() {
+                  var newText = this.value.trim();
+                  var newPTag = document.createElement('p');
+                  newPTag.innerText = newText;
+                  this.parentNode.replaceChild(newPTag, this);
+               
+                  // 수정된 p 태그에 다시 클릭 이벤트를 추가하여 수정 가능하도록 합니다.
+                  newPTag.addEventListener('click', editContent);
+              });
+      
+              // 현재 클릭한 p 태그의 클릭 이벤트를 제거하여 다중 수정을 방지합니다.
+              this.removeEventListener('click', editContent);
+          });
+      });
+   </script>
+</body>
+</html>

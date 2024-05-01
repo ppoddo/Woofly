@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WOOFLY</title>
+<link rel="icon" href="/image/woofly.png">
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+</style>
+</head>
+<body>
+<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/topAdd :: topAdd}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-between mx-5">
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+		 	<div class="col-10 mx-auto">
+				<div class="d-flex align-items-center mt-5 mb-4 pb-5 justify-content-center" style="height: 150px;">
+                	<img class="mx-3" id="profileImg" th:src="|/image/${user.mbPhoto}|" style="width: 150px; height: 150px; border-radius: 100px; border: 1px solid black; font-size: 1rem">
+                </div>
+				<div class="border-bottom border-3 border-black ">
+                	<h3 class="text-center mb-5">[[${user.mbIntro}]]</h3>
+                	<div class="d-flex justify-content-between">
+						<h3>[[${user.mbNickName}]]님의 프로필</h3>
+                		<div>
+                			<a th:href="|/userPhoto?mbId=${user.mbId}|" th:if="${!#arrays.isEmpty(list)}" class="btn btn-dark">사진첩 보러가기</a>
+                		</div>
+                	</div>
+					
+				</div>
+				<div class="mt-3 gap-5 row justify-content-center">	
+					<th:block th:each="p : ${list}">
+						<div class="card" style="width: 14rem;">
+						  <img th:src="'/image/'+${p.petProfile}" th:onclick="|location.href='/pet/petDetail/${p.petId}'|" class="card-img-top mt-2" alt="..." role="button" style="width: 200px; height: 200px;">
+						  <div class="card-body">
+						    <h5 class="card-title">[[${p.petName}]]</h5>
+						    <p class="card-text">[[${p.petIntro}]]</p>
+						  </div>
+						</div>
+					</th:block>
+					<div th:if="${#arrays.isEmpty(list)}" style="width: 500px;" class="mx-auto text-center">
+						<img src="/images/cryingdog.png" style="width:200px;">
+						<h3>해당 회원은 펫이 없습니다.</h3>
+						<button class="btn btn-outline-dark" onclick="window.history.go(-1);">뒤로가기</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+	
+	<script>
+		const myNav = document.getElementById("myPet1");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+		
+	</script>
+	
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>petContest</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+<link rel="icon" href="/image/woofly.png">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+</style>
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-between mx-5">
+			<div th:replace="~{common/myNav :: myNav}"></div>
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<div class="col-10">
+				<div class="border-bottom border-3 border-black">
+					<h3>개통령 참여현황</h3>
+				</div>
+				<div class="d-flex justify-content-between mt-3 mb-3">
+					<form action="/pet/petContest" class="d-flex">
+						<div class = "p-2 bd-highlight">
+						  <select class="form-select" name="petName" style="width: 160px;" required>
+							  <option value="" selected>강아지 선택</option>
+						  	  <option th:each="p : ${pList}" th:value="${p.petId}" th:text="${p.petName}"></option>
+						  </select>
+					 	</div>
+					 	<div class="p-2 bd-highlight">
+					  		<button class="btn btn-dark btn">조회</button>
+					  	</div>
+				  	</form>
+					<div class="d-flex ms-auto p-2 align-items-center bd-highlight">
+					    <a href="/contest/contestParticipation" class="btn btn-dark btn">콘테스트 참가</a>
+					</div>
+				</div>
+				<div class="mb-5">
+					<div class="d-flex flex-wrap gap-5 mt-2">	
+						<div class="card" style="width: 14rem;" th:each="pt : ${ptList}" th:onclick="|location.href='/contest/selectContest?pNo=${pt.pNo}&page=1'|">
+						  <img th:src="'/image/contestFiles/' + ${pt.renameName}" class="card-img-top mt-2 mx-auto" alt="..." style="width: 200px; height: 200px; cursor:pointer;">
+						  <div class="card-body">
+						  	<div class="d-flex justify-content-between">
+						    	<h5 class="card-title" th:text="${pt.pPet}"></h5>
+						    	<p th:text="${pt.conGen}+기"></p>
+						    </div>
+						    <p class="card-text" th:text="${pt.pTitle}"></p>
+						  </div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="d-flex justify-content-center align-items-center" style="min-height: 500px" th:if="${ #arrays.isEmpty(ptList) }">
+					<div class="d-flex flex-column justify-content-center align-items-center">
+						<img src="/images/cryingdog.png" style="width:200px;">
+						<p>컨테스트 참여 내역이 없습니다.</p>
+						<!-- <div>
+							<button class="btn btn-outline-dark" onclick="">콘테스트 참여하기</button>
+						</div> -->
+					</div>
+				</div>
+				
+			</div>
+		</div>
+	</main>
+	<script>
+		const myNav = document.getElementById("myPet4");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+	</script>
+</body>
+</html>

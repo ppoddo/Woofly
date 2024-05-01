@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.kh.woofly.account.model.dao.AccountDAO">
+	<select id="login" resultType="Member">
+		select *
+		from member
+		where MB_ID = #{mbId} and mb_status='Y'
+	</select>
+	
+	<select id="idCheck" resultType="_int">
+		select count(*)
+		from member
+		where MB_ID = #{mbId}
+	</select>
+	
+	<select id="nickCheck" resultType="_int">
+		select count(*)
+		from member
+		where MB_NICKNAME = #{mbNickname}
+	</select>
+	
+	<insert id="signUpMember" parameterType="Member">
+		INSERT INTO MEMBER
+		VALUES (#{mbId}, #{mbPwd}, #{mbName}, #{mbPhoto}, null, #{mbNickName}, #{mbEmail}, #{mbBirth}, #{mbTel}, default, default, default, default, default, null, default, #{isKakao})
+	</insert>
+	
+	<insert id="signUpMemberAddr" parameterType="MemberAddress">
+		INSERT INTO MEMBER_ADDRESS
+		VALUES (address_seq.nextval, #{addr}, #{mbId}, 'Y', #{mbTel}, #{mbName}, #{postcode}, #{addrDetail})
+	</insert>
+	
+	<select id="checkNameEmail" resultType="_int">
+		select count(*)
+		from member
+		where MB_NAME = #{mbName} and MB_EMAIL = #{mbEmail}
+	</select>
+	
+	<select id="sendId" parameterType="Member">
+		select mb_id
+		from member
+		where mb_name = #{mbName} and mb_email = #{mbEmail} and mb_status = 'Y'
+	</select>	
+	
+	<select id="checkIdEmail" resultType="_int">
+		select count(*)
+		from member
+		where mb_id = #{mbId} and mb_email = #{mbEmail} and mb_status = 'Y'
+	</select>
+	
+	<update id="updatePwd">
+		update member
+		set mb_pwd = #{mbPwd}
+		where mb_id = #{mbId}
+	</update>
+	
+</mapper>

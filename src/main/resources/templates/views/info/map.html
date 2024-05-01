@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<style>
+	.topActive {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+</style>
+<body>
+	<div th:replace="~{common/topAdd :: topAdd}"></div>
+	
+	
+	<script>
+		const navSelect = document.getElementById("top3");
+		$(navSelect).removeClass('text-black');
+		$(navSelect).addClass('topActive');
+	</script>
+</body>
+</html>

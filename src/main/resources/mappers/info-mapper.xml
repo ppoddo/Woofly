@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.kh.woofly.info.model.dao.InfoDAO">
+	
+	<!-- count -->
+	<select id="getListCount" resultType="_int">	
+		<if test="i == 1">
+			SELECT COUNT(*)
+			FROM company
+			WHERE COM_STATUS ='Y'
+		</if>
+		<if test="i == 2">
+			SELECT COUNT(*)
+			FROM QNA
+			WHERE Q_STATUS ='Y'
+		</if>
+		<if test="i == 3">
+			SELECT COUNT(*)
+			FROM NOTICE
+			WHERE N_STATUS ='Y'
+		</if>		
+	</select>
+	
+	<select id="searchCount" resultType="_int">	
+		<if test="type == 1">
+			SELECT COUNT(*)
+			FROM ${table}
+			WHERE ${status} ='Y' AND ( (${title} LIKE '%${search}%') OR (${content} LIKE '%${search}%') )
+		</if>
+		<if test="type == 4">
+			SELECT COUNT(*)
+			FROM ${table}
+			WHERE ${status} ='Y' AND ( (${title} LIKE '%${search}%') OR (${content} LIKE '%${search}%')) AND ${abc} = #{value}
+		</if>
+		<if test="type == 2">
+			SELECT COUNT(*)
+			FROM ${table}
+			WHERE ${status} ='Y' AND ${Category} LIKE '%${search}%' AND ${abc} = #{value}
+		</if>
+		<if test="type == 3">
+			SELECT COUNT(*)
+			FROM ${table}
+			WHERE ${status} ='Y' AND ${Category} LIKE '%${search}%'
+		</if>
+		<if test="type == 5">
+			SELECT COUNT(*)
+			FROM ${table}
+			WHERE ${status} ='Y' AND ${Category} LIKE '%${search}%' AND COM_CATEGORY = #{comCategory}
+		</if>
+	</select>
+	
+	<select id="selectCount" resultType="_int">	
+		SELECT COUNT(*)
+		FROM ${table}
+		WHERE ${status} ='Y'AND ${Category} = #{value}
+	</select>
+	
+	
+	<!-- 공지사항  -->
+	<insert id="insertNotice">
+		insert into notice
+		values ( NOTICE_SEQ.NEXTVAL , #{nTitle}, #{nContent}, sysdate, sysdate, #{nCategory}, default, default, #{nWriter})
+	</insert>
+	
+	<select id="selectNoticeList" resultType="Notice">
+		select *
+		from notice
+		WHERE N_STATUS ='Y'
+		ORDER BY N_CREATE_DATE DESC
+	</select>
+	
+	<select id="noticeNo" resultType="_int">
+		SELECT *
+	    FROM (
+			select N_NO
+			from NOTICE
+			ORDER BY N_NO DESC
+		)
+		<![CDATA[
+	    WHERE ROWNUM <= 1
+	    ]]>
+	</select>
+	
+	<select id="selectNotice" resultType="Notice">
+		select *
+		from NOTICE
+		WHERE N_NO = #{ nNum }	
+	</select>
+	
+	<update id="deleteNotice">
+		UPDATE notice
+		SET N_STATUS = 'N'
+		WHERE N_NO = #{ nNo }
+	</update>
+	
+	<update id="updateNotice">
+		UPDATE notice
+		SET n_Title = #{nTitle}, n_Content = #{nContent},  N_MODIFY_DATE = SYSDATE, n_Category = #{nCategory}
+		WHERE n_No = #{nNo}
+	</update>
+	
+	<select id="searchNotice" resultType="Notice">
+		<if test="type == 1">
+			select *
+			from Notice
+			WHERE ${status} ='Y' AND ( ${title} LIKE '%${search}%' OR ${content} LIKE '%${search}%' ) AND N_CATEGORY = #{value}
+			ORDER BY N_CREATE_DATE DESC
+		</if>
+		<if test="type == 2">
+			select *
+			from Notice
+			WHERE ${status} ='Y' AND  ${Category} LIKE '%${search}%' AND N_CATEGORY = #{value}
+			ORDER BY N_CREATE_DATE DESC
+		</if>
+	</select>
+	
+	<select id="selectNoticeCategory" resultType="Notice">
+		select *
+		from Notice
+		WHERE ${status} ='Y' AND N_CATEGORY = #{value}
+		ORDER BY N_CREATE_DATE DESC
+	</select>
+	
+	<select id="searchAllNotice" resultType="Notice">
+		<if test="type == 1">
+			select *
+			from Notice
+			WHERE ${status} ='Y' AND ( ${title} LIKE '%${search}%' OR ${content} LIKE '%${search}%' )
+			ORDER BY N_CREATE_DATE DESC
+		</if>
+		<if test="type == 2">
+			select *
+			from Notice
+			WHERE ${status} ='Y' AND ( ${Category} LIKE '%${search}%')
+			ORDER BY N_CREATE_DATE DESC
+		</if>
+	</select>
+	
+	
+	<select id="selectAttmNList" resultType="NoticeAttm">
+		select *
+		from ATTACHMENT
+		WHERE ATTM_STATUS = 'Y' AND ATTM_REF_NO = #{nNum}  AND ATTM_REF_TYPE = 'N'
+	</select>
+	
+	<!-- 조회수 -->
+	<update id="updateCount">
+		UPDATE NOTICE
+		SET N_COUNT = N_COUNT + 1
+		WHERE N_NO = #{nNo}
+	</update>
+	
+	<!-- QNA(FAQ) -->
+	<insert id="insertQNA">
+		insert into QNA
+		values ( QNA_SEQ.NEXTVAL , #{qTitle}, #{qContent}, sysdate, sysdate, #{qCategory}, default, 0, #{qWriter} )
+	</insert>
+	
+	<select id="selectQNAList" resultType="QNA">
+		select *
+		from QNA
+		WHERE Q_STATUS ='Y'
+		ORDER BY Q_CATEGORY DESC
+	</select>
+	
+	<select id="selectQNA" resultType="QNA">
+		select *
+		from QNA
+		WHERE Q_ID = #{ qId }
+	</select>
+	
+	<update id="updateQNA">
+		UPDATE QNA
+		SET Q_TITLE = #{qTitle}, Q_CONTENT = #{qContent}, Q_MODIFY_DATE = SYSDATE, Q_CATEGORY = #{qCategory}
+		WHERE Q_ID = #{qId}
+	</update>	
+	
+	<update id="deleteQNA">
+		UPDATE QNA
+		SET Q_STATUS = 'N'
+		WHERE Q_ID = #{qId}
+	</update>
+	
+	<select id="searchQNA" resultType="QNA">
+		<if test="type == 1">
+			select *
+			from QNA
+			WHERE ${status} ='Y' AND ( ${title} LIKE '%${search}%' OR ${content} LIKE '%${search}%' )  AND Q_CATEGORY = #{value}
+			ORDER BY Q_CATEGORY, Q_ID DESC
+		</if>
+		<if test="type == 2">
+			select *
+			from QNA
+			WHERE ${status} ='Y' AND ${Category} LIKE '%${search}%'  AND Q_CATEGORY = #{value}
+			ORDER BY Q_CATEGORY, Q_ID DESC
+		</if>
+	</select>
+	
+	<select id="searchAllQNA" resultType="QNA">
+		<if test="type == 1">
+			select *
+			from QNA
+			WHERE ${status} ='Y' AND ( ${title} LIKE '%${search}%' OR ${content} LIKE '%${search}%' )
+			ORDER BY Q_ID DESC
+		</if>
+		<if test="type == 2">
+			select *
+			from QNA
+			WHERE ${status} ='Y' AND ( ${Category} LIKE '%${search}%')
+			ORDER BY Q_ID DESC
+		</if>
+	</select>
+	
+	<select id="selectQNACategory" resultType="QNA">
+		select *
+		from QNA
+		WHERE ${status} ='Y' AND Q_CATEGORY = #{value}
+		ORDER BY Q_ID DESC
+	</select>
+	
+	<!-- 협력업체 -->
+	<insert id="insertCompany">
+		insert into company
+		values ( COMPANY_SEQ.NEXTVAL , #{comName}, #{comCategory}, #{comPhone}, sysdate, #{comEmail}, default, #{comAddr})
+	</insert>
+	
+	<select id="selectCompanyList" resultType="Company">
+		select *
+		from company
+		WHERE COM_STATUS ='Y'
+		ORDER BY COM_CATEGORY ASC	
+	</select>
+	
+	<select id="selectCompany" resultType="Company">
+		select *
+		from COMPANY
+		WHERE COM_NO = #{ comNo }	
+	</select>
+	
+	<update id="updateCompany">
+		UPDATE COMPANY
+		SET com_Name = #{comName}, com_Category = #{comCategory}, com_Phone = #{comPhone}, com_Email = #{comEmail}, com_Addr = #{comAddr}
+		WHERE com_No = #{comNo}
+	</update>
+	
+	<update id="deleteCompany">
+		UPDATE COMPANY
+		SET COM_STATUS = 'N'
+		WHERE COM_NO = #{comNo}
+	</update>
+	
+	<select id="searchCompany" resultType="Company">
+		<if test="type == 5">
+			select *
+			from Company
+			WHERE ${status} ='Y' AND ${Category} LIKE '%${search}%'And COM_CATEGORY = #{comCategory}
+			ORDER BY COM_CATEGORY ASC
+		</if>
+		<if test="type == 3">
+			select *
+			from Company
+			WHERE ${status} ='Y' AND ${Category} LIKE '%${search}%'
+			ORDER BY COM_CATEGORY ASC
+		</if>
+	</select>
+	
+	<insert id="insertAttm">
+		INSERT ALL
+		<foreach collection="list" item="a">
+			INTO ATTACHMENT
+			VALUES (NEW_AID, #{a.originalName}, #{a.renameName}, SYSDATE, SYSDATE, #{a.attmPath}, DEFAULT, 'N', #{a.attmRefNo} , #{a.attmLevel})
+		</foreach>
+		SELECT *
+		FROM DUAL
+	</insert>
+	
+	<update id="deleteAttm">
+		UPDATE ATTACHMENT
+		SET ATTM_STATUS = 'N'
+		WHERE ATTM_REF_TYPE = 'N' AND RENAME_NAME = #{string}
+	</update>
+	
+	<select id="selectComNo" resultType="_int">
+		SELECT COM_NO
+			FROM (
+			select COM_NO
+			from COMPANY
+			ORDER BY COM_NO DESC
+		)
+		<![CDATA[
+		WHERE ROWNUM <= 1
+		]]>
+	</select>
+	
+</mapper>

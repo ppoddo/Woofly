@@ -1,0 +1,402 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WOOFLY</title>
+<link rel="icon" href="image/woofly.png">
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+</style>
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-between mx-5">
+			<div th:replace="~{common/myNav :: myNav}"></div>
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<div class="col-10 pt-3 mb-5 me-4">
+				<div class="border-bottom border-3 border-black mb-5">
+					<h3>로그인 정보</h3>
+				</div>
+				<h4>내 계정</h4>
+				<br>
+				<div class="col-6">
+					<p class="text-secondary">이메일 주소</p>
+					<div class="border-bottom d-flex justify-content-between">
+						<p>[[${session.loginUser.mbEmail}]]</p>
+						<div>
+							<button class="btn btn-outline-dark btn-sm" data-bs-toggle="modal" th:if="${session.loginUser.isKakao == 'N'}" data-bs-target="#emailModal">변경</button>
+						</div>
+					</div>
+				</div>
+				<br>
+				<div class="col-6 mb-5">
+					<p class="text-secondary">비밀번호<p>
+					<div class="border-bottom d-flex justify-content-between">
+						<p>●●●●●●●●●</p>
+						<div>
+							<button class="btn btn-outline-dark btn-sm" data-bs-toggle="modal" data-bs-target="#pwdModal">변경</button>
+						</div>
+					</div>
+				</div>
+				
+				<h4>개인 정보</h4>
+				<br>
+				<div class="col-6">
+					<p class="text-secondary">휴대폰 번호</p>
+					<div class="border-bottom d-flex justify-content-between">
+						<p>[[|010-${session.loginUser.mbTel[3]}***-*${#strings.substring(session.loginUser.mbTel, 8, 11)}|]]</p>
+						<div>
+							<button class="btn btn-outline-dark btn-sm" data-bs-toggle="modal" data-bs-target="#phoneModal">변경</button>
+						</div>
+					</div>
+				</div>
+				<br>
+				<br>
+				<p><a role="button" id="updateMbStatus" class="link-underline-secondary text-secondary">회원 탈퇴</a></p>
+			</div>
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+		</div>
+	</main>
+	
+	<form action="/updateEmail.yj" method="POST" id="updateEmailForm">
+		<div class="modal fade" id="emailModal" tabindex="-1">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+		        		<h1 class="modal-title fs-5" id="emailModalToggleLabel">이메일 변경</h1>
+			        	<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body text-left">
+						<div class="mb-3">
+						    <label for="email" class="form-label">Email address</label>
+							<input type="email" class="form-control" name="to" id="email" placeholder="새 이메일 주소">
+						</div>
+						<div class="text-center">
+							<button type="button" class="btn btn-outline-dark btn-sm" id="emailSendBtn">인증번호 받기</button>
+						</div>
+						<div class="mb-3">
+						    <label for="verification" class="form-label">Verification code</label>
+							<input type="text" class="form-control" id="emailVerification" placeholder="인증번호">
+							<div class="form-text" id="checkEmailResult"></div>
+							<input type="hidden" id="emailCode" value="">
+						</div>
+						<div class="text-center">
+							<button type="button" class="btn btn-outline-dark btn-sm" id="checkEmailBtn">인증 번호 확인</button>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" id="updateEmailBtn" class="btn btn-outline-primary">저장하기</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+	<form action="/updatePwd.yj" method="POST" id="updatePwdForm">
+		<div class="modal fade" id="pwdModal" tabindex="-1">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+		        		<h1 class="modal-title fs-5" id="">비밀번호 변경</h1>
+			        	<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body text-start">
+						<div class="mb-3">
+							<label class="form-label" for="currentPwd">현재 비밀번호</label>					
+							<input type="password" class="form-control" id="currentPwd" placeholder="현재 비밀번호">
+							<div class="form-text" id="currentPwdResult"></div>
+						</div>
+						<div class="mb-3">
+							<label class="form-label" for="newPwd">새 비밀번호</label>
+							<input type="password" class="form-control" name="newPwd" placeholder="새 비밀번호" id="newPwd">
+							<div class="form-text" id="pwdRegCheck"></div>
+						</div>
+						<div class="mb-3">
+							<label class="form-label" for="checkPwd">비밀번호 확인</label>					
+							<input type="password" class="form-control" id="checkPwd" placeholder="비밀번호 확인">
+							<div class="form-text" id="checkPwdResult"></div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button id="updatePwdBtn" class="btn btn-outline-primary" type="button">변경하기</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+	<form action="/updatePhone.yj" method="POST" id="updatePhoneForm">
+		<div class="modal fade" id="phoneModal" tabindex="-1">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+		        		<h1 class="modal-title fs-5" id="">전화번호 변경</h1>
+			        	<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body text-left">
+						<div class="mb-3">
+						    <label for="phone" class="form-label">PHONE</label>
+							<input type="text" class="form-control" id="phone" name="phone" placeholder="- 없이 핸드폰 번호를 적어주세요">
+						</div>
+						<div class="text-center">
+							<button type="button" id="checkPhoneBtn" class="btn btn-outline-dark btn-sm">인증번호 받기</button>
+						</div>
+						<div class="mb-3">
+						    <label for="verification" class="form-label">Verification code</label>
+							<input type="text" class="form-control" id="phoneVerification" placeholder="인증번호">
+							<div class="form-text" id="phoneCheckResult"></div>
+							<input type="hidden" value="" id="phoneCode"> 
+						</div>
+						<div class="text-center">
+							<button type="button" id="checkPhoneCodeBtn" class="btn btn-outline-dark btn-sm">인증 번호 확인</button>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" id="updatePhoneBtn" class="btn btn-outline-primary">변경하기</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+						
+	<script th:inline="javascript">
+		const myNav = document.getElementById("myNav4");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+		let validEmail = false;
+		
+		
+		// 현재 비밀번호 확인 란
+		const currentPwd = document.getElementById('currentPwd');
+		const currentPwdResult = document.getElementById("currentPwdResult");
+		currentPwd.addEventListener('keyup', () => {
+			$.ajax({
+				url: "/checkPwd.yj",
+				data: {'currentPwd': currentPwd.value},
+				success: (data) => {
+					console.log(data);
+					if(data == 'Y') {
+						currentPwdResult.innerText = '비밀번호가 일치 합니다';
+						currentPwdResult.style.color = 'green';
+					} else {
+						currentPwdResult.innerText = '비밀번호가 일치 하기 않습니다.';
+						currentPwdResult.style.color = 'red';
+					}
+				},
+				error: (data) => console.log(data)
+			})
+		})
+		
+		
+		const checkPwdResult = document.getElementById('checkPwdResult');
+		const checkPwd = document.getElementById('checkPwd');
+		const newPwd = document.getElementById('newPwd');
+		const pwdRegCheck = document.getElementById('pwdRegCheck');
+		const pwdReg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,15}$/;
+		
+		// 비밀번호 확인란
+		newPwd.addEventListener('keyup', () => {
+			console.log(123);
+			$.ajax({
+				url: "/checkPwd.yj",
+				data: {'currentPwd': newPwd.value},
+				success: (data) => {
+					console.log(data);
+					if(data == 'Y') {
+						pwdRegCheck.innerText = '현재 사용하고 있는 비밀번호와 같습니다.';
+						pwdRegCheck.style.color = 'red';
+					} else {
+						if (!pwdReg.test(newPwd.value)) {
+							pwdRegCheck.innerText = '비밀번호는 영문,숫자,특수문자 포함 8자리~15자리 이상입니다.';
+							pwdRegCheck.style.color = "red";
+						} else {
+							pwdRegCheck.innerText = '사용 가능한 비밀번호 입니다.';
+							pwdRegCheck.style.color = 'green';
+						}
+					}
+				},
+				error: (data) => console.log(data)
+			})
+			
+		})
+		
+		
+		// 새 비밀번호 확인 란
+		checkPwd.addEventListener('keyup', () => {
+			if (pwdRegCheck.style.color == 'green') {
+				if (checkPwd.value === newPwd.value) {
+					checkPwdResult.innerText = '비밀번호가 일치 합니다';
+					checkPwdResult.style.color = 'green';
+				} else {
+					checkPwdResult.innerText = '비밀번호가 일치 하기 않습니다.';
+					checkPwdResult.style.color = 'red';
+				}
+			}
+		})
+		
+		// 비밀번호 변경 버튼
+		document.getElementById("updatePwdBtn").addEventListener("click", () => {
+			if (currentPwdResult.style.color == 'green' && checkPwdResult.style.color == 'green' && pwdRegCheck.style.color == 'green') {
+				document.getElementById("updatePwdForm").submit();
+			}
+		})
+		
+		// 이메일 전송
+		
+		document.getElementById("emailSendBtn").addEventListener('click', () => {
+			const email = document.getElementById('email').value;
+			const email_regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
+			if(email_regex.test(email)){
+				/*<![CDATA[*/
+				if(email != /*[[${session.loginUser.mbEmail}]]*/'email') {
+				/*]]>*/
+					$.ajax({
+						url: "/mailCheck.yj",
+						data: {"to": email},
+						success: (data) => {
+							console.log(data);
+							document.getElementById("emailCode").value = data;
+							
+						},
+						error: (data) => console.log(data)
+					})
+				} else {
+					alert("변경할 이메일을 입력해주세요");
+				}
+			} else {
+				alert("올바른 형식으로 이메일을 입력해주세요");
+			}
+
+
+			
+		})
+		
+		// 이메일 확인 란
+		const checkEmailBtn = document.getElementById('checkEmailBtn');
+		const emailResult = document.getElementById('checkEmailResult');
+		checkEmailBtn.addEventListener('click', () => {
+			const email = document.getElementById('email').value;
+			const emailVerification = document.getElementById('emailVerification');
+			const emailCode = document.getElementById("emailCode");
+			if (emailCode.value == "") {
+				emailResult.innerText = '인증번호를 발급 받으세요';
+				emailResult.style.color = "red";
+			} else if (emailVerification.value.trim() == "") {
+				emailResult.innerText = '인증번호를 입력해주세요';
+				emailResult.style.color = "red";
+			} else if (emailVerification.value === emailCode.value) {
+				emailResult.innerText = '인증번호가 일치 합니다';
+				emailResult.style.color = 'green';
+				validEmail = true;
+			} else {
+				emailResult.innerText = '인증번호가 일치 하기 않습니다.';
+				emailResult.style.color = 'red';
+			}
+		})
+		
+		//이메일 수정
+		const updateEmailBtn = document.getElementById("updateEmailBtn");
+		updateEmailBtn.addEventListener("click", () => {
+			if(validEmail) {
+				document.getElementById('updateEmailForm').submit();
+			} else {
+				alert("인증번호를 확인해주세요");
+			}
+		})
+		
+		// 인증 문자 전송
+		const phone = document.getElementById("phone");
+		document.getElementById("checkPhoneBtn").addEventListener("click", () => {
+			const phone_regex = /010+[0-9]{8}/;
+
+		 	if (phone_regex.test(phone.value)) {
+		 		/*<![CDATA[*/
+				if(phone.value != /*[[${session.loginUser.mbTel}]]*/'phone') {
+				/*]]>*/
+				
+					$.ajax({
+						url: '/send-msg',
+						data: {to: phone.value},
+						success: data => {
+							console.log(data);
+							if (data == 'bad') {
+								alert('인증번호 전송에 예기치 않은 오류가 발생했습니다. 새로고침 하고 다시 시도 해주세요');
+							} else {
+								document.getElementById("phoneCode").value = data;
+							}
+						},
+						error: data => console.log(data)
+					
+					})
+				} else {
+					alert('등록되어있는 핸드폰 번호 입니다.');
+				} 
+			} else {
+				alert('형식에 맞는 핸드폰 번호를 입력해주세요');
+			}
+		})
+		
+		let validPhone = false;
+		// 인증 번호 확인
+		document.getElementById('checkPhoneCodeBtn').addEventListener('click', () => {
+			const phoneCode = document.getElementById('phoneCode').value;
+			const phoneCheckResult = document.getElementById('phoneCheckResult');
+			const phoneVerification = document.getElementById('phoneVerification').value;
+			
+			if (phoneCode == "") {
+				phoneCheckResult.innerText = '인증번호를 발급 받으세요';
+				phoneCheckResult.style.color = "red";
+			} else if (phoneVerification.trim() == "") {
+				phoneCheckResult.innerText = '인증번호를 입력해주세요';
+				phoneCheckResult.style.color = "red";
+			} else if (phoneVerification === phoneCode) {
+				phoneCheckResult.innerText = '인증번호가 일치 합니다';
+				phoneCheckResult.style.color = 'green';
+				validPhone = true;
+			} else {
+				phoneCheckResult.innerText = '인증번호가 일치 하기 않습니다.';
+				phoneCheckResult.style.color = 'red';
+			}
+		})
+		
+		// 번호 변경
+		document.getElementById('updatePhoneBtn').addEventListener('click', () => {
+			if (validPhone) {
+				document.getElementById("updatePhoneForm").submit();
+			} else {
+				alert('인증번호를 확인해주세요');
+			}
+		})
+		
+		// 회원 탈퇴
+		document.getElementById("updateMbStatus").addEventListener("click", () => {
+			if (confirm("정말 탈퇴 하시겠습니까?")) {
+				if (confirm("탈퇴후에는 복구가 불가능합니다. 진행하시겠습니까?")) {
+					window.location.href = "/updateMbStatus.yj";
+				}
+			}
+			
+		})
+		
+		
+	</script>
+</body>
+</html>

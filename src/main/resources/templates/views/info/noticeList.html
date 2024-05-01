@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" th:href="@{/image/woofly.png}">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+	crossorigin="anonymous">
+<style>
+.board-list {
+	cursor: pointer;
+}
+</style>
+</head>
+<body>
+    <div th:replace="~{common/top :: top}"></div>
+	<main>
+		<div class="container-fluid d-flex mx-5">
+			
+			<!-- 관리자만 보이게!!!!!!!!!!!!!!!!!!! -->
+			<th:block th:if="${session.loginUser == null or session.loginUser.isAdmin == 'N'}">
+				<div th:replace="~{common/infoNav :: infoNav}"></div>
+			</th:block>
+			<th:block th:if="${session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+				<div th:replace="~{common/adminNav :: adminNav}"></div>
+			</th:block>
+			
+			<div class="container mx-5 mt-5">
+				<div class="container d-flex px-0 border-bottom border-black border-3 justify-content-between align-items-center">
+					<h1>공지사항</h1>
+					<!-- 관리자만 보이도록 -->
+					<a role="button" href="/info/noticeWrite" class="btn btn-dark btn-sm h-50"  th:if="${ session.loginUser != null && session.loginUser.isAdmin == 'Y'}">글 작성</a>
+				</div>
+				
+				<!-- 카테고리 버튼들 -->
+				<div class="container text-center mt-3 row-cols-6 catagorBar">
+					<button type="button" class="btn btn-outline-dark" name="categoryBtn" value="공지">공지</button>
+					<button type="button" class="btn btn-outline-dark" name="categoryBtn" value="쇼핑몰">쇼핑몰</button>
+					<button type="button" class="btn btn-outline-dark" name="categoryBtn" value="콘테스트">콘테스트</button>
+					<button type="button" class="btn btn-outline-dark" name="categoryBtn" value="커뮤니티">커뮤니티</button>
+				</div>
+         		
+				<form action="/info/searchNotice">
+					<input type="hidden" th:value="${ value }" name="value" id="aaaa" >
+					<div class="row col-auto mt-1">
+						<label for="search-box" class="form-label">게시글 검색</label>
+					</div>
+					<div class="row g-0 text-center">
+						<div class="col-3 col-md-2">
+							<select  class="form-select-lg" name="Category" style="display: inline-block;">
+								<option value="n_Title" th:selected="${ Category == 'n_Title'}">제목</option>
+								<option value="n_Content" th:selected="${ Category == 'n_Content'}">내용</option>
+								<option value="all" th:selected="${ Category == 'all'}">제목+내용</option>
+							</select>
+						</div>
+						<div class="col-6 col-md-9 input-group-lg">
+							<input type="text" id="search-box" class="form-control" placeholder="검색" name="search" th:value="${ search }">
+						</div>
+						<div class="col-3 col-md-1">
+							<button  class="btn btn-outline-dark btn-lg">검색</button>
+						</div>
+					</div>
+				</form>
+					
+				<div class="container board-list" style="margin-top: 20px">
+					<div name="list" class="row border-top border-secondary text-center board-list" style="height: 80px;" th:each="l : ${list}">
+						<input type="hidden" th:value="${ l.nNo }" name="nNo">
+						<label class="nNo" style="display: none;">[[${ l.nNo }]]</label>
+						<div class="col-1" style="line-height: 80px;">[[${ l.nCategory }]]</div>
+						<div class="col-7" style="line-height: 80px;">[[${ l.nTitle }]]</div>
+						<div class="col-2" style="line-height: 80px;">관리자</div>
+						<div class="col-2" style="line-height: 80px;">[[${ l.nCreateDate }]]</div>
+					</div>
+				</div>
+					
+				<div th:replace="~{info/pageNav :: pageNav}"></div>
+			</div>	
+		</div>
+    </main>
+    
+    
+	<script th:inline="javascript">
+		window.onload = () => {
+			const divs = document.getElementsByName('list');
+			for(const div of divs) {
+				div.addEventListener('click', function() {
+					const nNo = this.querySelector('.nNo').innerText;
+					/*<![CDATA[*/
+			        location.href = '/info/selectNotice?nNo=' + nNo + "&page=" + /*[[${pi.currentPage}]]*/123;
+			        /*]]>*/
+				})
+			}
+			
+			const category = document.getElementById('aaaa').value;
+			const cbts = document.getElementsByName('categoryBtn');
+			for(const cbt of cbts) {
+				const value = cbt.value;
+				
+				if(category == value){
+					cbt.className = "btn btn-dark"
+					
+					cbt.addEventListener('click', (event) => {
+					     location.href = '/info/notice' ;
+					});
+					
+				} else{
+					cbt.addEventListener('click', (event) => {
+						location.href = '/info/selectCategoryNotice?value=' + value ;
+					});
+				}	
+			}	
+			
+			const pbts = document.getElementsByName('pagebtn');
+			
+			for(const pbt of pbts) {
+				const cp1 = "[[${pi.currentPage}]]"
+				const cp2 = pbt.innerText
+				if(cp1 == cp2) {
+					pbt.style.background = 'lightgrey';
+				}
+			}
+			
+			const anav = document.getElementById('myNav1')
+			anav.style.fontWeight = 'bold';
+			
+			
+		}
+	</script>
+</body>
+</html>

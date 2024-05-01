@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" href="/image/woofly.png">
+</head>
+<body>
+	<div th:replace="~{common/topAdd :: topAdd}"></div>
+	 <div class="container mt-5 mb-3">
+      	<div class="container d-flex px-0 mb-3 border-bottom border-black border-3 justify-content-between align-items-center">
+			<h1>실종신고 게시판</h1>
+			<h3>게시글 수정하기</h3>
+			
+		</div>
+		<div class="container">
+			<!-- 사진 작성자 작성일자 드롭다운 -->
+			<div class="header-container d-flex mt-3 justify-content-between">
+				<div class="d-flex">
+					<img class="float-start me-4" th:src="'/image/' + ${m.mbPhoto}" alt="" style="height: 50px; width: 50px; border-radius: 50px;">
+					<div class="header-text-container">
+						<h6 name="mbNickName">[[${m.mbNickName}]]</h6>
+						<p name="mCreateDate">[[${m.mCreateDate}]]</p>
+					</div>
+				</div>
+			</div>
+			
+			<!--<form action="/editLostBoard.he" method="post">-->
+			<form class="needs-validation" method="POST" enctype="multipart/form-data" action="/board/lost/edit"  id="attmForm">
+				<input type="hidden" th:value="${m.mNo}" name="mNo">
+				<input type = "hidden" th:value ="${ page }" name ="page">
+				
+				<div class="mb-3" style="width: 24%;">
+					<label for="title" class="form-label">실종 상태 여부</label>
+				    <select name="mRescue" class="form-select mb-1" required>
+				    	<option value="1" th:selected="${m.mRescue == 1}">구조중</option>
+						<option value="2" th:selected="${m.mRescue == 2}">구조완료</option>
+					</select>
+				</div>
+				<div class="mb-3">
+					<label for="title" class="form-label">제목</label>
+				  	<input th:value="${m.mTitle}" type="text" class="form-control" id="title" placeholder="" name="mTitle" required>
+				</div>
+				<div class="mb-3">
+				  	<label for="content" class="form-label">내용</label>
+				  	<textarea th:text="${m.mContent}" class="form-control" id="content" rows="20" style="resize: none;" name="mContent" required></textarea>
+				</div>
+				<label for="file" class="form-label">첨부파일</label><br>
+					<div th:each="a : ${ list }">
+						<h5>
+							<a th:href="@{ image/ } + ${a.renameName}" th:download="${ a.originalName }">[[${a.originalName }]]</a>
+							<button type="button" class="btn btn-outline-dark btn-sm deleteAttm" th:id="|delete-${ a.renameName }/${a.attmLevel}|">유지</button>
+							<input type="hidden" name="deleteAttm" value="none">
+						</h5>
+					</div> 
+				<button type="button" class="btn btn-dark btn-sm h-50" id="addFile">파일추가</button> <br><br>
+					<div id="fileArea">
+					   
+					</div>
+				<div class="row border-top border-black pt-3">
+					<button class="btn btn-dark">수정하기</button>
+				</div>
+			</form>
+		</div>
+		
+	</div>
+	
+	<script>
+		// 해당 페이지 nav bar 강조 넣기
+		// 페이지 별로 id만 수정 하면 됨 eg.) topAdd1, topAdd2, ...
+		const boardNav = document.getElementById("topAdd7");
+		$(boardNav).addClass('active');
+		
+		function validateForm() {
+    	    // 필수 필드 검증
+    	    var form = document.getElementById("attmForm");
+    	    var isValid = form.checkValidity();
+
+    	    if (!isValid) {
+    	        // 필수 필드 중 하나라도 비어 있다면
+    	        var requiredFields = form.querySelectorAll(':invalid');
+    	        
+    	        // 첫 번째 필수 필드로 포커스 이동
+    	        requiredFields[0].focus();
+    	    } else {
+    	        // 유효성 검사 통과 시 다음 동작 수행
+    	        form.submit(); // 또는 원하는 동작 수행
+    	    }
+    	}
+		
+		window.onload = () =>{
+			const fileArea = document.querySelector('#fileArea');
+			document.getElementById('addFile').addEventListener('click', () =>{
+				const newDiv = document.createElement('div');
+				newDiv.classList.add('mb-3');
+				newDiv.innerHTML = '<input type = "file" class = "form-control form-control-sm" name ="file">';
+				
+				fileArea.append(newDiv);
+			});
+			
+			const delBtns = document.getElementsByClassName("deleteAttm");
+	         for(const btn of delBtns) {
+	        	 btn.addEventListener('click', function() {
+	        		const nextHidden = this.nextElementSibling;
+					if(this.innerText == '유지') {
+						this.style.background = 'black';
+						this.style.color = 'white';
+						this.innerText = '삭제';
+						nextHidden.value = this.id.split('-')[1];
+					} else {
+						this.style.background = 'none';
+						this.style.color = 'black';
+						this.innerText = '유지';
+						nextHidden.value = 'none';
+					}
+	        	 });
+	         }
+		}
+	</script>
+	
+</body>
+</html>

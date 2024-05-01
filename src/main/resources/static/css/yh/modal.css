@@ -1,0 +1,56 @@
+@charset "UTF-8";
+
+/*모달 버튼*/
+
+/*띄우지 않을때는 안 보이게*/
+
+
+
+
+.apply {	
+	height: 40px;
+	width: 70px;
+	margin-left: 2px;
+}
+
+/*모달창 아래에 깔릴 화면*/
+#modalContainer {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+
+
+
+/* 모달 창 css*/
+#modalContent {
+  position: absolute;
+  background-color: white;
+  color : black;
+  width: 530px;
+  height: 200px;
+  padding: 15px;  
+}
+
+.modalContentCss{
+  position: absolute;
+  background-color: white;
+  color : black;
+  width: 530px;
+  height: 200px;
+  padding: 15px;
+}
+
+
+#modalContainer.hidden {
+    display: none;
+}
+
+

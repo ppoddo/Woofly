@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.kh.woofly.pet.model.dao.PetDAO">
+
+	<select id="selectMember" resultType="Member">
+		select * from member where mb_id = #{mbId}
+	</select>
+
+	<update id="updatePetPhoto">
+		update album
+		set ab_content = #{abContent}, pet_id = #{petId}
+		where ab_no = #{abNo}
+	</update>
+	
+	<update id="deleteImage">
+		update attachment
+		set attm_status = 'N'
+		where rename_name = #{renameName}
+	</update>
+
+	<insert id="petAdd" parameterType="Pet">
+		INSERT INTO pet
+		VALUES (pet_seq.nextval, #{petProfile}, #{petName}, #{petBirth}, #{petGender}, #{petWeight}, #{petBreed}, #{petMemo}, default, #{ownerId}, #{petIntro})
+	</insert>
+	
+	<select id="getListCount" resultType="_int">
+		select count(*)
+		from album
+		where ab_status = 'Y'
+	</select>
+	
+	<select id="petInfoList" resultType="Pet">
+		select *
+		from pet
+		where owner_id = #{ownerId} and pet_status = 'Y'
+		order by pet_id desc
+	</select>
+	
+	<select id="petDetail" resultType="Pet">
+		select *
+		from pet
+		where pet_id = #{petId}
+	</select>
+	
+	<update id="petEditName">
+		update pet
+		set pet_name = #{newPetName}
+		where pet_id = #{petId}
+	</update> 
+	
+	<update id="petEditIntro">
+		update pet
+		set pet_intro = #{newPetIntro}
+		where pet_id = #{petId}
+	</update> 
+	
+	<update id="petEditBirth">
+		update pet
+		set pet_birth = #{newPetBirth}
+		where pet_id = #{petId}
+	</update> 
+	
+	<update id="petEditBreed">
+		update pet
+		set pet_breed = #{newPetBreed}
+		where pet_id = #{petId}
+	</update> 
+	
+	<update id="petEditWeight">
+		update pet
+		set pet_weight = #{newPetWeight}
+		where pet_id = #{petId}
+	</update> 
+	
+	<update id="petEditGender">
+		update pet
+		set pet_gender = #{newPetGender}
+		where pet_id = #{petId}
+	</update> 
+	
+	<update id="petEditMemo">
+		update pet
+		set pet_memo = #{newPetMemo}
+		where pet_id = #{petId}
+	</update> 
+	
+	<update id="petDelete">
+		update pet
+		set pet_status = 'N'
+		where pet_id = #{petId}
+	</update> 
+	
+	<update id="editPetPhoto">
+		update pet
+		set pet_profile= #{petProfile}
+		where pet_id = #{petId}
+	</update>
+	
+	<update id="deletePetPhoto">
+		update pet
+		set pet_profile = default
+		where pet_id = #{petId}
+	</update>
+	
+	<insert id="petDiaryWrite" parameterType="Diary">
+		<selectKey order="BEFORE" keyProperty="drNo" resultType="_int">
+			select diary_seq.nextval from dual
+		</selectKey>
+		insert into diary
+		values (#{drNo}, #{drContent}, #{drDate}, default, #{writerId}, #{petId}, #{petHealth})
+	</insert>
+	
+	<select id="getDiaryCount" resultType="_int">
+		select count(*)
+		from diary
+			 join pet using(pet_id)
+		where dr_status = 'Y' and writer_Id=#{id}
+			<if test="startDate != null">
+		    	and dr_date >= #{startDate}
+		    </if>
+		    <if test="endDate != null">
+		    	and dr_date <![CDATA[<]]> #{endDate}
+		    </if>
+		    <if test="petId != null">
+		    	and pet_id = #{petId}
+		    </if>
+		    <if test="petHealth != null">
+		    	and pet_health = #{petHealth}
+		    </if>
+		order by dr_date desc
+	</select>
+	
+	<select id="petDiaryList" resultType="Diary">
+		select *
+		from diary
+			 join pet using(pet_id)
+		where dr_status = 'Y' and writer_Id=#{id} and pet_status = 'Y'
+			<if test="startDate != null">
+		    	and dr_date >= #{startDate}
+		    </if>
+		    <if test="endDate != null">
+		    	and dr_date <![CDATA[<]]> #{endDate}
+		    </if>
+		    <if test="petId != null">
+		    	and pet_id = #{petId}
+		    </if>
+		    <if test='petHealth != null'>
+		    	and pet_health = #{petHealth}
+		    </if>
+		order by dr_date desc
+	</select>
+	
+	<select id="petDiaryDetail" parameterType="Diary">
+		select *
+		from diary
+			join pet using(pet_id)
+		where dr_no = #{drNo} and dr_status = 'Y'
+	</select>
+	
+	<update id="petDiaryEdit">
+		update diary
+		set dr_content = #{drContent} , dr_date = #{drDate}, pet_id = #{petId}, pet_health = #{petHealth}
+		where dr_no = #{drNo}
+	</update>
+	
+	<update id="petDiaryDelete">
+		update diary
+		set dr_status = 'N'
+		where dr_no = #{drNo}
+	</update>
+	
+	<insert id="insertPetPhoto" parameterType="Album">
+		<selectKey order="BEFORE" keyProperty="abNo" resultType="_int">
+			select ab_seq.nextval from dual
+		</selectKey>
+		insert into album
+		values (#{abNo}, #{abContent}, sysdate, default, #{writerId}, #{petId}, 0)
+	</insert>
+	
+	<insert id="insertPetAlbum" parameterType="Attachment">
+		insert into attachment
+		values (attm_seq.nextval, #{originalName}, #{renameName}, default , default, 'test', default, #{attmRefType}, #{attmRefNo}, #{attmLevel})
+	</insert>
+	
+	<select id="selectMyAlbum" resultType="Album">
+		select *
+		from album
+		where ab_status = 'Y' and writer_id = #{id}
+	</select>
+	
+	<select id="selectMyAlbums" resultType="Album">
+		select *
+		from album
+			 join attachment on (ab_no = attm_ref_no)
+		where ab_status = 'Y' and writer_id = #{id} and attm_ref_type = 'AB' and attm_status = 'Y' and attm_level = 1
+			<if test="petId != null">
+		    	and pet_id = #{petId}
+		    </if>
+		order by attm_level desc, ab_date desc
+	</select>
+	
+	<select id="selectMyAlbumAttm" resultType="Attachment">
+	<!-- 리스트를 뿌려줄 거기 때문에 썸네일 레벨 1인것들을 조건으로 -->
+	<!-- 마이펫 사진첩의 abNo를 가진 유일한 썸네일 사진을 반환 -->
+		select *
+		from attachment
+		where attm_status = 'Y' and attm_ref_type = 'AB' and attm_ref_no = #{abNo} and attm_level = 1
+	</select>
+	
+	<select id="petPhotoDetail" resultType="Album">
+		select *
+		from album 
+		    join attachment on (ab_no = attm_ref_no)
+		where ab_no= #{abNo} and ab_status = 'Y' and attm_ref_type = 'AB' and attm_ref_no = #{abNo} and attm_status = 'Y'
+		order by attm_level
+	</select>
+	
+	<select id="petInfo" resultType="pet">
+		select *
+		from pet
+			join album using(pet_id)
+		where ab_no = #{abNo}
+	</select>
+	
+	<select id="petAlbumDetail" resultType="Album">
+		select *
+		from album
+		where ab_no = #{abNo}
+	</select>
+	
+	<select id="petAttmList" resultType="Attachment">
+		select rename_name
+		from attachment
+    		join album on (ab_no = attm_ref_no)
+    	where ab_no = #{abNo} and ab_status = 'Y' and attm_ref_type='AB' and attm_status = 'Y'
+	</select>
+	
+	<update id="petPhotoDelete">
+		update album
+		set ab_status = 'N'
+		where ab_no = #{abNo}
+	</update>
+	
+	<insert id="insertAlbumReply" parameterType="Reply">
+		insert into reply
+     	values(reply_seq.nextval, 'AB', #{bNo}, #{reContent}, SYSDATE, default, default, #{mbId})
+	</insert>
+	
+	<select id="replyList" resultType="Reply">
+		select *
+		from reply
+			join MEMBER using (MB_ID)
+		where b_type = 'AB' and re_d_status = 'Y' and B_NO = #{abNo}
+		order by re_date desc
+	</select>
+	
+	<update id="updateReply">
+		update reply
+		set re_content = #{reContent}
+		where r_No = #{rNo}
+	</update>
+	
+	<update id="deleteReply">
+		update reply
+		set re_d_status = 'N'
+		where r_No = #{rNo}
+	</update>
+	
+	<insert id="insertReport" parameterType="Report">
+		insert into report
+		values(rep_seq.nextval, #{rContent}, sysdate, 'A', 'AB', #{rBoardNo}, #{rType}, #{rAccuser}, #{rAccused})
+	</insert>
+	
+	<select id="checkResult" resultType="_int">
+		select count(*)
+		from report
+		where r_board_no = #{rBoardNo} and r_accuser = #{rAccuser}
+	</select>
+	
+	<select id="selectReplyLike" resultType="ReplyLike">
+		select *
+			from reply
+	             join reply_like on (r_no = like_ref_board)
+	      where like_ref_board = #{rNo} and like_user = #{mbId}
+	</select>
+	
+	<select id="albumLike" resultType="_int">
+		select count(*)
+		from board_like
+		where like_ref_board = #{abNo} and like_user = #{id}
+	</select>
+	
+	<insert id="insertReplyLike">
+		insert into reply_like
+		values (rl_seq.nextval, #{rNo}, #{id})
+	</insert>
+	
+	<delete id="deleteReplyLike">
+		delete from reply_like
+		where like_ref_board = #{rNo} and like_user = #{id}
+	</delete>
+	
+	<insert id="insertBoardLike">
+		insert into board_like
+		values (bl_seq.nextval, 'AB', #{abNo}, #{id})
+	</insert>
+	
+	<delete id="deleteBoardLike">
+		delete from board_like
+		where like_ref_board = #{abNo} and like_ref_type = 'AB' and like_user = #{id}
+	</delete>
+	
+	<insert id="insertReplyNotice">
+		insert into notification
+		values (noti_seq.nextval, (select writer_id from album where ab_no = #{abNo}), 'RL', null, 'Y', #{id}, 1, sysdate)
+	</insert>
+	
+	<insert id="insertBoardNotice">
+		insert into notification
+		values (noti_seq.nextval, (select writer_id from album where ab_no = #{abNo}), 'AB', null, 'Y', #{id}, 1, sysdate)
+	</insert>
+	
+	<select id="petContestList" resultType="Participants">
+		select *
+		from participants
+			 join attachment on (p_no = attm_ref_no)
+			 join contest on (contest_id = con_no)
+		where p_status = 'Y' and mb_id = #{id} and attm_ref_type = 'C' and attm_level = 1
+		<if test="petId != null">
+	    	and pet_id = #{petId}
+	    </if>
+		order by contest_id desc
+		<!-- select *
+		from participants
+			join pet using (pet_id)
+			join contest on (contest_id = con_no)
+		where p_status = 'Y' and owner_id = #{id} -->
+	</select>
+	
+	<select id="repiesList" resultType="Reply">
+		select *
+		from reply
+		where b_type = 'AB' and MB_ID =#{id}
+	</select>
+</mapper>

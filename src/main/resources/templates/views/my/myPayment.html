@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" href="image/woofly.png">
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+</style>
+<script src="https://js.tosspayments.com/v1/payment"></script>
+
+</head>
+<body>
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/top :: top}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<div class="d-flex justify-content-between mx-5">
+			<div th:replace="~{common/myNav :: myNav}"></div>
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<!-- 아래만 수정해주세요 -->
+			<div class="col-10 pt-3 mb-5 me-4">
+				<div class="d-flex justify-content-between mb-5 border-bottom border-3 border-black">
+					<div>
+						<h3>결제 정보</h3>
+						<p>수수료(페널티, 착불배송비 등)가 정산되지 않을 경우, 별도 고지 없이 해당 금액을 결제 시도할 수 있습니다.</p>
+					</div>
+					<div class="my-auto">
+						<button class="btn btn-outline-dark btn-sm" onclick="addPayment()">+새 카드 추가하기</button>
+					</div>
+				</div>
+				<div th:if="${#arrays.isEmpty(list)}" class="d-flex justify-content-center align-items-center" style="height: 500px; line-height: 500px;">카드 정보를 등록해주세요</div>
+				<div class="d-flex justify-content-between border-bottom border-black border-2 pb-5 mb-5" th:each="card : ${list}">
+					<div class="d-flex">
+						<div class="d-flex align-items-center">
+							<button class="btn btn-outline-dark disabled">[[${card.cardCompany}]]</button>
+						</div>
+						&nbsp;&nbsp;&nbsp;
+						<div>
+							
+							<p class="mb-0">[[|●●●●-●●●●-●●●●-${#strings.substring(card.cardNumber, 12, 15)}●|]]</p>
+							<span class="badge rounded-pill text-bg-secondary" th:if="${ card.paymentType == 'Y' }">기본 결제</span>
+						</div>
+					</div>
+					<div class="my-auto">
+						<button class="btn btn-sm btn-outline-dark paymentStatus" th:if="${ card.paymentType == 'N' }" data-bs-toggle="modal" data-bs-target="#updatePaymentModal">기본 결제</button>
+						<input type="hidden" th:value="${card.paymentNo}">
+						<button class="btn btn-sm btn-outline-dark paymentDelete" th:if="${ card.paymentType != 'Y'}">삭제</button>
+					</div>
+				</div>
+			</div>
+			
+			<div class="modal fade" id="updatePaymentModal" tabindex="-1">
+				<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+					<div class="modal-content">
+						<div class="modal-body text-start">
+							<div class="text-center">
+								<h3>기본 결제로</h3>
+								<h3>변경하시겠습니까?</h3>
+								<p>이미 진행 중인 거래를 포함하여 앞으로<br>모든 거래의 결제가 해당카드로 변경됩니다.</p>
+								<button class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
+								<button class="btn btn-dark" id="updatePaymentBtn">계속 변경</button>
+							</div>
+							
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+			<!-- 여기까지가 수정 -->
+		</div>
+	</main>
+	<script th:inline="javascript">
+		const myNav = document.getElementById("myNav7");
+		$(myNav).removeClass('text-secondary');
+		$(myNav).addClass('active');
+		
+		// API 개별 테스트 연동 키
+		// 토스페이먼츠에 회원 가입하기 전이라면 아래 키는 문서 테스트 키입니다.
+		// 토스페이먼츠에 회원 가입하고 로그인한 상태라면 아래 키는 내 테스트 키입니다.
+		const clientKey = 'test_ck_Z1aOwX7K8myj1aOG70ga8yQxzvNP'
+		const secretKey = 'test_sk_kYG57Eba3G6AeDn45qa98pWDOxmA'
+		
+		// ------ 클라이언트 키로 객체 초기화 ------
+	    var tossPayments = TossPayments(clientKey)
+		const addPayment = () => {
+		    tossPayments
+		    	.requestBillingAuth('카드', {
+		        	// 결제수단 파라미터 (자동결제는 카드만 지원합니다.)
+		        	// 결제 정보 파라미터
+		        	/*<![CDATA[*/
+		        	customerKey: /*[[${session.loginUser.mbId}]]*/null, 
+		        	/*]]>*/
+		        	successUrl: 'http://192.168.20.217:8080/my/addPayment', // 카드 등록에 성공하면 이동하는 페이지(직접 만들어주세요)
+		        	failUrl: 'http://192.168.20.217:8080/my/payment', // 카드 등록에 실패하면 이동하는 페이지(직접 만들어주세요)
+		      	})
+				.catch(function (error) {
+		        	if (error.code === 'USER_CANCEL') {
+		          		// 결제 고객이 결제창을 닫았을 때 에러 처리
+		        	}
+		      	})
+		}
+		
+		let paymentNo;
+		const paymentStatus = document.getElementsByClassName('paymentStatus');
+		for(const payment of paymentStatus) {
+			payment.addEventListener('click', () => {
+				paymentNo = payment.nextElementSibling.value;
+			})
+		}
+		
+		document.getElementById('updatePaymentBtn').addEventListener('click', () => {
+			window.location.href = "/updatePayment.yj?paymentNo=" + paymentNo;
+		})
+		
+		const deletePayments = document.getElementsByClassName('paymentDelete');
+		for(const deletePayment of deletePayments) {
+			deletePayment.addEventListener('click', () => {
+				const paymentNo = deletePayment.previousElementSibling.value;
+				console.log(deletePayment);
+				window.location.href = '/deletePayment.yj?paymentNo=' + paymentNo;
+			})
+		}
+		
+		
+	</script>
+</body>
+</html>

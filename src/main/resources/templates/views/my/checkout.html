@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>WOOFLY</title>
+<link rel="icon" href="image/woofly.png">
+<style>
+	.active {
+		color: black !important;
+		font-weight: 700 !important;
+	}
+	
+</style>
+<script src="http://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script src="https://js.tosspayments.com/v1/payment"></script>
+</head>
+<body class="bg-secondary-subtle">
+	<!-- top navigation bar -->
+	<!-- 마이 페이지에 공통으로 들어가는 navigation bar -->
+	<div th:replace="~{common/checkoutNav :: checkoutNav}"></div>
+	<!-- 메인 네비게이션 바 아래 있는 모든 요소들 -->
+	<main>
+		<form action="/checkout.yj" method="post">
+			<input type="hidden" th:value=${total} name="amount">
+			<br>
+			<div class="mb-2 w-50 bg-white mx-auto">
+				<div class="d-flex align-content-center mx-4" style="height: 140px" th:each="cart, cartStat: ${cList}" th:classappend="${!cartStat.last} ? 'border-bottom'">
+					<th:block th:each="attm : ${paList}" th:if="${attm.attmRefNo == cart.productId}">
+						<img class="rounded float-start my-auto" th:src="'/image/shopFiles/' + ${attm.renameName}" style="width: 80px; height: 80px;">
+					</th:block>
+					<div class="d-flex flex-column justify-content-center">
+						<input type="hidden" name="cartId" th:value="${cart.cartId}">
+						<div class="ms-3"><b>[[${cart.productId}]]</b></div>
+						<div class="ms-3">[[${cart.productName}]]</div>
+						<div class="ms-3 text-secondary">[[${cart.pSize == 'N'} ? '' : ${cart.pSize}]] [[${cart.pSize != 'N' and cart.color != 'N'} ? '/']] [[${cart.color == 'N'} ? '' : ${cart.color}]]</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="bg-white w-50 mx-auto p-4 mb-2">
+				<div class="d-flex justify-content-between">
+					<div>
+						<h3 class="mb-0">배송 주소</h3>
+					</div>
+					<div class="d-flex align-items-end">
+						<a class="link-secondary link-underline-opacity-0" role="button" data-bs-toggle="modal" data-bs-target="#newAddr">+새 주소 추가</a>
+					</div>
+				</div>
+				<div class="d-flex justify-content-between mt-2 align-items-center">
+					<div class="d-flex align-items-start col-11">
+						<div class="d-flex flex-column justify-content-center col-3">
+							<div>받는 분</div>
+							<div>연락처</div>
+							<div>배송 주소</div>
+						</div>
+						<div class="d-flex flex-column justify-content-center col-9" id="addrView">
+							<div><th:block th:if="${!#arrays.isEmpty(maList)}"> [[|${#strings.substring(maList[0].mbName, 0, 1)}**|]]</th:block></div>
+							<div><th:block th:if="${!#arrays.isEmpty(maList)}"> [[|010-${maList[0].mbTel[3]}***-*${#strings.substring(maList[0].mbTel, 8, 11)}|]]</th:block></div>
+							<div><th:block th:if="${!#arrays.isEmpty(maList)}"> [[|(${maList[0].postcode})${maList[0].addr} ${maList[0].addrDetail != null ? maList[0].addrDetail : ""}]]</th:block></div>
+							<th:block th:if="${!#arrays.isEmpty(maList)}"> <input type="hidden" id="addrViewId" th:value="${maList[0].addrId}" name="addrId"></th:block>
+						</div>
+					</div>
+					<div class="col-1">
+						<button type="button" data-bs-toggle="modal" data-bs-target="#addrModal" class="btn btn-outline-secondary" onclick="checkAddr();">변경</button>
+					</div>
+				</div>
+				<div class="d-grid mt-2">
+					<div class="rounded border p-2 d-flex justify-content-between align-items-center" role="button" data-bs-toggle="modal" data-bs-target="#requestModal">
+						<input type="hidden" name="orderRequest">
+						<div class="ms-2" id="orderRequest">요청 사항 없음</div>
+						<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
+							<path d="M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"/>
+						</svg>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 포인트 정보 -->
+			<div class="bg-white w-50 mx-auto p-4 mb-2">
+				<div class="">
+					<div>
+						<h3 class="mb-0">할인 혜택</h3>
+					</div>
+				</div>
+				<div class="form-text mt-2">포인트</div>
+				[[${#numbers.formatInteger(session.loginUser.mbPoint, 3, 'COMMA')}]]P
+				<div class="d-flex align-items-center mt-2">
+					<div class="col-10">
+						<input type="number" class="form-control" th:readonly="${session.loginUser.mbPoint < 1000}" name="usedPoints" value="0" th:style="${session.loginUser.mbPoint < 1000} ? 'cursor: not-allowed;'">
+					</div>
+					&nbsp;&nbsp;&nbsp;
+					<div>
+						<button type="button" class="badge rounded-pill text-bg-secondary" th:disabled="${session.loginUser.mbPoint < 1000}" style="border: none;" role='button' th:styleappend="${session.loginUser.mbPoint < 1000} ? 'cursor: not-allowed;'" id="allPoints">최대 사용</button>
+					</div>
+				</div>
+				<div class="d-flex">
+					<div class="form-text">보유 포인트</div>
+					&nbsp;
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle mt-2" role="button" viewBox="0 0 16 16" data-bs-toggle="modal" data-bs-target="#pointInfo">
+					  	<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+					  	<path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94"/>
+					</svg>
+					&nbsp;
+					<div class="form-text">[[${#numbers.formatInteger(session.loginUser.mbPoint, 3, 'COMMA')}]]P</div>
+				</div>
+			</div>
+			
+			<!-- 카드 정보 -->
+			<div class="bg-white w-50 mx-auto p-4 mb-2">
+				<div class="d-flex justify-content-between">
+					<div>
+						<h3 class="mb-0">결제 방법</h3>
+					</div>
+				</div>
+				<br>
+				<div class="d-flex justify-content-between align-items-center rounded border border-black p-2" role="button" id="selectedPayment">
+					<div class="ms-2">
+							<th:block th:if="${!#arrays.isEmpty(pList)}">
+								<input type="hidden" th:value="${pList[0].billingKey}" name="billingKey">
+							</th:block>
+							<th:block th:if="${#arrays.isEmpty(pList)}">
+								<input type="hidden" name="billingKey">
+							 </th:block>
+							<div><th:block th:if="${!#arrays.isEmpty(pList)}">[[${pList[0].cardCompany}]]</th:block></div>
+							<div><th:block th:if="${!#arrays.isEmpty(pList)}">****-****-****-[[${#strings.substring(pList[0].cardNumber, 12)}]]</th:block></div>
+					</div>
+					<div class="me-2">
+						<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
+							<path d="M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"/>
+						</svg>
+					</div>
+				</div>
+				<div class="bg-light px-3 rounded-bottom border" style="display: none;">
+					<div class="d-flex py-3 justify-content-between align-items-center border-bottom payment" th:each="card, cardStat : ${pList}" role="button">
+						<input type="hidden" th:value="${card.billingKey}">
+						<input type="hidden" th:value="${card.cardCompany}">
+						<input type="hidden" th:value="${card.cardNumber}">
+						<div class="d-flex gap-3">
+							<div class="border rounded text-center bg-white" style="height: 35px; width: 50px; line-height: 35px;">
+								[[${card.cardCompany}]]
+							</div>
+							
+							<div class="d-flex flex-column">
+								****-****-****-[[${#strings.substring(card.cardNumber, 12)}]]
+								<div>
+									<span class="badge rounded-pill text-bg-secondary" th:if="${card.paymentType == 'Y'}">기본 결제</span>
+								</div>
+							</div>
+						</div>
+						<div>
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16" th:style="${cardStat.index != 0} ? 'display: none;'">
+							  	<path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0"/>
+							</svg>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 금액 -->
+			<div class="bg-white w-50 mx-auto p-4">
+				<div>
+					<h3 class="mb-0">최종 주문 정보</h3>
+				</div>
+				<br>
+				<div class="d-flex justify-content-between">
+					<div>
+						<div>구매가</div>
+						<div>배송비</div>
+						<div>포인트 사용</div>
+					</div>
+					<div class="text-end">
+						<div>[[${#numbers.formatInteger(total-3000, 3, 'COMMA')}]]원</div>
+						<div>3,000원</div>
+						<div id="uPoints">-</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 총 금액 -->
+			<div class="w-50 mx-auto p-4 border-top border-bottom bg-light ">
+				<p>총 결제 금액</p>
+				<h3 class="text-end" id="tPrice">[[${#numbers.formatInteger(total, 3, 'COMMA')}]]원</h3>
+			</div>
+			
+			<!-- 포인트 -->
+			<div class="bg-white w-50 mx-auto p-4 mb-2">
+				<input type="hidden" name="points" th:value="${ points }">
+				<div>
+					<h3 class="mb-0">포인트 혜택</h3>
+				</div>
+				<div class="d-flex justify-content-between py-2">
+					<div>계좌 간편결제 시</div>
+					<div class="dPoints">[[${points}]]P</div>
+				</div>
+				<div class="border"></div>
+				<div class="d-flex justify-content-between py-2">
+					<div>적립 예정 포인트</div>
+					<div class="dPoints">[[${points}]]P</div>
+				</div>
+			</div>
+			
+			
+			<!-- 약관 -->
+			<div class="bg-white w-50 mx-auto p-4" id="terms">
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<div>
+							판매자의 판매거부, 배송지연, 미입고 등의 사유가 발생할 경우, 거래가 취소될 수 있습니다.
+						</div>
+						<div>
+							앱 알림 해제, 알림톡 차단, 전화번호 변경 후 미등록 시에는 거래 진행 상태 알림을 받을 수 없습니다.
+						</div>
+					</div>
+					<input type="checkbox" class="form-check-input">
+				</div>
+				<hr>
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<div>
+							창고 보관을 선택한 경우, 구매자에게 배송되지 않고 WOOFLY 창고에 보관됩니다.	
+						</div>
+						<div>
+							검수 합격 후 보관이 완료되면 창고 이용료(현재 첫 30일 무료)가 결제됩니다.
+						</div>
+					</div>
+					<input type="checkbox" class="form-check-input">
+				</div>
+				<hr>
+				<div class="d-flex justify-content-between align-items-center">
+					<div class="col-11">
+						<div>
+							‘바로 결제하기’ 를 선택하시면 즉시 결제가 진행되며, 단순 변심이나 실수에 따른 구매 결정 후 취소는 불가능합니다.판매자의 판매거부, 배송지연, 미입고 등의 사유가 발생할 경우, 거래가 취소될 수 있습니다.
+						</div>
+						<div>
+							본 거래는 개인간 거래로 전자상거래법(제17조)에 따른 청약철회(환불, 교환) 규정이 적용되지 않습니다. 단, 조작 실수 등을 고려하여 계정당 하루 1회 구매를 거부할 수 있습니다.
+						</div>
+					</div>
+					<input type="checkbox" class="form-check-input">
+				</div>
+				<hr>
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<strong>구매 조건을 모두 확인하였으며, 거래 진행에 동의합니다.</strong>
+					</div>
+					<input type="checkbox" class="form-check-input">
+				</div>
+				<br>
+				<br>
+				<div class="d-flex justify-content-between">
+					<div><strong>총 결제 내역</strong></div>
+					<div><h3 class="text-danger" id="rtPrice">[[${#numbers.formatInteger(total, 3, 'COMMA')}]]원</h3></div>
+				</div>
+				
+				<div class="d-grid mt-2">
+					<button class="btn btn-secondary" disabled id="checkoutBtn">결제하기</button>
+				</div>
+			</div>
+		</form>
+	</main>
+	
+	<!-- 새 주소 등록 모달 -->
+	<div class="modal fade" id="newAddr" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header d-flex justify-content-between">					
+					<div style="width:32px"></div>
+	        		<h1 class="modal-title fs-5">새 주소 추가</h1>
+		        	<button type="button" class="btn-close ms-0" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body text-left">
+					<div class="mb-3">
+					    <label for="addNewName" class="form-label">이름</label>
+						<input type="text" class="form-control" id="addNewName" name="mbName" placeholder="수령인의 이름">
+						<div class="form-text" id="addNameCheck"></div>
+					</div>
+					<div class="mb-3">
+					    <label for="mbTel" class="form-label">휴대폰 번호</label>
+						<input type="text" class="form-control" id="addNewPhone" name="mbTel" placeholder="- 없이 입력">
+						<div class="form-text" id="addPhoneCheck"></div>
+					</div>
+					<div class="mb-3 d-flex align-items-end gap-4">
+						<div class="col-9">
+						    <label for="addNewPostcode" class="form-label">우편번호</label>
+							<input type="text" class="form-control" id="addNewPostcode" name="postcode" readonly placeholder="우편 번호를 검색하세요">
+						</div>
+						<div class="col-3">
+							<button type="button" id="addSearchBtn" onclick="addAddr();" class="btn btn-outline-dark btn">주소 검색</button>
+						</div>
+					</div>
+					<div class="mb-3">
+					    <label for="addNewAddr" class="form-label">주소</label>
+						<input type="text" class="form-control" id="addNewAddr" name="address" readonly placeholder="우편 번호 검색후 자동 입력됩니다">
+					</div>
+					<div class="mb-3">
+					    <label for="addNewDetailAddr" class="form-label">상세주소</label>
+						<input type="text" class="form-control" id="addNewDetailAddr" name="addressDetail" placeholder="건물, 아파트, 동/호수 입력">
+					</div>
+					<div class="form-check mb-3">
+					  	<input class="form-check-input" type="checkbox" value="Y" name="addrType" id="newCheckBox">
+					  	<label class="form-check-label text-secondary" for="newCheckBox">
+					    	기본 배송지로 설정
+					  	</label>
+					</div>
+					<div class="text-center">
+						<button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">취소</button>
+						<button type="button" id="addAddressSubmitBtn" class="btn btn-dark disabled">저장하기</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 주소 목록 모달 -->
+	<div class="modal fade" id="addrModal" tabindex="-1" style="height: 75%;">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header d-flex justify-content-between">
+					<div style="width:32px"></div>
+					<h1 class="modal-title fs-5">주소록</h1>
+		        	<button type="button" class="btn-close ms-0" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body" id="addrBody">
+					<div class="d-flex justify-content-between border-bottom mb-3" role="button" th:each="address: ${maList}" onclick="changeAddr(this);">
+						<input type="hidden" th:value="${ address.addrId }">
+						<input type="hidden" th:value="${ address.addr }">
+						<input type="hidden" th:value="${ address.addrDetail }">
+						<input type="hidden" th:value="${ address.postcode }">
+						<input type="hidden" th:value="${ address.mbTel }">
+						<input type="hidden" th:value="${ address.mbName }">
+						<input type="hidden" th:value="${ address.addrType }">
+						<div>
+							<div class="d-flex mb-1" style="height: 20px;">
+								<p>[[|${#strings.substring(address.mbName, 0, 1)}**|]]</p> &nbsp;&nbsp;
+								<div th:if="${ address.addrType == 'Y'}">
+									<span class="badge rounded-pill text-bg-light">기본 배송지</span>
+								</div>
+							</div>
+							<div class="d-flex justify-content-between">
+								<p class="mb-0">[[|010-${session.loginUser.mbTel[3]}***-*${#strings.substring(session.loginUser.mbTel, 8, 11)}|]]</p>
+							</div>
+							<p>[[|(${address.postcode})${address.addr} ${address.addrDetail != null ? address.addrDetail : ""}]]</p>
+						</div>
+						<div class="col-1">
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16" th:if="${ maList[0].addrId == address.addrId }">
+							  	<path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0"/>
+							</svg>
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16" style="display: none;" th:if="${ maList[0].addrId != address.addrId }">
+							  	<path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0"/>
+							</svg>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 요청 사항 모달 -->
+	<div class="modal fade" id="requestModal" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header d-flex justify-content-between">
+					<div style="width:32px"></div>
+					<h1 class="modal-title fs-5">요청사항</h1>
+		        	<button type="button" class="btn-close ms-0" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body fs-5">
+					<div class="border-bottom p-2 d-flex justify-content-between" style="font-weight: 800;" role="button">
+						요청사항 없음
+						<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
+						  	<path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+						</svg>
+					</div>
+					<div class="border-bottom p-2  d-flex justify-content-between" role="button">
+						문 앞에 놓아주세요
+						<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16" style="display: none;">
+						  	<path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+						</svg>
+					</div>
+					<div class="border-bottom p-2  d-flex justify-content-between" role="button">
+						경비실에 맡겨 놔주세요
+						<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16" style="display: none;">
+						  	<path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+						</svg>
+					</div>
+					<div class="border-bottom p-2  d-flex justify-content-between" role="button">
+						파손 위험 상품입니다.배송 시 주의하세요
+						<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16" style="display: none;">
+						  	<path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+						</svg>
+					</div>
+					<div class="p-2  d-flex justify-content-between" role="button">
+						직접 입력
+						<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16" style="display: none;">
+						  	<path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+						</svg>
+					</div>
+					<textarea rows="5" cols="10" style="resize: none; display: none;" class="form-control" placeholder="요청 사항을 적어주세요"></textarea>
+				</div>
+				<div class="text-center mb-3">
+					<button type="button" data-bs-dismiss="modal" class="btn btn-outline-secondary">취소</button>
+					<button type="button" class="btn btn-dark" id="saveRequest">저장하기</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 포인트 정보 -->
+	<div class="modal fade" id="pointInfo" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header d-flex justify-content-between">
+					<div style="width:32px"></div>
+					<h1 class="modal-title fs-5 text-center">이용안내</h1>
+					<button type="button" class="btn-close ms-0" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body m-3">
+					<p><b>사용 가능한 포인트</b></p>
+					<h3 class="border-bottom border-black border-3">&nbsp;&nbsp;[[${session.loginUser.mbPoint}]]P</h3>
+					<br>
+					<div>이번달 소멸 예정 포인트 0P</div>
+					<div class="pb-5 border-bottom">포인트 유효기간은 적립일로부터 최대 1년까지이며, 유형에 따라 달라질 수 있습니다.</div>
+					<ul class="ps-1" style="font-size: 12px;">
+						<li>1,000P 이상부터 구매금액 제한 없이 사용하실 수 있습니다.</li>
+						<li>입찰 삭제, 거래 취소 시 사용한 포인트는 환불됩니다.</li>
+						<li>먼저 적립된 포인트부터 순서대로 사용되며, 사용하지 않으실 경우 유효기간이 지나면 자동 소멸됩니다.</li>
+						<li>유효기간이 지난 후 환불받은 포인트는 다시 사용하실 수 없습니다.</li>
+					</ul>
+					<div class="text-center">
+						<button type="button" data-bs-dismiss="modal" class="btn btn-dark">확인</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script  th:inline="javascript">
+		
+		window.onload = () => {
+			/*<![CDATA[*/
+			const pList = /*[[${pList}]]*/null;
+			/*]]>*/
+			
+			if (pList == null || pList.length == 0) {
+				alert('결제 정보를 먼저 등록해주세요.');
+				window.location.href = '/my/payment'; 
+			}
+		}
+	
+		const selectedPayment = document.querySelector('#selectedPayment');
+		selectedPayment.addEventListener('click', () => {
+			if(selectedPayment.nextElementSibling.style.display == 'block') {
+				selectedPayment.nextElementSibling.style.display = 'none';
+			} else {
+				selectedPayment.nextElementSibling.style.display = 'block';
+			}
+		})
+		console.log();
+	
+	
+		const payments = document.getElementsByClassName('payment');
+		for(const payment of payments) {
+			payment.addEventListener('click', () => {
+				const billingKey = payment.querySelectorAll('input')[0].value;
+				const cardCompany = payment.querySelectorAll('input')[1].value;
+				const cardNo = payment.querySelectorAll('input')[2].value;
+				document.getElementsByName('billingKey')[0].value = billingKey;
+				const input = document.querySelectorAll('#selectedPayment > div > div');
+				input[0].innerText = cardCompany;
+				input[1].innerText = cardNo;
+				
+				for(const p of payments) {
+					if(payment == p) {
+						p.querySelector('svg').style.display = "block";
+					} else {
+						p.querySelector('svg').style.display = "none";
+						
+					}
+				}
+			})
+		}
+		
+		
+		
+		const rtPrice = document.getElementById('rtPrice');
+		//포인트 전부 사용
+		document.getElementById('allPoints').addEventListener('click', () => {
+			const points = document.getElementsByName('usedPoints')[0];
+			/*<![CDATA[*/
+			const mbPoints = /*[[${session.loginUser.mbPoint}]]*/0;
+			points.value = mbPoints;
+			
+			const dPoints = document.getElementsByClassName('dPoints');
+			for(const dPoint of dPoints) {
+				dPoint.innerText = "0P";
+			}
+			
+			const uPoints = document.getElementById('uPoints');
+			uPoints.innerText = "-" + mbPoints.toLocaleString() + "원";
+
+			const tPrice = document.getElementById('tPrice');
+			const total = /*[[${total}]]*/0;
+			tPrice.innerText = (total - mbPoints).toLocaleString() + "원";
+			rtPrice.innerText = (total - mbPoints).toLocaleString() + "원";
+			/*]]>*/
+		});
+		
+		// 포인트 일부 사용
+		const points = document.getElementsByName('usedPoints')[0];
+		points.addEventListener('keyup', () => {
+			const x = parseInt(points.value);
+			console.log(x);
+			const uPoints = document.getElementById('uPoints');
+			
+			/*<![CDATA[*/
+			
+			const total = /*[[${total}]]*/0;
+			const mbPoints = /*[[${session.loginUser.mbPoint}]]*/0;
+			const sP = /*[[${points}]]*/0;
+			
+			/*]]>*/
+			const tPrice = document.getElementById('tPrice');
+			const dPoints = document.getElementsByClassName('dPoints');
+			
+			if(x < 1000) {
+				for(const dPoint of dPoints) {
+					dPoint.innerText = sP.toLocaleString() + "P";
+				}
+				uPoints.innerText = "-";
+				tPrice.innerText = (total).toLocaleString() + "원";
+				rtPrice.innerText = (total).toLocaleString() + "원";
+
+
+
+			} else if (x >= 1000){
+				for(const dPoint of dPoints) {
+					dPoint.innerText = "0P";
+				}
+				tPrice.innerText = (total - x).toLocaleString() + "원";
+				uPoints.innerText = "-" + x.toLocaleString() + "원";
+				rtPrice.innerText = (total - x).toLocaleString() + "원";
+
+
+
+			}
+		});
+	
+		// 요청 사항 저장
+		const saveRequest = document.getElementById('saveRequest');
+		saveRequest.addEventListener('click', () => {
+			for (const request of requests) {
+				if($(request).css('font-weight') == '800') {
+					const orderRequest = document.getElementById('orderRequest');
+					if(request.innerText == '직접 입력') {
+						orderRequest.innerText = document.querySelector('#requestModal .modal-body > textarea').value;
+						document.getElementsByName('orderRequest')[0].value = document.querySelector('#requestModal .modal-body > textarea').value;
+					} else {
+						orderRequest.innerText = request.innerText;
+						document.getElementsByName('orderRequest')[0].value = request.innerText;
+					}
+					$('#requestModal').modal('hide');
+					break;
+				}
+			}
+		})
+	
+		// 요청 사항 변경
+		const requests = document.querySelectorAll('#requestModal .modal-body > div');
+		for(const request of requests) {
+			request.addEventListener('click', () => {
+				
+				for(const r of requests) {
+					const svg = r.querySelector('svg');
+					if (request != r) {
+						$(r).css('font-weight', '400');
+						svg.style.display = "none";
+					} else {
+						$(r).css('font-weight', '800');
+						svg.style.display = "block";
+					}
+				}
+				
+				if(request.innerText == '직접 입력') {
+					 document.querySelector('#requestModal .modal-body > textarea').style.display = 'block';
+				} else {
+					document.querySelector('#requestModal .modal-body > textarea').style.display = 'none';
+				}
+			})
+		}
+	
+		// 주소 변경
+		const changeAddr = (target) => {
+			const addrId = target.children[0].value;
+			const address = target.children[1].value;
+			const addressDetail = target.children[2].value;
+			const postcode = target.children[3].value;
+			const mbTel = target.children[4].value;
+			const mbName = target.children[5].value;
+			
+			const addrView = document.getElementById('addrView');
+			addrView.children[0].innerText = mbName.substring(0, 1) + '**';
+			addrView.children[1].innerText = '010-' + mbTel.substring(3, 4) + '***-*' + mbTel.substring(8);
+			addrView.children[2].innerText = '(' + postcode + ')' + address + addressDetail;
+			addrView.children[3].value = addrId;
+			
+			checkAddr();
+		}
+			
+	
+	
+		//약관 동의
+		const checkboxes = document.querySelectorAll('#terms .form-check-input');
+		for (const checkbox of checkboxes) {
+			checkbox.addEventListener('click', () => {
+				let allChecked = true;
+				for(const box of checkboxes) {
+					if (box.checked == false) {
+						allChecked = false;
+					}
+				}
+				if (allChecked) {
+					const checkoutBtn = document.getElementById('checkoutBtn');
+					checkoutBtn.disabled = false;
+					checkoutBtn.classList = 'btn btn-dark';  
+				}
+			})
+		}
+		
+		// 새 주소 등록 주소 검색
+		const addAddr = () => {
+		    new daum.Postcode({
+		        oncomplete: function(data) {
+		        	// 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+	                // 도로명 주소의 노출 규칙에 따라 주소를 표시한다.
+	                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+	                var roadAddr = data.roadAddress; // 도로명 주소 변수
+	                var extraRoadAddr = ''; // 참고 항목 변수
+
+	                // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+	                // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+	                if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+	                    extraRoadAddr += data.bname;
+	                }
+	                // 건물명이 있고, 공동주택일 경우 추가한다.
+	                if(data.buildingName !== ''){
+	                   extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+	                }
+	                // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+	                if(extraRoadAddr !== ''){
+	                    extraRoadAddr = ' (' + extraRoadAddr + ')';
+	                }
+
+	                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+	                document.getElementById('addNewPostcode').value = data.zonecode;
+	                document.getElementById("addNewAddr").value = roadAddr + extraRoadAddr;
+	                
+	                const postcode = document.getElementById("addNewPostcode").value;
+	    			const address = document.getElementById("addNewAddr").value;
+	    			const name = document.getElementById("addNewName").value;
+	    			const phone = document.getElementById("addNewPhone").value;
+	    			if (address != "" && postcode != "" && name != "" && phone != "") {
+	    				$("#addAddressSubmitBtn").removeClass('disabled');
+	    			} else {
+	    				document.getElementById("addAddressSubmitBtn").className = "btn btn-dark disabled";
+	    			}
+	                
+            	}
+		    }).open();
+		}
+		
+		// 새 주소 등록
+		const phone_regex = /010+[0-9]{8}/;
+		document.getElementById("addAddressSubmitBtn").addEventListener('click', () => {
+			const postcode = document.getElementById("addNewPostcode").value;
+			const address = document.getElementById("addNewAddr").value;
+			const addressDetail = document.getElementById("addNewDetailAddr").value;
+			const mbName = document.getElementById("addNewName").value;
+			const mbTel = document.getElementById("addNewPhone").value;
+			// 기본 배송지 선택했을때
+			if (document.getElementById('newCheckBox').checked == true) {
+				// 기본배송지가 있는지 확인
+				$.ajax({
+					url: '/checkAddrType.yj',
+					success: (data) =>{
+						console.log(data);
+						if (data == 'bad') {
+							alert("기본 배송지가 이미 있습니다.");
+						} else {
+							// 이미 있는 주소지 인지 확인
+							$.ajax({
+								url: '/checkAddr.yj',
+								data: {'postcode' : postcode, 
+									   'address' : address,
+									   'addressDetail' : addressDetail},
+								success: data => {
+									console.log(data);
+									if (data == 'bad') {
+										alert("이미 있는 배송지 입니다, 등록하신 주소 수정으로 이동하세요.");
+									} else {
+										$.ajax({
+											url: '/addCheckoutAddr.yj',
+											data: {'postcode' : postcode, 
+												   'mbTel' : mbTel,
+												   'mbName' : mbName,
+												   'address' : address,
+												   'addressDetail' : addressDetail},
+											success: data => {
+												$('#addrBody').load(location.href + " #addrBody > *");
+												const addrView = document.getElementById('addrView');
+												addrView.children[0].innerText = mbName.substring(0, 1) + '**';
+												addrView.children[1].innerText = '010' + mbTel.substring(3, 4) + '***-*' + mbTel.substring(8);
+												addrView.children[2].innerText = '(' + postcode + ')' + address + addressDetail;
+												addrView.children[3].value = data;
+												$('#newAddr').modal('hide');
+												document.getElementById("addNewPostcode").value = "";
+												document.getElementById("addNewAddr").value = "";
+												document.getElementById("addNewDetailAddr").value = "";
+												document.getElementById("addNewName").value = "";
+												document.getElementById("addNewPhone").value = "";
+			
+											},
+											error: data => console.log(data)
+											
+										})
+									}
+								},
+								error: data => console.log(data)
+								
+							})
+						}
+					},
+					error: data => console.log(data)
+				})
+			} else {
+				$.ajax({
+					url: '/checkAddr.yj',
+					data: {'postcode' : postcode, 
+						   'address' : address,
+						   'addressDetail' : addressDetail},
+					success: data => {
+						if (data == 'bad') {
+							alert("이미 있는 배송지 입니다");
+						} else {
+							$.ajax({
+								url: '/addCheckoutAddr.yj',
+								data: {'postcode' : postcode, 
+									   'mbTel' : mbTel,
+									   'mbName' : mbName, 
+									   'address' : address,
+									   'addressDetail' : addressDetail},
+								success: data => {
+
+									$('#addrBody').load(location.href + " #addrBody > *");
+									const addrView = document.getElementById('addrView');
+									addrView.children[0].innerText = mbName.substring(0, 1) + '**';
+									addrView.children[1].innerText = '010' + mbTel.substring(3, 4) + '***-*' + mbTel.substring(8);
+									addrView.children[2].innerText = '(' + postcode + ')' + address + addressDetail;
+									addrView.children[3].value = data;
+									$('#newAddr').modal('hide');
+									document.getElementById("addNewPostcode").value = "";
+									document.getElementById("addNewAddr").value = "";
+									document.getElementById("addNewDetailAddr").value = "";
+									document.getElementById("addNewName").value = "";
+									document.getElementById("addNewPhone").value = "";
+									
+								},
+								error: data => console.log(data)
+							})
+						}
+					},
+					error: data => console.log(data)
+					
+				})
+			}
+		}) 
+		
+		// 모달 창 예외 처리
+		const checkAddrModal = () => {
+			const postcode = document.getElementById("addNewPostcode").value;
+			const address = document.getElementById("addNewAddr").value;
+			const name = document.getElementById("addNewName").value;
+			const phone = document.getElementById("addNewPhone").value;
+			if (address != "" && postcode != "" && name != "" && phone != "") {
+				$("#addAddressSubmitBtn").removeClass('disabled');
+			} else {
+				document.getElementById("addAddressSubmitBtn").className = "btn btn-dark disabled";
+			}
+		}
+		
+		
+		const addNewName = document.getElementById('addNewName');
+		addNewName.addEventListener('keyup', () => {
+			if (addNewName.value.length < 2 || addNewName.value.length > 7) {
+				document.getElementById('addNameCheck').innerText = "올바른 이름을 입력해주세요. (2 - 7자)";
+				document.getElementById('addNameCheck').style.color = "red";
+			} else {
+				document.getElementById('addNameCheck').innerText = "";
+				checkAddrModal();
+			}
+		})
+		
+		const addNewPhone = document.getElementById('addNewPhone');
+		addNewPhone.addEventListener('keyup', () => {
+			if (!phone_regex.test(addNewPhone.value)) {
+				document.getElementById('addPhoneCheck').innerText = "정확한 휴대폰 번호를 입력해주세요.";
+				document.getElementById('addPhoneCheck').style.color = "red";
+			} else {
+				document.getElementById('addPhoneCheck').innerText = "";
+				checkAddrModal();
+			}
+		})
+		
+		// 체크 한 주소 표시
+		const checkAddr = () => {
+			const addrs = document.querySelectorAll('#addrBody > div');
+			for(const addr of addrs) {
+				const addrView = document.getElementById('addrView');
+				const addrId = addrView.children[3].value;
+				const id = addr.querySelector('input').value;
+				const svg = addr.querySelector('svg');
+				
+				if (id == addrId) {
+					svg.style.display = 'block';
+				} else {
+					svg.style.display = 'none';
+				}
+			}
+		}
+		
+		
+		
+	</script>
+
+</body>
+</html>

@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>WOOFLY</title>
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+	<link rel="icon" href="image/woofly.png">
+	<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+	crossorigin="anonymous">
+	
+	<link rel="stylesheet" type="text/css" th:href="@{/css/yh/contestParticipation.css}" /> 
+</head>
+<body>
+   <div th:replace="~{common/top :: top}"></div>
+	<main>
+		<form action="/contest/contestEnroll" method="POST" id="contestParticipation" enctype="multipart/form-data">
+			<div class="container-fluid d-flex mx-5">
+			
+			<!-- 관리자만 보이게!!!!!!!!!!!!!!!!!!! -->
+			<th:block th:if="${ session.loginUser != null && session.loginUser.isAdmin == 'Y'}">
+				<div th:replace="~{common/adminNav :: adminNav}"></div>
+			</th:block>
+			<th:block th:if="${ session.loginUser == null || session.loginUser.isAdmin != 'Y'}">
+				<div th:replace="~{common/contestNav :: contestNav}"></div>
+			</th:block>
+				
+				<div class="col-10 b-5">
+				 <div class="container mt-4">
+				  <div class="row">
+				   <div class="col-md-12 mb-4">
+				    <div class="card">
+						<div class="card-header">
+							<h4>콘테스트 참가</h4>
+						</div>
+						<div class="card-body">
+							<table class="table">
+								<tbody>
+									<tr>
+										<th  style="width: 22%">제목</th>
+										<td>
+											<input class="form-control" type="text" aria-label="default input example" placeholder="제목" name="pTitle" id="pTitle" required="required">
+										</td>
+									</tr>                                                   
+									<tr>
+										<th>강아지이름</th>
+										<td>
+											<select id="pPet" class="form-select" name="pPet" style="width: 40%;">
+												<option value="us">-- 마이 펫을 선택해주세요 --</option>
+												<option th:each="p : ${petList}" th:value="${p.PET_ID}" >
+														[[${p.PET_NAME}]]
+												</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<th>내용</th>
+										<td>
+											<textarea class="form-control" rows="6" placeholder="내용" style="resize: none;" name="pContent" required="required" id="pContent"></textarea>
+										</td>
+									</tr>
+									<tr>
+										<th>사진</th>
+										<td>
+										<div class="d-flex justify-content-between">
+											<div class="col-6">														
+										        <!-- 만약 미리보기 만들면 이 자리가 미리보기 자리고 파일 추가 버튼들은 오른쪽 div로 이동-->
+						                        <div class="album bg-light m-4" id="thumbnail">
+						                            <div class="card shadow-sm p-3 mx-auto my-auto" style="height: 320px; width: 450px; ">
+						                            	<!-- 썸네일 담는곳 -->
+						                                <svg class="bd-placeholder-img card-img-top mx-auto my-auto" width="100%" height="100%" name="thumbnailSvg"> 
+						                                    <rect width="100%" height="100%" fill="#55595c"></rect>
+						                                    <text x="50%" y="50%" fill="#eceeef" dy=".3em">1</text>
+						                                </svg>
+						                            </div>
+						                        </div>
+					                        </div>
+					                        <div class="col-4">
+												<button type="button" class="btn btn-outline-dark" id="addFile">이미지 추가</button>
+												<div id="fileArea">
+													<div class="mb-3 p-1 d-flex" id="thumbnailParent">
+														<input type="file" class="form-control form-control-lg" name="thumbnailFile" accept="image/*">
+														<button type="button" class="btn btn-large" name="deleteThumbButton">
+															<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-file-x" viewBox="0 0 16 16">
+																<path d="M6.146 6.146a.5.5 0 0 1 .708 0L8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 0 1 0-.708z"/>
+																<path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+															</svg>
+														</button>
+													</div>
+												</div>
+											</div>
+										</div>
+										</td>
+									</tr>
+									<tr>
+										<th>추천애완용품 (선택사항)
+											<button type="button" class="btn btn-sm  rounded-2 btn-outline-dark" id="modalLink" style="margin-left: 1%">검색</button><br><br>
+										</th>
+										<td>
+											<div id="td" class="outside-check">
+											</div>
+											<button type="button" class="btn btn-sm  rounded-2 btn-outline-dark" id="itemsDelete" >삭제</button>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							<div class="container text-center">
+								<button type="button" class="btn btn-lg fs-10 col-2 m-0 rounded-2 btn-outline-primary"  id="submitContest">등록</button>
+								<button type="button" class="btn btn-lg fs-10 col-2 m-0 rounded-2 btn-outline-dark" onclick="javascrpt:history.back();">이전</button>
+							</div>
+						</div>	
+				    </div>
+				   </div>
+				  </div>                    
+				 </div>
+				</div>
+			</div>
+		</form> 
+		<div id="modalLayer" >
+			<div class="modalContent">
+				<button type="button" class="btn-close" aria-label="Close" id="modalLink"> </button>		
+				<br>
+				
+				<div id="title1">
+					
+					<div style="display: inline-block; margin-left: 18px;">
+						<input class="btn btn-sm btn-outline-dark" type="button"  id="allItems" value="전체상품 보기" >
+					</div>
+					<span style="margin-left: 25%;"><b>나의 구매내역</b></span>
+					
+				</div>
+				
+				<div id="title2" style="display: none;">
+					<span style="margin-left: 42%;"><b>Woofly 상품 검색</b></span><br><br>
+					<div style="display: inline-block; margin-left: 18px;">
+						<input class="btn btn-sm btn-outline-dark" type="button"  id="myItems" value="구매내역 보기" >
+					</div>
+					<span style="margin-left: 8%;">전체 애완용품</span>
+					<div style="display: inline-block; margin-left: 40px;" >
+						<input type="text" placeholder="검색" name="search" id="allSearchInput">
+					</div>
+					<div style="display: inline-block; margin-left: 25px;">
+						<input class="btn btn-sm btn-outline-dark" type="button"  id="pSearchButton" value="검색" >
+					</div>
+				</div>
+				
+				<table class="table" style="margin-top: 20px;" id="sc1">
+					<thead>
+						<tr>
+							<th scope="col" class="bbb">#</th>
+							<th scope="col" style="width: 10%">#</th>
+							<th scope="col" style="width: 78%">애완용품명</th>
+							<th scope="col" style="width: 13%">선택</th>
+						</tr>
+					</thead>
+					<tbody id="case1">
+						<tr th:if="${itemList.isEmpty()}">
+							<td colspan="4">구매내역이 없습니다. 추천 물품 등록을 원하면 전체상품보기 선택 후 검색을 해주세요</td>
+						</tr>	
+						<tr th:each="l : ${itemList}">
+							<th:block th:unless="${itemList.isEmpty()}">
+								<td class="pNum">o[[${l.orderDetailId}]]</td>
+								<td><input type="image" style="height: 0px; width: 0px" ></td>
+								<td>[[${l.productName}]]</td>
+								<td><input type="checkbox" style="width: 20px; height: 20px;" class="checkbox"></td>
+							</th:block>
+						</tr>
+					</tbody>
+					<tbody id="case2" style="display: none;">
+						
+					</tbody>
+				</table>
+				
+				<div style="text-align: center;">
+	 				<input class="btn btn-outline-dark" type="button" value="추가" onclick="register()">			
+				</div>
+			</div>
+		</div>
+    </main>
+    
+	<!-- 모달 -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="modalChoice">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content rounded-1 shadow">
+                <div class="modal-body p-4 text-center">
+                    <h4 id="modalTitle" class="mb-1">이미지는 최소 한장이 있어야 합니다.</h4>
+                    <p id="modalContent" class="mb-1">이미지를 반드시 삽입해주세요.</p>
+                </div>
+                <div class="modal-footer flex-nowrap p-1">
+                    <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 m-0 rounded-0 border-end" id="checkFile">
+                        <strong>네</strong>
+                     </button>
+                     <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 m-0 rounded-0" data-bs-dismiss="modal">아니오</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+	<script th:inline="javascript">
+		$(document).ready(function(){
+			var modalLayer = $("#modalLayer");
+			var modalLink = $("#modalLink");
+			var modalCont = $(".modalContent");
+			var marginLeft = modalCont.outerWidth()/2;
+			var marginTop = modalCont.outerHeight()/2; 
+		
+		
+			modalLink.click(function(){
+				modalLayer.fadeIn("slow");
+				modalCont.css({"margin-top" : -marginTop, "margin-left" : -marginLeft});
+				$(this).blur();
+				$(".modalContent > a").focus(); 
+				return false;
+			});
+			
+			$(".modalContent > button").click(function(){
+				modalLayer.fadeOut("slow");
+				modalLink.focus();
+			});		
+			
+			// 각 행에 대한 클릭 이벤트 처리
+	        $('#case1').on('click', 'tr', function (event) {
+	            // 클릭된 요소가 체크박스인 경우는 처리하지 않음
+	            if (event.target.type !== 'checkbox') {
+	                // 현재 클릭된 행에서 체크박스 찾기
+	                var checkbox = $(this).find('.checkbox');
+
+	                // 체크박스 상태 변경
+	                checkbox.prop('checked', !checkbox.prop('checked'));
+	            }
+	        });
+			
+	     // 각 행에 대한 클릭 이벤트 처리
+	        $('#case2').on('click', 'tr', function (event) {
+	            // 클릭된 요소가 체크박스인 경우는 처리하지 않음
+	            if (event.target.type !== 'checkbox') {
+	                // 현재 클릭된 행에서 체크박스 찾기
+	                var checkbox = $(this).find('.checkbox');
+
+	                // 체크박스 상태 변경
+	                checkbox.prop('checked', !checkbox.prop('checked'));
+	            }
+	        });
+		});
+	
+		
+		let divChildren = document.getElementById('thumbnail').querySelectorAll('div');
+		
+		window.onload = () =>{
+			const anav = document.getElementById('myNav5')
+			if(anav != null){
+				anav.style.fontWeight = 'bold';
+			}
+			const canav = document.getElementById('cmyNav1')
+			if(canav != null){
+				canav.style.fontWeight = 'bold';
+			}
+			
+			var fileAreaCount = 2;
+
+			const fileArea = document.querySelector('#fileArea');
+            const thumbDiv = document.getElementById('thumbnail');
+			document.getElementById('addFile').addEventListener('click', () =>{
+
+                if(fileAreaCount <= 5) {
+                    const newDiv = document.createElement('div');
+                    newDiv.classList.add('mb-3', 'p-1', 'd-flex');
+                    newDiv.innerHTML = `<input type="file" class="form-control form-control-lg" name="thumbnailFile" accept="image/*">
+                    					<button type="button" class="btn btn-large" name="deleteThumbButton">
+			                        		<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-file-x" viewBox="0 0 16 16">
+											  <path d="M6.146 6.146a.5.5 0 0 1 .708 0L8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 0 1 0-.708z"/>
+											  <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+											</svg>
+			                        	</button>
+			                        	`;
+                    fileArea.append(newDiv);
+
+                     // 역따옴표 쓰는거임(코드 블록 표현 시)
+                    const thumbSvgTemplate = `
+                        <svg class="bd-placeholder-img card-img-top" width="100%" height="100%" name="thumbnailSvg">
+                            <rect width="100%" height="100%" fill="#55595c"></rect>
+                            <text x="50%" y="50%" fill="#eceeef" dy=".3em">${fileAreaCount}</text>
+                        </svg>
+                        `;
+
+                    const newSvg = document.createElement('div');
+                    newSvg.classList.add('card', 'shadow-sm', 'p-3');
+                    newSvg.innerHTML = thumbSvgTemplate;
+                    newSvg.style.width = '450px'; // 너비 지정
+                    newSvg.style.height = '320px'; // 높이 지정
+                    
+                    thumbDiv.append(newSvg);
+
+                    divChildren = thumbDiv.querySelectorAll('div');
+                    
+                    fileAreaCount += 1;
+
+                } else {
+                    alert("사진은 최대 5개까지 가능합니다.");
+                }
+				               
+			});
+		
+            let filesIsEmpty = true;
+
+            // 제출 이벤트
+			const form = document.getElementById('contestParticipation');
+            
+			document.getElementById('submitContest').addEventListener('click', () =>{
+				const files = document.getElementsByName('thumbnailFile');
+				const pTitle = document.getElementById('pTitle');
+				const pContent = document.getElementById('pContent');
+				const pPet = document.getElementById('pPet');
+				
+				console.log(pPet.value);
+				
+				for(const f of files) {
+					if(f.value != '') {
+						filesIsEmpty = false;
+					}
+				}
+				
+				if(pTitle.value == ""){
+					var newTitle = '제목이 비어있습니다';
+			        var newContent = '제목을 반드시 삽입해주세요.';
+			        
+					document.getElementById('modalTitle').innerText = newTitle;
+				    document.getElementById('modalContent').innerText = newContent;
+					$('#modalChoice').modal('show');
+				} else if(pContent.value == ""){
+					var newTitle = '내용이 비어있습니다';
+			        var newContent = '내용을 반드시 삽입해주세요.';
+					
+					document.getElementById('modalTitle').innerText = newTitle;
+				    document.getElementById('modalContent').innerText = newContent;
+					$('#modalChoice').modal('show');
+				} else if(pPet.value == "us" ) {
+					var newTitle = '강아지를 선택해주세요';
+			        var newContent = '마이펫 프로필에 등록한 강아지만 선택할 수 있습니다';
+					
+					document.getElementById('modalTitle').innerText = newTitle;
+				    document.getElementById('modalContent').innerText = newContent;
+					$('#modalChoice').modal('show');
+				} else if(filesIsEmpty){
+					var newTitle = '이미지는 최소 한장이 있어야 합니다.';
+			        var newContent = '이미지를 반드시 삽입해주세요.';
+					
+					document.getElementById('modalTitle').innerText = newTitle;
+				    document.getElementById('modalContent').innerText = newContent;
+					$('#modalChoice').modal('show');
+				} 	else {
+					form.submit();
+				}
+			});
+            
+            document.getElementById('checkFile').addEventListener('click', () =>{
+                $('#modalChoice').modal('hide');
+
+                if(filesIsEmpty) {
+                    document.getElementById('addFile').focus();
+                } 
+    
+            });
+
+
+            // thumbDiv의 자식 요소 divChildren을 innerHTML = "" 하면 아래 요소는 삭제 된다. == 초기화
+            // thumbDiv 아래에 넣기(썸네일의 최대 부모div)
+            const thumbInput = document.getElementsByName('thumbnailFile');
+            const preImage = document.createElement('img');
+            //let divChildren = thumbDiv.querySelectorAll('div'); // 아래에는 <svg>가 있음..
+
+            fileArea.addEventListener('click', function(event){
+            	const target = event.target;
+            	if(target.name === 'deleteThumbButton' || target.tagName ==='svg') {
+					const parentDivs = fileArea.querySelectorAll('.mb-3.p-1.d-flex');
+					const parentDiv = target.closest('.mb-3.p-1.d-flex');
+
+					if(parentDiv) {
+						const index = Array.from(parentDivs).indexOf(parentDiv);
+						parentDiv.remove();
+						
+						let tDiv = thumbDiv.querySelectorAll('div');
+						tDiv[index].remove();
+						fileAreaCount -= 1;
+					}
+            	}
+            });
+            
+            
+            fileArea.addEventListener('change', function(event) {
+                // 이벤트 발생된 자식 요소
+                const target = event.target;
+
+                if(target.name === 'thumbnailFile'){
+                    const index = Array.from(fileArea.querySelectorAll('input[name="thumbnailFile"]')).indexOf(target);
+                    
+                    if(target.files.length > 0) {
+                        if(divChildren != null) {
+                            divChildren[index].innerHTML = '';
+
+                            const preImage = document.createElement('img');
+                            preImage.setAttribute('height', '100%');
+                            const selectedFile = target.files[0];
+                            preImage.setAttribute('height', '100%');
+                            const objectURL = URL.createObjectURL(selectedFile);
+                            preImage.src = objectURL;
+
+                            divChildren[index].append(preImage);
+
+                        }
+                    } else {
+                        divChildren[index].innerHTML = `
+                            <svg class="bd-placeholder-img card-img-top" width="100%" height="225" name="thumbnailSvg">
+                                <rect width="100%" height="100%" fill="#55595c"></rect>
+                                <text x="50%" y="50%" fill="#eceeef" dy=".3em">인덱스밸류+1</text>
+                            </svg>
+                         `;
+                    }
+                } 
+            });
+			
+            // 전체 상품 보는 버튼
+			const allBtn = document.getElementById('allItems');
+			// 나의 상품 검색하는 버튼
+			const mysearchBtn = document.getElementById('mySearchButton');
+			// 나의 구매내역 보는 버튼
+			const myItemBtn = document.getElementById('myItems');
+			// 전체 상품 검색하는 버튼
+			const pSearchBtn = document.getElementById('pSearchButton');
+		    
+			
+			allBtn.addEventListener('click', function() {
+				const title1 = document.getElementById("title1");
+			    const title2 = document.getElementById("title2");
+			    const case1 = document.getElementById("case1");
+			    const case2 = document.getElementById("case2");
+			    
+				// 기존 데이터 지우기
+			    case2.innerHTML = '';
+			    
+			    title1.style.display = 'none'; // 숨기기
+			    title2.style.display = 'block'; // 보이기
+			    case1.style.display = 'none'; // 숨기기
+			    case2.style.display = 'table-row-group'; // 보이기
+			});
+			
+			myItemBtn.addEventListener('click', function() {
+				var inputValue = document.getElementById("allSearchInput").value;
+				
+				const title1 = document.getElementById("title1");
+			    const title2 = document.getElementById("title2");
+			    const case1 = document.getElementById("case1");
+			    const case2 = document.getElementById("case2");
+			    
+				// 기존 데이터 지우기
+			    case2.innerHTML = '';
+				
+			    title1.style.display = 'block'; // 보이기
+			    title2.style.display = 'none'; // 숨기기
+			    case1.style.display = 'table-row-group'; // 보이기
+			    case2.style.display = 'none'; // 숨기기
+			});
+			
+			pSearchBtn.addEventListener('click', function() {
+			    var inputValue = document.getElementById("allSearchInput").value;
+			    
+			    const case1 = document.getElementById("case1");
+			    const case2 = document.getElementById("case2");
+			    
+			    // 기존 데이터 지우기
+			    case2.innerHTML = '';
+			    
+			    case1.style.display = 'none'; // 숨기기
+			    case2.style.display = 'table-row-group'; // 보이기
+			    
+			    $.ajax({
+			        url: '/contest/searchItem',
+			        data: {pSearch: inputValue},
+			        success: function(data) {
+			            console.log(data);
+			                
+			            const existingPNames = document.querySelectorAll('.pName');
+			            existingPNames.forEach(element => {
+			                element.remove();
+			            });
+			                
+			            // 각각의 행에 대해 제목을 추가
+			            for (var i = 0; i < data.length; i++) {
+			                console.log(data[i].productName);
+			                    
+			                const titleCell1 = document.createElement('td');
+			                titleCell1.classList.add('pNum'); 
+			                titleCell1.textContent = data[i].productId;
+			                
+			                const titleCell2 = document.createElement('td');
+			                titleCell2.classList.add('pName'); 
+			                titleCell2.textContent = data[i].productName;
+
+			                const newRow = document.createElement('tr');
+			                newRow.appendChild(titleCell1);
+			                newRow.appendChild(document.createElement('td')).appendChild(createImg());
+			                newRow.appendChild(titleCell2);
+			                newRow.appendChild(document.createElement('td')).appendChild(createCheckbox());
+
+			                case2.appendChild(newRow);
+			            }
+			        },
+			        error: function(error) {
+			            console.log(error);
+			        }
+			    });
+			});
+			
+			// 새로운 체크박스 엘리먼트 생성 함수
+			function createCheckbox() {
+			    const checkbox = document.createElement('input');
+			    checkbox.type = 'checkbox';
+			    checkbox.style.width = '20px'; // 원하는 스타일을 설정할 수 있습니다.
+			    checkbox.style.height = '20px';
+			    checkbox.className = 'checkbox'; // 동적으로 클래스 추가
+			    return checkbox;
+			}
+			
+			function createImg() {
+			    const img = document.createElement('input');
+			    img.type = 'image';
+			    img.style.width = '0px'; // 원하는 스타일을 설정할 수 있습니다.
+			    img.style.height = '0px';
+			    img.className = 'itemImg'; // 동적으로 클래스 추가
+			    return img;
+			}
+			
+		}	
+		
+		function register() {
+		    const md = document.getElementById("modalLayer");
+		    const checkboxes = md.querySelectorAll('.checkbox');
+		    const selectedItems = [];
+		    const selectedItemsNum = [];
+		    const tdDiv = document.getElementById('td');
+
+		    // 기존의 자식 요소들을 제거
+		    tdDiv.innerHTML = '';
+
+		    checkboxes.forEach((checkbox, index) => {
+		        if (checkbox.checked) {
+		            const tdElements = document.querySelectorAll('td:nth-child(3)');
+		            const iNumber = document.querySelectorAll('td:nth-child(1)');
+		            if (tdElements[index]) {
+		                const productName = tdElements[index].textContent;
+		                const productNum = iNumber[index].textContent;
+		                selectedItems.push(productName);
+		                selectedItemsNum.push(productNum);
+		            }
+		        }
+		    });
+
+		    for (let i = 0; i < selectedItems.length; i++) {
+		        const a = selectedItems[i];
+		        const b = selectedItemsNum[i];
+		        
+		        // 새로운 체크박스 엘리먼트 및 히든 타입 엘리먼트 생성
+		        const newCheckbox = document.createElement('input');
+		        newCheckbox.type = 'checkbox';
+		        newCheckbox.className = 'checkbox';
+
+		    	// 클릭 이벤트 핸들러 추가
+		        newCheckbox.addEventListener('click', function () {
+		            newCheckbox.checked = !newCheckbox.checked;
+		        });
+		        
+		        const newHiddenInput = document.createElement('input');
+		        newHiddenInput.type = 'hidden';
+		        newHiddenInput.name = 'selectedItemsNum'; // 히든 타입의 이름 설정
+		        newHiddenInput.value = b; // 히든 타입의 값 설정
+
+		        // 새로운 div 엘리먼트 생성
+		        const newDiv = document.createElement('div');
+		        newDiv.textContent = a;
+		        
+		        // 새로운 div에 체크박스와 히든 타입 추가
+		        newDiv.appendChild(newCheckbox);
+		        newDiv.appendChild(newHiddenInput);
+
+		    	// 클릭 이벤트 핸들러 추가
+		        newDiv.addEventListener('click', function () {
+		            newCheckbox.checked = !newCheckbox.checked;
+		        });
+		    	
+		        // 기존의 tdDiv에 새로운 div 추가
+		        tdDiv.appendChild(newDiv);
+		    }
+
+		    var modalLayer = $("#modalLayer");
+		    modalLayer.fadeOut("fast");
+		}
+
+		
+		document.addEventListener('DOMContentLoaded', function () {
+		    var deleteButton = document.getElementById('itemsDelete');
+		    deleteButton.addEventListener('click', function () {
+		        var checkboxes = document.querySelectorAll('#td input[type="checkbox"]');
+		        checkboxes.forEach(function (checkbox) {
+		            if (checkbox.checked) {
+		                // 체크된 체크박스의 부모인 div를 찾기
+		                var parentDiv = checkbox.closest('div');
+
+		                // 체크된 체크박스와 관련된 hidden input 찾기
+		                var hiddenInput = parentDiv.querySelector('input[name="selectedItemsNum"]');
+
+		                // 모달창 안의 <td scope="row" class="pNum"> 값 찾기
+		                var modalTdValue = hiddenInput.value; 
+
+		                // 체크를 풀기 위해 체크박스의 상태 변경
+		                checkbox.checked = false;
+
+		                // 기존에 체크했던 애완용품들 중에서 해당하는 hidden input을 가진 부분 찾아 체크 해제
+		                var modalCheckboxes = document.querySelectorAll('.modalContent #case1 .checkbox');
+		                modalCheckboxes.forEach(function (modalCheckbox) {
+		                    var modalParentDiv = modalCheckbox.closest('tr');
+		                    var modalHiddenInput = modalParentDiv.querySelector('.pNum');
+
+		                    // 모달창 안의 <td scope="row" class="pNum"> 값과 hidden input 값이 같은 경우 체크 해제
+		                    if (modalHiddenInput.textContent == modalTdValue) {
+		                        modalCheckbox.checked = false;
+		                    }
+		                });
+		                
+		            	// 기존에 체크했던 애완용품들 중에서 해당하는 hidden input을 가진 부분 찾아 체크 해제
+		                var modalCheckboxes = document.querySelectorAll('.modalContent #case2 .checkbox');
+		                modalCheckboxes.forEach(function (modalCheckbox) {
+		                    var modalParentDiv = modalCheckbox.closest('tr');
+		                    var modalHiddenInput = modalParentDiv.querySelector('.pNum');
+
+		                    // 모달창 안의 <td scope="row" class="pNum"> 값과 hidden input 값이 같은 경우 체크 해제
+		                    if (modalHiddenInput.textContent == modalTdValue) {
+		                        modalCheckbox.checked = false;
+		                    }
+		                });
+
+		                // 모달창 밖에서 체크된 아이템을 지우기
+		                var outsideCheckboxes = document.querySelectorAll('.outside-check input[type="checkbox"]');
+		                outsideCheckboxes.forEach(function (outsideCheckbox) {
+		                    var outsideParentDiv = outsideCheckbox.closest('div');
+
+		                    // 모달창 안의 <td scope="row" class="pNum"> 값과 hidden input 값이 같은 경우 해당 아이템 삭제
+		                    if (outsideParentDiv.querySelector('input[name="selectedItemsNum"]').value == modalTdValue) {
+		                        outsideParentDiv.remove();
+		                    }
+		                });
+		            }
+		        });
+		    });
+		    
+		    var selectElement = document.querySelector('select[name="pPet"]');
+	        var options = selectElement.getElementsByTagName('option');
+	        /*<![CDATA[*/
+	        var cPetList = /*[[${cPetList}]]*/ [];
+
+	        for (var i = 0; i < options.length; i++) {
+	            var petId = options[i].value;
+
+	            for (var j = 0; j < cPetList.length; j++) {
+	                var cPet = cPetList[j];
+	                var cPetId;
+
+	                if (typeof cPet === 'object' && cPet !== null) {
+	                    cPetId = cPet.PET_ID;
+	                } else {
+	                    cPetId = cPet;
+	                }
+	                if(petId==cPetId){
+	                	options[i].disabled = true;
+	                	// 옵션 텍스트 변경 예시
+	                    options[i].text += " : 이번에 이미 참여한 강아지 입니다";
+	                    options[i].style.color='grey';
+	                }
+	            }
+	            if(!options[i].disabled){
+	            	options[i].selected = true;
+                }
+	        }
+	        /*]]>*/
+	        
+		});
+
+	</script>
+	
+</body>
+</html>

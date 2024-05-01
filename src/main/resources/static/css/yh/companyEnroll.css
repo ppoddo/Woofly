@@ -1,0 +1,30 @@
+.board-list {
+	cursor: pointer;
+}
+.tableLable{
+	background-color:  rgb(234,229,221);
+	margin :10px;
+	padding: 10px;
+	width: 100px;
+}
+
+.tableInput {
+	background-color: white;
+	width: 400px;
+	height: 35px;
+	margin: 3px;
+	border: 1px solid #ddd;
+	line-height: 10px;
+}
+
+
+.tablebutton{
+   background-color:#E0E0E0;
+   display: inline-block; 
+    min-width: 80px;
+    margin-left: 10px;
+    padding : 5px; 
+     border : 1px solid #dedee2;
+    border-radius: 2px; 
+    font-size:1.4rem;
+}
